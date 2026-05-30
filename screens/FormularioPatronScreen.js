@@ -4,60 +4,45 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   SafeAreaView,
   StatusBar,
   ScrollView,
+  Alert,
+  ActivityIndicator,
   Modal,
-  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { formularioStyles as styles, PURPLE } from '../styles';
 
-const PURPLE = '#7B3F7E';
+const API_BASE_URL = 'http://TU_IP:TU_PUERTO';
+const USER_ID = '1';
 
-const OPCIONES_TAMANO = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-const OPCIONES_TECNICA = ['Crochet', 'Dos agujas', 'Telar', 'Bordado'];
+function NumericStepper({ valor, onChange }) {
+  const decrement = () => { if (valor > 1) onChange(valor - 1); };
+  const increment = () => { if (valor < 100) onChange(valor + 1); };
 
-function DropdownField({ label, opciones, valor, onChange }) {
-  const [visible, setVisible] = useState(false);
+  const handleText = (text) => {
+    const num = parseInt(text, 10);
+    if (!isNaN(num) && num >= 1 && num <= 100) onChange(num);
+    else if (text === '') onChange('');
+  };
 
   return (
-    <View style={styles.fieldGroup}>
-      <Text style={styles.label}>{label}</Text>
-      <TouchableOpacity style={styles.dropdown} onPress={() => setVisible(true)}>
-        <Text style={[styles.dropdownText, !valor && styles.placeholder]}>
-          {valor || 'Selecciona una opción'}
-        </Text>
-        <Ionicons name="chevron-down" size={20} color="#888" />
+    <View style={styles.stepper}>
+      <TouchableOpacity style={styles.stepperBtn} onPress={decrement} disabled={valor <= 1}>
+        <Text style={[styles.stepperSymbol, valor <= 1 && styles.stepperDisabled]}>−</Text>
       </TouchableOpacity>
-
-      <Modal visible={visible} transparent animationType="fade">
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setVisible(false)}
-        >
-          <View style={styles.dropdownList}>
-            <FlatList
-              data={opciones}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  onPress={() => {
-                    onChange(item);
-                    setVisible(false);
-                  }}
-                >
-                  <Text style={[styles.dropdownItemText, item === valor && styles.selectedItem]}>
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      <TextInput
+        style={styles.stepperInput}
+        value={String(valor)}
+        onChangeText={handleText}
+        keyboardType="numeric"
+        maxLength={3}
+        textAlign="center"
+      />
+      <TouchableOpacity style={styles.stepperBtn} onPress={increment} disabled={valor >= 100}>
+        <Text style={[styles.stepperSymbol, valor >= 100 && styles.stepperDisabled]}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -65,21 +50,19 @@ function DropdownField({ label, opciones, valor, onChange }) {
 export default function FormularioPatronScreen({ navigation, route }) {
   const { imageUri } = route?.params || {};
   const [nombre, setNombre] = useState('');
-  const [tamano, setTamano] = useState('');
-  const [tecnica, setTecnica] = useState('');
+  const [tamano, setTamano] = useState(50);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
-  const puedeGenerar = nombre.trim().length > 0 && tamano && tecnica;
+  const puedeGenerar = nombre.trim().length > 0 && tamano >= 1 && tamano <= 100;
 
   const handleGenerar = () => {
-    // Por ahora solo navega a Vista Previa sin llamar al backend
-    navigation.navigate('VistaPrevia', { imageUri, nombre, tamano, tecnica });
+    navigation.navigate('VistaPrevia', { imageUri, nombre, tamano });
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="white" />
 
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Generar patrón</Text>
         <TouchableOpacity onPress={() => navigation.popToTop()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -88,7 +71,7 @@ export default function FormularioPatronScreen({ navigation, route }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        {/* Nombre */}
+
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Nombre</Text>
           <TextInput
@@ -100,19 +83,15 @@ export default function FormularioPatronScreen({ navigation, route }) {
           />
         </View>
 
-        <DropdownField
-          label="Tamaño"
-          opciones={OPCIONES_TAMANO}
-          valor={tamano}
-          onChange={setTamano}
-        />
-
-        <DropdownField
-          label="Técnica de tejido"
-          opciones={OPCIONES_TECNICA}
-          valor={tecnica}
-          onChange={setTecnica}
-        />
+        <View style={styles.fieldGroup}>
+          <View style={styles.labelRow}>
+            <Text style={styles.label}>Tamaño (1 – 100)</Text>
+            <TouchableOpacity onPress={() => setShowInfoModal(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="information-circle-outline" size={22} color={PURPLE} />
+            </TouchableOpacity>
+          </View>
+          <NumericStepper valor={tamano} onChange={setTamano} />
+        </View>
 
         <TouchableOpacity
           style={[styles.button, !puedeGenerar && styles.buttonDisabled]}
@@ -121,115 +100,45 @@ export default function FormularioPatronScreen({ navigation, route }) {
         >
           <Text style={styles.buttonText}>Generar</Text>
         </TouchableOpacity>
+
       </ScrollView>
+
+      <Modal visible={showInfoModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Ionicons name="information-circle" size={48} color={PURPLE} />
+            <Text style={styles.modalTitle}>¿Qué tamaño elegir?</Text>
+
+            <View style={styles.infoRow}>
+              <Ionicons name="image-outline" size={20} color={PURPLE} />
+              <View style={styles.infoTextGroup}>
+                <Text style={styles.infoLabel}>Imagen pequeña o simple</Text>
+                <Text style={styles.infoDesc}>Pocos colores o diseño sencillo → tamaño 10 – 30</Text>
+              </View>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Ionicons name="image" size={20} color={PURPLE} />
+              <View style={styles.infoTextGroup}>
+                <Text style={styles.infoLabel}>Imagen mediana</Text>
+                <Text style={styles.infoDesc}>Detalle moderado → tamaño 30 – 50</Text>
+              </View>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Ionicons name="images" size={20} color={PURPLE} />
+              <View style={styles.infoTextGroup}>
+                <Text style={styles.infoLabel}>Imagen grande o detallada</Text>
+                <Text style={styles.infoDesc}>Muchos colores o alta resolución → tamaño 40 – 60 para que el patrón salga bien</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.modalBtn} onPress={() => setShowInfoModal(false)}>
+              <Text style={styles.modalBtnText}>Entendido</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 10,
-    backgroundColor: 'white',
-  },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: PURPLE,
-  },
-  content: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
-    gap: 24,
-  },
-  fieldGroup: {
-    gap: 8,
-  },
-  label: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#111',
-    textDecorationLine: 'underline',
-  },
-  input: {
-    borderWidth: 1.5,
-    borderColor: PURPLE,
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 15,
-    color: '#111',
-  },
-  dropdown: {
-    borderWidth: 1.5,
-    borderColor: PURPLE,
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  dropdownText: {
-    fontSize: 15,
-    color: '#111',
-  },
-  placeholder: {
-    color: '#aaa',
-  },
-  // Dropdown modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'center',
-    paddingHorizontal: 40,
-  },
-  dropdownList: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    overflow: 'hidden',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  dropdownItem: {
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  dropdownItemText: {
-    fontSize: 15,
-    color: '#111',
-  },
-  selectedItem: {
-    color: PURPLE,
-    fontWeight: 'bold',
-  },
-  button: {
-    backgroundColor: PURPLE,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    backgroundColor: '#b89aba',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
