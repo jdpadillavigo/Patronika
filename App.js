@@ -7,6 +7,7 @@ import MisPatronesScreen from './screens/MisPatronesScreen';
 import GenerarPatronScreen from './screens/GenerarPatronScreen';
 import FormularioPatronScreen from './screens/FormularioPatronScreen';
 import VistaPreviaScreen from './screens/VistaPreviaScreen';
+import PerfilScreen from './screens/PerfilScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +21,7 @@ export default function App() {
         <Stack.Screen name="GenerarPatron" component={GenerarPatronScreen} />
         <Stack.Screen name="Formulario" component={FormularioPatronScreen} />
         <Stack.Screen name="VistaPrevia" component={VistaPreviaScreen} />
+        <Stack.Screen name="Perfil" component={PerfilScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
