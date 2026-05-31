@@ -49,7 +49,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       await login({ username: usuario.trim(), password: contrasena });
-      navigation.replace('GenerarPatron');
+      navigation.replace('MisPatrones');
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {
