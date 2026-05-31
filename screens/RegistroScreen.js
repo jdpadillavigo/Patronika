@@ -10,7 +10,6 @@ import {
   Platform,
   ScrollView,
   Animated,
-  Alert,
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,6 +28,7 @@ export default function RegistroScreen({ navigation }) {
   const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
@@ -70,18 +70,17 @@ export default function RegistroScreen({ navigation }) {
   };
 
   const handleCrearCuenta = async () => {
+    setError('');
     if (contrasena !== confirmar) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
+      setError('Las contraseñas no coinciden');
       return;
     }
     setLoading(true);
     try {
       await register({ username: usuario.trim(), email: correo.trim(), password: contrasena });
-      Alert.alert('¡Cuenta creada!', 'Ya puedes iniciar sesión.', [
-        { text: 'Ir a login', onPress: () => navigation.replace('Login') },
-      ]);
-    } catch (error) {
-      Alert.alert('Error', error.message);
+      navigation.replace('Login');
+    } catch (e) {
+      setError(e.message);
     } finally {
       setLoading(false);
     }
@@ -206,6 +205,12 @@ export default function RegistroScreen({ navigation }) {
                 Aceptar <Text style={styles.checkLabelLink}>términos y condiciones</Text>
               </Text>
             </TouchableOpacity>
+
+            {error ? (
+              <Text style={{ color: '#ff6b6b', fontSize: 13, textAlign: 'center', marginTop: -8 }}>
+                {error}
+              </Text>
+            ) : null}
 
             <TouchableOpacity
               style={[styles.button, (!puedeCrear || loading) && styles.buttonDisabled]}
