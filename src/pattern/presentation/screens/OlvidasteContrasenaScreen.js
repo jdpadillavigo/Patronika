@@ -1,5 +1,5 @@
-// screens/OlvidasteContrasenaScreen.js
-// NUEVO — Pantalla 1 del flujo de recuperación de contraseña
+﻿// screens/OlvidasteContrasenaScreen.js
+// NUEVO â€” Pantalla 1 del flujo de recuperaciÃ³n de contraseÃ±a
 
 import React, { useState } from 'react';
 import {
@@ -11,27 +11,25 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { olvidasteStyles as styles, PURPLE } from '../styles';
+import { olvidasteStyles as styles, PURPLE } from '../styles/OlvidasteContrasenaStyles';
+import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
 
 export default function OlvidasteContrasenaScreen({ navigation }) {
   const [email, setEmail] = useState('');
 
-  const handleEnviar = () => {
-    // Validación básica del email
-    if (!email.trim() || !email.includes('@')) {
-      Alert.alert('Error', 'Por favor ingresa un correo electrónico válido');
+  const handleEnviar = async () => {
+    const result = await PasswordRecoveryUseCase.requestCode(email);
+    if (!result.success) {
+      Alert.alert('Error', result.error || 'No se pudo enviar el codigo');
       return;
     }
-
-    // TODO: conectar con endpoint del backend para enviar el correo
-    // Por ahora solo navega a la pantalla de verificación
-    navigation.navigate('VerificarCorreo', { email });
+    navigation.navigate('VerificarCorreo', { mode: 'recovery', email });
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
 
-      {/* Botón Volver — regresa al Login (no a la pantalla anterior del stack) */}
+      {/* BotÃ³n Volver â€” regresa al Login (no a la pantalla anterior del stack) */}
       <TouchableOpacity
         style={styles.volverBtn}
         onPress={() => navigation.navigate('Login')}
@@ -41,17 +39,17 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
 
       <View style={styles.contenido}>
 
-        {/* Título y descripción */}
-        <Text style={styles.titulo}>¿Olvidaste tu{'\n'}contraseña?</Text>
+        {/* TÃ­tulo y descripciÃ³n */}
+        <Text style={styles.titulo}>Â¿Olvidaste tu{'\n'}contraseÃ±a?</Text>
         <Text style={styles.descripcion}>
-          Ingrese su dirección de correo electrónico a continuación y le
-          enviaremos un correo con instrucciones sobre cómo cambiar su contraseña.
+          Ingrese su direcciÃ³n de correo electrÃ³nico a continuaciÃ³n y le
+          enviaremos un correo con instrucciones sobre cÃ³mo cambiar su contraseÃ±a.
         </Text>
 
-        {/* Campo email con solo línea inferior */}
+        {/* Campo email con solo lÃ­nea inferior */}
         <TextInput
           style={styles.input}
-          placeholder="Correo electrónico"
+          placeholder="Correo electrÃ³nico"
           placeholderTextColor="#BDBDBD"
           value={email}
           onChangeText={setEmail}
@@ -60,7 +58,7 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
           autoCorrect={false}
         />
 
-        {/* Botón enviar */}
+        {/* BotÃ³n enviar */}
         <TouchableOpacity style={styles.boton} onPress={handleEnviar}>
           <Text style={styles.botonText}>Enviar</Text>
         </TouchableOpacity>
@@ -69,3 +67,4 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+

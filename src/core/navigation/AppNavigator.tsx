@@ -3,9 +3,16 @@ import { ActivityIndicator, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import LoginScreen from '../../pattern/presentation/screens/LoginScreen';
-import RegisterScreen from '../../pattern/presentation/screens/RegisterScreen';
-import HomeScreen from '../../pattern/presentation/screens/HomeScreen';
+import LoginScreen from '../../pattern/presentation/screens/LoginScreen.js';
+import RegistroScreen from '../../pattern/presentation/screens/RegistroScreen.js';
+import MisPatronesScreen from '../../pattern/presentation/screens/MisPatronesScreen.js';
+import GenerarPatronScreen from '../../pattern/presentation/screens/GenerarPatronScreen.js';
+import FormularioPatronScreen from '../../pattern/presentation/screens/FormularioPatronScreen.js';
+import VistaPreviaScreen from '../../pattern/presentation/screens/VistaPreviaScreen.js';
+import PerfilScreen from '../../pattern/presentation/screens/PerfilScreen.js';
+import OlvidasteContrasenaScreen from '../../pattern/presentation/screens/OlvidasteContrasenaScreen.js';
+import VerificarCorreoScreen from '../../pattern/presentation/screens/VerificarCorreoScreen.js';
+import RestablecerContrasenaScreen from '../../pattern/presentation/screens/RestablecerContrasenaScreen.js';
 import OnboardingScreen from '../../pattern/presentation/screens/OnboardingScreen';
 import type { RootStackParamList } from './types';
 
@@ -45,8 +52,17 @@ export default function AppNavigator() {
         >
             <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Register" component={RegistroScreen} />
+            <Stack.Screen name="Registro" component={RegistroScreen} />
+            <Stack.Screen name="Home" component={MisPatronesScreen} />
+            <Stack.Screen name="MisPatrones" component={MisPatronesScreen} />
+            <Stack.Screen name="GenerarPatron" component={GenerarPatronScreen} />
+            <Stack.Screen name="Formulario" component={FormularioPatronScreen} />
+            <Stack.Screen name="VistaPrevia" component={VistaPreviaScreen} />
+            <Stack.Screen name="Perfil" component={PerfilScreen} />
+            <Stack.Screen name="OlvidasteContrasena" component={OlvidasteContrasenaScreen} />
+            <Stack.Screen name="VerificarCorreo" component={VerificarCorreoScreen} />
+            <Stack.Screen name="RestablecerContrasena" component={RestablecerContrasenaScreen} />
         </Stack.Navigator>
     );
 }

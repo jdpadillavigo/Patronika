@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,8 +15,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { register } from '../services/auth';
-import { registroStyles as styles, AUTH_GRADIENTS, absoluteFill } from '../styles';
+import { registroStyles as styles, AUTH_GRADIENTS, absoluteFill } from '../styles/RegistroStyles';
+import RegisterUseCase from '../../domain/usecases/RegisterUseCase';
 
 export default function RegistroScreen({ navigation }) {
   const [avatar, setAvatar] = useState(null);
@@ -72,13 +72,22 @@ export default function RegistroScreen({ navigation }) {
   const handleCrearCuenta = async () => {
     setError('');
     if (contrasena !== confirmar) {
-      setError('Las contraseñas no coinciden');
+      setError('Las contraseÃ±as no coinciden');
       return;
     }
     setLoading(true);
     try {
-      await register({ username: usuario.trim(), email: correo.trim(), password: contrasena });
-      navigation.replace('Login');
+      const result = await RegisterUseCase.requestCode(usuario.trim(), correo.trim(), contrasena, confirmar);
+      if (!result.success) {
+        setError(result.error || 'No se pudo enviar el codigo');
+        return;
+      }
+      navigation.navigate('VerificarCorreo', {
+        mode: 'register',
+        email: correo.trim(),
+        username: usuario.trim(),
+        password: contrasena,
+      });
     } catch (e) {
       setError(e.message);
     } finally {
@@ -139,7 +148,7 @@ export default function RegistroScreen({ navigation }) {
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="Correo electrónico"
+                placeholder="Correo electrÃ³nico"
                 placeholderTextColor="rgba(255,255,255,0.45)"
                 value={correo}
                 onChangeText={setCorreo}
@@ -152,7 +161,7 @@ export default function RegistroScreen({ navigation }) {
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="Contraseña"
+                placeholder="ContraseÃ±a"
                 placeholderTextColor="rgba(255,255,255,0.45)"
                 value={contrasena}
                 onChangeText={setContrasena}
@@ -174,7 +183,7 @@ export default function RegistroScreen({ navigation }) {
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="Confirmar contraseña"
+                placeholder="Confirmar contraseÃ±a"
                 placeholderTextColor="rgba(255,255,255,0.45)"
                 value={confirmar}
                 onChangeText={setConfirmar}
@@ -202,7 +211,7 @@ export default function RegistroScreen({ navigation }) {
                 {aceptaTerminos && <Ionicons name="checkmark" size={13} color="white" />}
               </View>
               <Text style={styles.checkLabel}>
-                Aceptar <Text style={styles.checkLabelLink}>términos y condiciones</Text>
+                Aceptar <Text style={styles.checkLabelLink}>tÃ©rminos y condiciones</Text>
               </Text>
             </TouchableOpacity>
 
@@ -224,9 +233,9 @@ export default function RegistroScreen({ navigation }) {
           </View>
 
           <View style={styles.bottom}>
-            <Text style={styles.bottomText}>¿Ya estás registrado? </Text>
+            <Text style={styles.bottomText}>Â¿Ya estÃ¡s registrado? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.bottomLink}>Inicia sesión</Text>
+              <Text style={styles.bottomLink}>Inicia sesiÃ³n</Text>
             </TouchableOpacity>
           </View>
 
@@ -235,3 +244,4 @@ export default function RegistroScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
