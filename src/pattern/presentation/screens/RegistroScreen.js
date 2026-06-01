@@ -72,14 +72,14 @@ export default function RegistroScreen({ navigation }) {
   const handleCrearCuenta = async () => {
     setError('');
     if (contrasena !== confirmar) {
-      setError('Las contraseÃ±as no coinciden');
+      setError('Las contraseñas no coinciden');
       return;
     }
     setLoading(true);
     try {
       const result = await RegisterUseCase.requestCode(usuario.trim(), correo.trim(), contrasena, confirmar);
       if (!result.success) {
-        setError(result.error || 'No se pudo enviar el codigo');
+        setError(result.error || 'No se pudo enviar el código');
         return;
       }
       navigation.navigate('VerificarCorreo', {
@@ -148,7 +148,7 @@ export default function RegistroScreen({ navigation }) {
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="Correo electrÃ³nico"
+                placeholder="Correo electrónico"
                 placeholderTextColor="rgba(255,255,255,0.45)"
                 value={correo}
                 onChangeText={setCorreo}
@@ -161,7 +161,7 @@ export default function RegistroScreen({ navigation }) {
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="ContraseÃ±a"
+                placeholder="Contraseña"
                 placeholderTextColor="rgba(255,255,255,0.45)"
                 value={contrasena}
                 onChangeText={setContrasena}
@@ -183,7 +183,7 @@ export default function RegistroScreen({ navigation }) {
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="Confirmar contraseÃ±a"
+                placeholder="Confirmar contraseña"
                 placeholderTextColor="rgba(255,255,255,0.45)"
                 value={confirmar}
                 onChangeText={setConfirmar}
@@ -211,7 +211,7 @@ export default function RegistroScreen({ navigation }) {
                 {aceptaTerminos && <Ionicons name="checkmark" size={13} color="white" />}
               </View>
               <Text style={styles.checkLabel}>
-                Aceptar <Text style={styles.checkLabelLink}>tÃ©rminos y condiciones</Text>
+                Aceptar <Text style={styles.checkLabelLink}>términos y condiciones</Text>
               </Text>
             </TouchableOpacity>
 
@@ -233,9 +233,9 @@ export default function RegistroScreen({ navigation }) {
           </View>
 
           <View style={styles.bottom}>
-            <Text style={styles.bottomText}>Â¿Ya estÃ¡s registrado? </Text>
+            <Text style={styles.bottomText}>¿Ya estás registrado? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.bottomLink}>Inicia sesiÃ³n</Text>
+              <Text style={styles.bottomLink}>Inicia sesión</Text>
             </TouchableOpacity>
           </View>
 

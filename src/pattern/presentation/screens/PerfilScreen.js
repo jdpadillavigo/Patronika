@@ -9,9 +9,10 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { PURPLE } from '../styles/CommonStyles';
+import { misPatronesStyles as navStyles } from '../styles/MisPatronesStyles';
 import ProfileUseCase from '../../domain/usecases/ProfileUseCase';
 import SessionUseCase from '../../domain/usecases/SessionUseCase';
 
@@ -60,7 +61,7 @@ export default function PerfilScreen({ navigation }) {
   const handleGuardarPerfil = async () => {
     setErrorPerfil('');
     if (!nuevoNombre.trim()) {
-      setErrorPerfil('El nombre de usuario no puede estar vacÃ­o');
+      setErrorPerfil('El nombre de usuario no puede estar vacío');
       return;
     }
     setLoadingPerfil(true);
@@ -94,21 +95,21 @@ export default function PerfilScreen({ navigation }) {
       return;
     }
     if (passNueva !== passConfirmar) {
-      setErrorPass('Las contraseÃ±as nuevas no coinciden');
+      setErrorPass('Las contraseñas nuevas no coinciden');
       return;
     }
     if (passNueva.length < 4) {
-      setErrorPass('La nueva contraseÃ±a debe tener al menos 4 caracteres');
+      setErrorPass('La nueva contraseña debe tener al menos 4 caracteres');
       return;
     }
     setLoadingPass(true);
     try {
       const result = await ProfileUseCase.changePassword(passActual, passNueva, passConfirmar);
       if (!result.success) {
-        setErrorPass(result.error || 'No se pudo cambiar la contrasena');
+        setErrorPass(result.error || 'No se pudo cambiar la contraseña');
         return;
       }
-      setExitoPass('ContraseÃ±a actualizada correctamente');
+      setExitoPass('Contraseña actualizada correctamente');
       setPassActual('');
       setPassNueva('');
       setPassConfirmar('');
@@ -125,31 +126,26 @@ export default function PerfilScreen({ navigation }) {
     navigation.replace('Login');
   };
 
+  const handleFab = () => {
+    navigation.navigate('GenerarPatron');
+  };
+
   const fotoActual = editando ? nuevaFoto : usuario?.avatar;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <StatusBar barStyle="light-content" backgroundColor={PURPLE} />
 
-      {/* Header */}
-      <View style={{
-        backgroundColor: PURPLE,
-        paddingHorizontal: 20,
-        paddingTop: 16,
-        paddingBottom: 14,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-      }}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
-        <Text style={{ color: 'white', fontSize: 22, fontWeight: 'bold' }}>Mi perfil</Text>
+      <View style={navStyles.header}>
+        <Text style={navStyles.headerTitle}>Patrónika</Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 28, paddingTop: 36, paddingBottom: 48, gap: 24 }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: 28, paddingTop: 36, paddingBottom: 48, gap: 24 }}
+      >
 
-        {/* â”€â”€ AVATAR â”€â”€ */}
+        {/* AVATAR */}
         <View style={{ alignItems: 'center', gap: 12 }}>
           <TouchableOpacity onPress={editando ? handlePickFoto : undefined} activeOpacity={editando ? 0.7 : 1}>
             <View style={{
@@ -175,12 +171,12 @@ export default function PerfilScreen({ navigation }) {
 
           {!editando && (
             <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#111' }}>
-              {usuario?.username ?? 'â€”'}
+              {usuario?.username ?? 'Usuario'}
             </Text>
           )}
         </View>
 
-        {/* â”€â”€ DATOS DEL PERFIL â”€â”€ */}
+        {/* DATOS DEL PERFIL */}
         <View style={{ gap: 16 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111' }}>Datos del perfil</Text>
@@ -217,7 +213,7 @@ export default function PerfilScreen({ navigation }) {
                 borderWidth: 1, borderColor: '#EFEFEF', borderRadius: 10,
                 backgroundColor: '#FAFAFA',
               }}>
-                {usuario?.username ?? 'â€”'}
+                {usuario?.username ?? 'Usuario'}
               </Text>
             )}
           </View>
@@ -226,7 +222,7 @@ export default function PerfilScreen({ navigation }) {
           <View style={{ gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Ionicons name="mail-outline" size={16} color={PURPLE} />
-              <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CORREO ELECTRÃ“NICO</Text>
+              <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CORREO ELECTRÓNICO</Text>
             </View>
             <Text style={{
               fontSize: 15, color: '#888',
@@ -234,7 +230,7 @@ export default function PerfilScreen({ navigation }) {
               borderWidth: 1, borderColor: '#EFEFEF', borderRadius: 10,
               backgroundColor: '#FAFAFA',
             }}>
-              {usuario?.email ?? 'â€”'}
+              {usuario?.email ?? 'Email'}
             </Text>
           </View>
 
@@ -242,7 +238,7 @@ export default function PerfilScreen({ navigation }) {
             <Text style={{ color: '#e74c3c', fontSize: 13, textAlign: 'center' }}>{errorPerfil}</Text>
           ) : null}
 
-          {/* Botones ediciÃ³n */}
+          {/* Botones edición */}
           {editando && (
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
               <TouchableOpacity
@@ -270,7 +266,7 @@ export default function PerfilScreen({ navigation }) {
           )}
         </View>
 
-        {/* â”€â”€ CAMBIAR CONTRASEÃ‘A â”€â”€ */}
+        {/* CAMBIAR CONTRASEÑA */}
         <View style={{ borderTopWidth: 1, borderTopColor: '#EFEFEF', paddingTop: 20, gap: 14 }}>
           <TouchableOpacity
             onPress={() => { setExpandirPass(v => !v); setErrorPass(''); setExitoPass(''); }}
@@ -278,16 +274,16 @@ export default function PerfilScreen({ navigation }) {
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Ionicons name="lock-closed-outline" size={18} color={PURPLE} />
-              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111' }}>Cambiar contraseÃ±a</Text>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111' }}>Cambiar contraseña</Text>
             </View>
             <Ionicons name={expandirPass ? 'chevron-up' : 'chevron-down'} size={20} color="#999" />
           </TouchableOpacity>
 
           {expandirPass && (
             <View style={{ gap: 12 }}>
-              {/* ContraseÃ±a actual */}
+              {/* Contraseña actual */}
               <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CONTRASEÃ‘A ACTUAL</Text>
+                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CONTRASEÑA ACTUAL</Text>
                 <View style={{
                   flexDirection: 'row', alignItems: 'center',
                   borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
@@ -299,7 +295,7 @@ export default function PerfilScreen({ navigation }) {
                     secureTextEntry={!mostrarActual}
                     autoCapitalize="none"
                     style={{ flex: 1, fontSize: 15, color: '#111' }}
-                    placeholder="ContraseÃ±a actual"
+                    placeholder="Contraseña actual"
                     placeholderTextColor="#BBB"
                   />
                   <TouchableOpacity onPress={() => setMostrarActual(v => !v)}>
@@ -310,7 +306,7 @@ export default function PerfilScreen({ navigation }) {
 
               {/* Nueva contraseÃ±a */}
               <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>NUEVA CONTRASEÃ‘A</Text>
+                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>NUEVA CONTRASEÑA</Text>
                 <View style={{
                   flexDirection: 'row', alignItems: 'center',
                   borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
@@ -322,7 +318,7 @@ export default function PerfilScreen({ navigation }) {
                     secureTextEntry={!mostrarNueva}
                     autoCapitalize="none"
                     style={{ flex: 1, fontSize: 15, color: '#111' }}
-                    placeholder="Nueva contraseÃ±a"
+                    placeholder="Nueva contraseña"
                     placeholderTextColor="#BBB"
                   />
                   <TouchableOpacity onPress={() => setMostrarNueva(v => !v)}>
@@ -333,7 +329,7 @@ export default function PerfilScreen({ navigation }) {
 
               {/* Confirmar nueva */}
               <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CONFIRMAR NUEVA CONTRASEÃ‘A</Text>
+                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CONFIRMAR NUEVA CONTRASEÑA</Text>
                 <View style={{
                   flexDirection: 'row', alignItems: 'center',
                   borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
@@ -345,7 +341,7 @@ export default function PerfilScreen({ navigation }) {
                     secureTextEntry={!mostrarConfirmar}
                     autoCapitalize="none"
                     style={{ flex: 1, fontSize: 15, color: '#111' }}
-                    placeholder="Repite la nueva contraseÃ±a"
+                    placeholder="Repite la nueva contraseña"
                     placeholderTextColor="#BBB"
                   />
                   <TouchableOpacity onPress={() => setMostrarConfirmar(v => !v)}>
@@ -370,14 +366,14 @@ export default function PerfilScreen({ navigation }) {
                 }}
               >
                 <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>
-                  {loadingPass ? 'Actualizando...' : 'Actualizar contraseÃ±a'}
+                  {loadingPass ? 'Actualizando...' : 'Actualizar contraseña'}
                 </Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
 
-        {/* â”€â”€ CERRAR SESIÃ“N â”€â”€ */}
+        {/* CERRAR SESIÓN */}
         <TouchableOpacity
           onPress={handleLogout}
           style={{
@@ -388,10 +384,39 @@ export default function PerfilScreen({ navigation }) {
           }}
         >
           <Ionicons name="log-out-outline" size={20} color={PURPLE} />
-          <Text style={{ color: PURPLE, fontSize: 15, fontWeight: 'bold' }}>Cerrar sesiÃ³n</Text>
+          <Text style={{ color: PURPLE, fontSize: 15, fontWeight: 'bold' }}>Cerrar sesión</Text>
         </TouchableOpacity>
 
       </ScrollView>
+
+      <View style={navStyles.navBar}>
+        <View style={navStyles.navLeft}>
+          <TouchableOpacity
+            style={navStyles.navItem}
+            onPress={() => navigation.navigate('MisPatrones')}
+          >
+            <Ionicons name="grid-outline" size={24} color="#AAA" />
+            <Text style={navStyles.navLabel}>Patrones</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={navStyles.navCenter} />
+
+        <View style={navStyles.navRight}>
+          <TouchableOpacity style={navStyles.navItem}>
+            <Ionicons name="person-outline" size={24} color={PURPLE} />
+            <Text style={[navStyles.navLabel, navStyles.navLabelActivo]}>Mi perfil</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          style={navStyles.fab}
+          onPress={handleFab}
+          activeOpacity={0.85}
+        >
+          <MaterialCommunityIcons name="camera-plus" size={30} color="white" />
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }

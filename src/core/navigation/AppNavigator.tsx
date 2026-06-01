@@ -6,19 +6,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginScreen from '../../pattern/presentation/screens/LoginScreen.js';
 import RegistroScreen from '../../pattern/presentation/screens/RegistroScreen.js';
 import MisPatronesScreen from '../../pattern/presentation/screens/MisPatronesScreen.js';
-import GenerarPatronScreen from '../../pattern/presentation/screens/GenerarPatronScreen.js';
-import FormularioPatronScreen from '../../pattern/presentation/screens/FormularioPatronScreen.js';
-import VistaPreviaScreen from '../../pattern/presentation/screens/VistaPreviaScreen.js';
 import PerfilScreen from '../../pattern/presentation/screens/PerfilScreen.js';
 import OlvidasteContrasenaScreen from '../../pattern/presentation/screens/OlvidasteContrasenaScreen.js';
 import VerificarCorreoScreen from '../../pattern/presentation/screens/VerificarCorreoScreen.js';
 import RestablecerContrasenaScreen from '../../pattern/presentation/screens/RestablecerContrasenaScreen.js';
 import OnboardingScreen from '../../pattern/presentation/screens/OnboardingScreen';
+import GeneratePatternNavigator from './GeneratePatternNavigator';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const ONBOARDING_KEY = '@patronika_onboarding_done';
+const tabLikeScreenOptions = { animation: 'none' as const };
+const bottomSheetScreenOptions = {
+    animation: 'none' as const,
+    presentation: 'modal' as const,
+    gestureDirection: 'vertical' as const,
+};
 
 export default function AppNavigator() {
     const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList | null>(null);
@@ -54,12 +58,10 @@ export default function AppNavigator() {
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegistroScreen} />
             <Stack.Screen name="Registro" component={RegistroScreen} />
-            <Stack.Screen name="Home" component={MisPatronesScreen} />
-            <Stack.Screen name="MisPatrones" component={MisPatronesScreen} />
-            <Stack.Screen name="GenerarPatron" component={GenerarPatronScreen} />
-            <Stack.Screen name="Formulario" component={FormularioPatronScreen} />
-            <Stack.Screen name="VistaPrevia" component={VistaPreviaScreen} />
-            <Stack.Screen name="Perfil" component={PerfilScreen} />
+            <Stack.Screen name="Home" component={MisPatronesScreen} options={tabLikeScreenOptions} />
+            <Stack.Screen name="MisPatrones" component={MisPatronesScreen} options={tabLikeScreenOptions} />
+            <Stack.Screen name="GenerarPatron" component={GeneratePatternNavigator} options={bottomSheetScreenOptions} />
+            <Stack.Screen name="Perfil" component={PerfilScreen} options={tabLikeScreenOptions} />
             <Stack.Screen name="OlvidasteContrasena" component={OlvidasteContrasenaScreen} />
             <Stack.Screen name="VerificarCorreo" component={VerificarCorreoScreen} />
             <Stack.Screen name="RestablecerContrasena" component={RestablecerContrasenaScreen} />

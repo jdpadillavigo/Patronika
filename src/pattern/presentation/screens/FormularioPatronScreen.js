@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { formularioStyles as styles, PURPLE } from '../styles/FormularioPatronStyles';
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
+import { useGeneratePatternFlow } from '../../../core/navigation/GeneratePatternFlowContext';
 
 function NumericStepper({ valor, onChange }) {
   const decrement = () => { if (valor > 1) onChange(valor - 1); };
@@ -28,7 +29,7 @@ function NumericStepper({ valor, onChange }) {
   return (
     <View style={styles.stepper}>
       <TouchableOpacity style={styles.stepperBtn} onPress={decrement} disabled={valor <= 1}>
-        <Text style={[styles.stepperSymbol, valor <= 1 && styles.stepperDisabled]}>âˆ’</Text>
+        <Text style={[styles.stepperSymbol, valor <= 1 && styles.stepperDisabled]}>-</Text>
       </TouchableOpacity>
       <TextInput
         style={styles.stepperInput}
@@ -46,6 +47,7 @@ function NumericStepper({ valor, onChange }) {
 }
 
 export default function FormularioPatronScreen({ navigation, route }) {
+  const { closeFlow } = useGeneratePatternFlow();
   const { imageUri } = route?.params || {};
   const [nombre, setNombre] = useState('');
   const [tamano, setTamano] = useState(50);
@@ -60,7 +62,7 @@ export default function FormularioPatronScreen({ navigation, route }) {
     setLoading(false);
 
     if (!result.success) {
-      Alert.alert('Error', result.error || 'No se pudo generar el patron');
+      Alert.alert('Error', result.error || 'No se pudo generar el patrón');
       return;
     }
 
@@ -69,7 +71,6 @@ export default function FormularioPatronScreen({ navigation, route }) {
       nombre,
       tamano,
       pattern: result.data,
-      patronUrl: result.data?.gridData || imageUri,
     });
   };
 
@@ -78,8 +79,8 @@ export default function FormularioPatronScreen({ navigation, route }) {
       <StatusBar barStyle="dark-content" backgroundColor="white" />
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Generar patrÃ³n</Text>
-        <TouchableOpacity onPress={() => navigation.popToTop()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <Text style={styles.headerTitle}>Generar patrón</Text>
+        <TouchableOpacity onPress={closeFlow} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <Ionicons name="close" size={24} color="#555" />
         </TouchableOpacity>
       </View>
@@ -99,7 +100,7 @@ export default function FormularioPatronScreen({ navigation, route }) {
 
         <View style={styles.fieldGroup}>
           <View style={styles.labelRow}>
-            <Text style={styles.label}>TamaÃ±o (1 â€“ 100)</Text>
+            <Text style={styles.label}>Tamaño (1 a 100)</Text>
             <TouchableOpacity onPress={() => setShowInfoModal(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Ionicons name="information-circle-outline" size={22} color={PURPLE} />
             </TouchableOpacity>
@@ -121,13 +122,13 @@ export default function FormularioPatronScreen({ navigation, route }) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Ionicons name="information-circle" size={48} color={PURPLE} />
-            <Text style={styles.modalTitle}>Â¿QuÃ© tamaÃ±o elegir?</Text>
+            <Text style={styles.modalTitle}>¿Qué tamaño elegir?</Text>
 
             <View style={styles.infoRow}>
               <Ionicons name="image-outline" size={20} color={PURPLE} />
               <View style={styles.infoTextGroup}>
-                <Text style={styles.infoLabel}>Imagen pequeÃ±a o simple</Text>
-                <Text style={styles.infoDesc}>Pocos colores o diseÃ±o sencillo â†’ tamaÃ±o 10 â€“ 30</Text>
+                <Text style={styles.infoLabel}>Imagen pequeña o simple</Text>
+                <Text style={styles.infoDesc}>Pocos colores o diseño sencillo (tamaño 10 a 30)</Text>
               </View>
             </View>
 
@@ -135,7 +136,7 @@ export default function FormularioPatronScreen({ navigation, route }) {
               <Ionicons name="image" size={20} color={PURPLE} />
               <View style={styles.infoTextGroup}>
                 <Text style={styles.infoLabel}>Imagen mediana</Text>
-                <Text style={styles.infoDesc}>Detalle moderado â†’ tamaÃ±o 30 â€“ 50</Text>
+                <Text style={styles.infoDesc}>Detalle moderado (tamaño 30 a 50)</Text>
               </View>
             </View>
 
@@ -143,7 +144,7 @@ export default function FormularioPatronScreen({ navigation, route }) {
               <Ionicons name="images" size={20} color={PURPLE} />
               <View style={styles.infoTextGroup}>
                 <Text style={styles.infoLabel}>Imagen grande o detallada</Text>
-                <Text style={styles.infoDesc}>Muchos colores o alta resoluciÃ³n â†’ tamaÃ±o 40 â€“ 60 para que el patrÃ³n salga bien</Text>
+                <Text style={styles.infoDesc}>Muchos colores o alta resolución (tamaño 40 a 60) para que el patrón salga bien</Text>
               </View>
             </View>
 

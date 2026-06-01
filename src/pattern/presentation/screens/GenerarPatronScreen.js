@@ -12,16 +12,17 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { generarPatronStyles as styles, PURPLE } from '../styles/GenerarPatronStyles';
+import { useGeneratePatternFlow } from '../../../core/navigation/GeneratePatternFlowContext';
 
 export default function GenerarPatronScreen({ navigation }) {
-  const onClose = () => navigation.goBack();
+  const { closeFlow } = useGeneratePatternFlow();
   const [image, setImage] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      alert('Se necesita permiso para acceder a la galerÃ­a');
+      alert('Se necesita permiso para acceder a la galería');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -42,20 +43,20 @@ export default function GenerarPatronScreen({ navigation }) {
 
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle}>Generar patrÃ³n</Text>
+          <Text style={styles.headerTitle}>Generar patrón</Text>
         </View>
-        <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity onPress={closeFlow} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <Ionicons name="close" size={26} color="white" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.subtitleContainer}>
-        <Text style={styles.subtitle}>Adjunta una imagen desde tu galerÃ­a</Text>
+        <Text style={styles.subtitle}>Adjunta una imagen desde tu galería</Text>
       </View>
 
       <View style={styles.banner}>
         <Ionicons name="help-circle" size={22} color="#4A9EDB" />
-        <Text style={styles.bannerText}>Lea los tÃ©rminos y condiciones de uso</Text>
+        <Text style={styles.bannerText}>Lea los términos y condiciones de uso</Text>
       </View>
 
       <View style={styles.content}>
@@ -93,7 +94,7 @@ export default function GenerarPatronScreen({ navigation }) {
           <View style={styles.modalCard}>
             <MaterialCommunityIcons name="image-check-outline" size={64} color={PURPLE} />
             <Text style={styles.modalTitle}>
-              {'Â¡Imagen cargada\ncorrectamente!'}
+              {'¡Imagen cargada\ncorrectamente!'}
             </Text>
             <TouchableOpacity
               style={styles.button}

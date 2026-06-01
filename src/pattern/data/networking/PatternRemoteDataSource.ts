@@ -43,9 +43,14 @@ async function create(userId: string, name: string, size: number, imageUri?: str
     return response.data;
 }
 
+async function remove(id: string): Promise<void> {
+    await ApiClient.delete<ApiResponse<string>>(`/api/patterns/${id}`);
+}
+
 const PatternRemoteDataSource = {
     loadByUser,
     create,
+    remove,
 };
 
 export default PatternRemoteDataSource;

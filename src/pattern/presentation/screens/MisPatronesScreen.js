@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,49 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { misPatronesStyles as styles, PURPLE } from '../styles/MisPatronesStyles';
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
+import { gridDataToImageUri } from '../utils/GridImage';
+
+function PatternCardImage({ gridData }) {
+  const [imageUri, setImageUri] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (!gridData) {
+      setImageUri(null);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    setTimeout(() => {
+      const generated = gridDataToImageUri(gridData, { maxDimension: 360 });
+      if (mounted) setImageUri(generated);
+    }, 0);
+
+    return () => {
+      mounted = false;
+    };
+  }, [gridData]);
+
+  if (!imageUri) {
+    return <View style={styles.cardImagen} />;
+  }
+
+  return (
+    <Image
+      source={{ uri: imageUri }}
+      style={styles.cardImagen}
+      resizeMode="contain"
+    />
+  );
+}
 
 export default function MisPatronesScreen({ navigation }) {
   const [navActiva, setNavActiva] = useState('patrones');
@@ -43,7 +81,7 @@ export default function MisPatronesScreen({ navigation }) {
       <StatusBar barStyle="light-content" backgroundColor={PURPLE} />
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Patronika</Text>
+        <Text style={styles.headerTitle}>Patrónika</Text>
       </View>
 
       <View style={styles.contenido}>
@@ -54,7 +92,7 @@ export default function MisPatronesScreen({ navigation }) {
         ) : navActiva === 'patrones' ? (
           patrones.length === 0 ? (
             <View style={styles.vacio}>
-              <Text style={styles.vacioText}>No creaste patrones aun</Text>
+              <Text style={styles.vacioText}>No creaste patrones aún</Text>
             </View>
           ) : (
             <FlatList
@@ -64,13 +102,13 @@ export default function MisPatronesScreen({ navigation }) {
               contentContainerStyle={styles.listaPatrones}
               renderItem={({ item }) => (
                 <TouchableOpacity style={styles.cardPatron}>
-                  <View style={styles.cardImagen} />
+                  <PatternCardImage gridData={item.gridData} />
                   <View style={styles.cardInfo}>
                     <Text style={styles.cardNombre} numberOfLines={1}>{item.name}</Text>
-                    <Text style={styles.cardCreador} numberOfLines={1}>Creador: {item.user?.username || 'Tu'}</Text>
+                    <Text style={styles.cardCreador} numberOfLines={1}>Creador: {item.user?.username || 'Tú'}</Text>
                     <View style={styles.cardFooter}>
                       <Text style={styles.cardValoracion}>Sin valoraciones</Text>
-                      <Text style={styles.cardDificultad}>Tamano: {item.size}</Text>
+                      <Text style={styles.cardDificultad}>Tamaño: {item.size}</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -79,7 +117,7 @@ export default function MisPatronesScreen({ navigation }) {
           )
         ) : (
           <View style={styles.vacio}>
-            <Text style={styles.vacioText}>Proximamente</Text>
+            <Text style={styles.vacioText}>Próximamente</Text>
           </View>
         )}
       </View>
@@ -120,4 +158,3 @@ export default function MisPatronesScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-

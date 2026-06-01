@@ -22,7 +22,7 @@ export default function RestablecerContrasenaScreen({ navigation }) {
   const handleRestablecer = async () => {
     const result = await PasswordRecoveryUseCase.resetPassword(password, confirmar);
     if (!result.success) {
-      Alert.alert('Endpoint pendiente', result.error || 'No se pudo restablecer la contrasena');
+      Alert.alert('Endpoint pendiente', result.error || 'No se pudo restablecer la contraseña');
       return;
     }
     setModalVisible(true);
@@ -49,11 +49,11 @@ export default function RestablecerContrasenaScreen({ navigation }) {
       </TouchableOpacity>
  
       <View style={styles.contenido}>
- 
-        {/* Título y descripción */}
+
+        {/* Tí­tulo y descripción */}
         <Text style={styles.titulo}>Restablecer{'\n'}contraseña</Text>
         <Text style={styles.descripcion}>Ingrese su nueva contraseña.</Text>
- 
+
         {/* Campo contraseña nueva */}
         <View style={styles.inputContainer}>
           <TextInput
@@ -73,7 +73,7 @@ export default function RestablecerContrasenaScreen({ navigation }) {
             />
           </TouchableOpacity>
         </View>
- 
+        
         {/* Campo confirmar contraseña */}
         <View style={styles.inputContainer}>
           <TextInput
