@@ -751,3 +751,191 @@ export const misPatronesStyles = StyleSheet.create({
     elevation: 8,
   },
 });
+
+// ─── Estilos compartidos del flujo recuperar contraseña ──────────────────────
+// Base reutilizada en las 3 pantallas: fondo blanco, "Volver" morado, inputs con línea inferior
+ 
+const recuperarBase = {
+  safeArea: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  volverBtn: {
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 50 : 16,
+    paddingBottom: 8,
+    alignSelf: 'flex-start',
+  },
+  volverText: {
+    color: PURPLE,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  contenido: {
+    flex: 1,
+    paddingHorizontal: 28,
+    paddingTop: 32,
+  },
+  titulo: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    lineHeight: 40,
+    marginBottom: 16,
+    letterSpacing: -0.5,
+  },
+  descripcion: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 22,
+    marginBottom: 36,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1A1A1A',
+    paddingVertical: Platform.OS === 'ios' ? 14 : 10,
+  },
+  boton: {
+    backgroundColor: PURPLE,
+    borderRadius: 10,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 32,
+    elevation: 3,
+    shadowColor: PURPLE,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
+  botonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+};
+ 
+// ─── OlvidasteContrasena ─────────────────────────────────────────────────────
+export const olvidasteStyles = StyleSheet.create({
+  ...recuperarBase,
+  // Input con solo línea inferior (igual al diseño del Login)
+  input: {
+    fontSize: 15,
+    color: '#1A1A1A',
+    paddingVertical: Platform.OS === 'ios' ? 14 : 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#BDBDBD',
+    marginBottom: 8,
+  },
+});
+ 
+// ─── VerificarCorreo ─────────────────────────────────────────────────────────
+export const verificarCorreoStyles = StyleSheet.create({
+  ...recuperarBase,
+  // 4 casillas separadas para el código OTP
+  codigoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 8,
+  },
+  codigoCasilla: {
+    flex: 1,
+    height: 56,
+    borderBottomWidth: 2,
+    borderBottomColor: '#BDBDBD',
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    textAlign: 'center',
+  },
+  reenviarText: {
+    color: PURPLE,
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 20,
+    textDecorationLine: 'underline',
+  },
+});
+ 
+// ─── RestablecerContrasena ───────────────────────────────────────────────────
+export const restablecerStyles = StyleSheet.create({
+  ...recuperarBase,
+  // Fila con input + ícono del ojo
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#BDBDBD',
+    marginBottom: 20,
+  },
+  // Modal overlay oscuro
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  // Tarjeta blanca del modal
+  modalCard: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    width: '100%',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+  },
+  // Contenedor del ícono con badge de refresh
+  modalIconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 2.5,
+    borderColor: PURPLE,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    position: 'relative',
+  },
+  modalIconBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 2,
+  },
+  modalTitulo: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    textAlign: 'center',
+    lineHeight: 28,
+    marginBottom: 24,
+  },
+  modalBoton: {
+    backgroundColor: PURPLE,
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    alignItems: 'center',
+    width: '100%',
+    elevation: 3,
+    shadowColor: PURPLE,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
+  modalBotonText: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+});

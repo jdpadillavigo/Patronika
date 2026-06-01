@@ -8,9 +8,13 @@ import GenerarPatronScreen from './screens/GenerarPatronScreen';
 import FormularioPatronScreen from './screens/FormularioPatronScreen';
 import VistaPreviaScreen from './screens/VistaPreviaScreen';
 import PerfilScreen from './screens/PerfilScreen';
+/* NUEVO — pantallas del flujo recuperar contraseña */
+import OlvidasteContrasenaScreen from './screens/OlvidasteContrasenaScreen';
+import VerificarCorreoScreen from './screens/VerificarCorreoScreen';
+import RestablecerContrasenaScreen from './screens/RestablecerContrasenaScreen';
 
 const Stack = createNativeStackNavigator();
-
+ 
 export default function App() {
   return (
     <NavigationContainer>
@@ -22,7 +26,12 @@ export default function App() {
         <Stack.Screen name="Formulario" component={FormularioPatronScreen} />
         <Stack.Screen name="VistaPrevia" component={VistaPreviaScreen} />
         <Stack.Screen name="Perfil" component={PerfilScreen} />
+          {/* NUEVO — flujo recuperar contraseña */}
+        <Stack.Screen name="OlvidasteContrasena" component={OlvidasteContrasenaScreen} />
+        <Stack.Screen name="VerificarCorreo" component={VerificarCorreoScreen} />
+        <Stack.Screen name="RestablecerContrasena" component={RestablecerContrasenaScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+ 
