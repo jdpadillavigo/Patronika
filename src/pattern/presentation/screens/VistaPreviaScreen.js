@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { vistaPreviaStyles as styles, PURPLE } from '../styles';
+import { vistaPreviaStyles as styles, PURPLE } from '../styles/VistaPreviaStyles';
 
 export default function VistaPreviaScreen({ navigation, route }) {
-  const { patronUrl, nombre } = route?.params || {};
+  const { patronUrl, imageUri, nombre } = route?.params || {};
+  const previewUri = patronUrl || imageUri;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -28,16 +29,16 @@ export default function VistaPreviaScreen({ navigation, route }) {
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.patternContainer}>
-          {patronUrl ? (
+          {previewUri ? (
             <Image
-              source={{ uri: patronUrl }}
+              source={{ uri: previewUri }}
               style={styles.patternImage}
               resizeMode="contain"
             />
           ) : (
             <View style={styles.patternPlaceholder}>
               <ActivityIndicator size="large" color={PURPLE} />
-              <Text style={styles.placeholderText}>Generando patrón...</Text>
+              <Text style={styles.placeholderText}>Generando patrÃ³n...</Text>
             </View>
           )}
         </View>
@@ -61,3 +62,4 @@ export default function VistaPreviaScreen({ navigation, route }) {
     </SafeAreaView>
   );
 }
+

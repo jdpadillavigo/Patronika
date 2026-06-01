@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,8 +14,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { login } from '../services/auth';
-import { loginStyles as styles, PURPLE, AUTH_GRADIENTS, absoluteFill } from '../styles';
+import { loginStyles as styles, PURPLE, AUTH_GRADIENTS, absoluteFill } from '../styles/LoginStyles';
+import LoginUseCase from '../../domain/usecases/LoginUseCase';
 
 export default function LoginScreen({ navigation }) {
   const [usuario, setUsuario] = useState('');
@@ -48,7 +48,11 @@ export default function LoginScreen({ navigation }) {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      await login({ username: usuario.trim(), password: contrasena });
+      const result = await LoginUseCase.execute(usuario.trim(), contrasena);
+      if (!result.success) {
+        Alert.alert('Error', result.error || 'No se pudo iniciar sesion');
+        return;
+      }
       navigation.replace('MisPatrones');
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -76,7 +80,7 @@ export default function LoginScreen({ navigation }) {
 
           <View style={styles.titleGroup}>
             <Text style={styles.title}>Bienvenido</Text>
-            <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
+            <Text style={styles.subtitle}>Inicia sesiÃ³n para continuar</Text>
           </View>
 
           <View style={styles.form}>
@@ -95,7 +99,7 @@ export default function LoginScreen({ navigation }) {
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="Contraseña"
+                placeholder="ContraseÃ±a"
                 placeholderTextColor="rgba(255,255,255,0.45)"
                 value={contrasena}
                 onChangeText={setContrasena}
@@ -120,19 +124,19 @@ export default function LoginScreen({ navigation }) {
               onPress={handleLogin}
             >
               <Text style={styles.buttonText}>
-                {loading ? 'Ingresando...' : 'INICIAR SESIÓN'}
+                {loading ? 'Ingresando...' : 'INICIAR SESIÃ“N'}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.linkCenter} onPress={() => navigation.navigate('OlvidasteContrasena')}>
-              <Text style={styles.linkText}>¿Olvidaste tu contraseña?</Text>
+              <Text style={styles.linkText}>Â¿Olvidaste tu contraseÃ±a?</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.bottom}>
-            <Text style={styles.bottomText}>¿Aún no tienes cuenta? </Text>
+            <Text style={styles.bottomText}>Â¿AÃºn no tienes cuenta? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Registro')}>
-              <Text style={styles.bottomLink}>Regístrate ahora</Text>
+              <Text style={styles.bottomLink}>RegÃ­strate ahora</Text>
             </TouchableOpacity>
           </View>
 
@@ -141,3 +145,4 @@ export default function LoginScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+

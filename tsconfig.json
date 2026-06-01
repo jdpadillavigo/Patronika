@@ -5,6 +5,8 @@
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": false,
+    "allowJs": true,
+    "checkJs": false,
     "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,7 +14,8 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "**/*.js"
   ],
   "exclude": [
     "node_modules"

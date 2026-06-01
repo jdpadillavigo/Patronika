@@ -9,31 +9,22 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { restablecerStyles as styles, PURPLE } from '../styles';
- 
+import { restablecerStyles as styles, PURPLE } from '../styles/RestablecerContrasenaStyles';
+import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
+
 export default function RestablecerContrasenaScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [confirmar, setConfirmar] = useState('');
   const [verPassword, setVerPassword] = useState(false);
   const [verConfirmar, setVerConfirmar] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
- 
-  const handleRestablecer = () => {
-    if (!password.trim()) {
-      Alert.alert('Error', 'Por favor ingresa una contraseña');
+
+  const handleRestablecer = async () => {
+    const result = await PasswordRecoveryUseCase.resetPassword(password, confirmar);
+    if (!result.success) {
+      Alert.alert('Endpoint pendiente', result.error || 'No se pudo restablecer la contrasena');
       return;
     }
-    if (password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-    if (password !== confirmar) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
-      return;
-    }
- 
-    // TODO: conectar con endpoint del backend para actualizar la contraseña
-    // Por ahora muestra el modal de confirmación
     setModalVisible(true);
   };
  

@@ -7,6 +7,8 @@ export interface User {
     status: number;
     registeredDate: string | null;
     activateNotification: boolean;
+    suspensionEndDate?: string | null;
+    avatar?: string | null;
 }
 
 export interface ValidationResult {
@@ -14,7 +16,6 @@ export interface ValidationResult {
     message: string;
 }
 
-/** Crea un modelo User a partir de datos del API. */
 export function createUser(apiData: Partial<User>): User {
     return {
         id: apiData.id || null,
@@ -24,7 +25,9 @@ export function createUser(apiData: Partial<User>): User {
         loggedIn: apiData.loggedIn || false,
         status: apiData.status || 0,
         registeredDate: apiData.registeredDate || null,
-        activateNotification: apiData.activateNotification || false,
+        activateNotification: apiData.activateNotification ?? true,
+        suspensionEndDate: apiData.suspensionEndDate || null,
+        avatar: apiData.avatar || null,
     };
 }
 
@@ -40,20 +43,20 @@ export function validateUsername(username: string): ValidationResult {
 
 export function validateEmail(email: string): ValidationResult {
     if (!email.trim()) {
-        return { isValid: false, message: 'Por favor ingresa tu correo electrónico' };
+        return { isValid: false, message: 'Por favor ingresa tu correo electronico' };
     }
     if (!email.includes('@')) {
-        return { isValid: false, message: 'Por favor ingresa un correo válido' };
+        return { isValid: false, message: 'Por favor ingresa un correo valido' };
     }
     return { isValid: true, message: '' };
 }
 
 export function validatePassword(password: string): ValidationResult {
     if (!password.trim()) {
-        return { isValid: false, message: 'Por favor ingresa tu contraseña' };
+        return { isValid: false, message: 'Por favor ingresa tu contrasena' };
     }
-    if (password.length < 6) {
-        return { isValid: false, message: 'La contraseña debe tener al menos 6 caracteres' };
+    if (password.length < 4) {
+        return { isValid: false, message: 'La contrasena debe tener al menos 4 caracteres' };
     }
     return { isValid: true, message: '' };
 }

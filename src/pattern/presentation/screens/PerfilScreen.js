@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,20 +11,21 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { PURPLE } from '../styles';
-import { getSession, logout, updateProfile, changePassword } from '../services/auth';
+import { PURPLE } from '../styles/CommonStyles';
+import ProfileUseCase from '../../domain/usecases/ProfileUseCase';
+import SessionUseCase from '../../domain/usecases/SessionUseCase';
 
 export default function PerfilScreen({ navigation }) {
   const [usuario, setUsuario] = useState(null);
 
-  // Edición de datos
+  // EdiciÃ³n de datos
   const [editando, setEditando] = useState(false);
   const [nuevoNombre, setNuevoNombre] = useState('');
   const [nuevaFoto, setNuevaFoto] = useState(null);
   const [errorPerfil, setErrorPerfil] = useState('');
   const [loadingPerfil, setLoadingPerfil] = useState(false);
 
-  // Cambio de contraseña
+  // Cambio de contraseÃ±a
   const [expandirPass, setExpandirPass] = useState(false);
   const [passActual, setPassActual] = useState('');
   const [passNueva, setPassNueva] = useState('');
@@ -37,7 +38,7 @@ export default function PerfilScreen({ navigation }) {
   const [exitoPass, setExitoPass] = useState('');
 
   useEffect(() => {
-    getSession().then(u => {
+    ProfileUseCase.getCurrent().then(u => {
       setUsuario(u);
       setNuevoNombre(u?.username ?? '');
       setNuevaFoto(u?.avatar ?? null);
@@ -59,17 +60,17 @@ export default function PerfilScreen({ navigation }) {
   const handleGuardarPerfil = async () => {
     setErrorPerfil('');
     if (!nuevoNombre.trim()) {
-      setErrorPerfil('El nombre de usuario no puede estar vacío');
+      setErrorPerfil('El nombre de usuario no puede estar vacÃ­o');
       return;
     }
     setLoadingPerfil(true);
     try {
-      const actualizado = await updateProfile({
-        userId: usuario.id,
-        username: nuevoNombre.trim(),
-        avatar: nuevaFoto,
-      });
-      setUsuario(actualizado);
+      const result = await ProfileUseCase.updateProfile(nuevoNombre.trim(), nuevaFoto);
+      if (!result.success) {
+        setErrorPerfil(result.error || 'No se pudo actualizar el perfil');
+        return;
+      }
+      setUsuario(result.data);
       setEditando(false);
     } catch (e) {
       setErrorPerfil(e.message);
@@ -93,17 +94,21 @@ export default function PerfilScreen({ navigation }) {
       return;
     }
     if (passNueva !== passConfirmar) {
-      setErrorPass('Las contraseñas nuevas no coinciden');
+      setErrorPass('Las contraseÃ±as nuevas no coinciden');
       return;
     }
     if (passNueva.length < 4) {
-      setErrorPass('La nueva contraseña debe tener al menos 4 caracteres');
+      setErrorPass('La nueva contraseÃ±a debe tener al menos 4 caracteres');
       return;
     }
     setLoadingPass(true);
     try {
-      await changePassword({ userId: usuario.id, currentPassword: passActual, newPassword: passNueva });
-      setExitoPass('Contraseña actualizada correctamente');
+      const result = await ProfileUseCase.changePassword(passActual, passNueva, passConfirmar);
+      if (!result.success) {
+        setErrorPass(result.error || 'No se pudo cambiar la contrasena');
+        return;
+      }
+      setExitoPass('ContraseÃ±a actualizada correctamente');
       setPassActual('');
       setPassNueva('');
       setPassConfirmar('');
@@ -116,7 +121,7 @@ export default function PerfilScreen({ navigation }) {
   };
 
   const handleLogout = async () => {
-    await logout();
+    await SessionUseCase.logout(usuario?.id);
     navigation.replace('Login');
   };
 
@@ -144,7 +149,7 @@ export default function PerfilScreen({ navigation }) {
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 28, paddingTop: 36, paddingBottom: 48, gap: 24 }}>
 
-        {/* ── AVATAR ── */}
+        {/* â”€â”€ AVATAR â”€â”€ */}
         <View style={{ alignItems: 'center', gap: 12 }}>
           <TouchableOpacity onPress={editando ? handlePickFoto : undefined} activeOpacity={editando ? 0.7 : 1}>
             <View style={{
@@ -170,12 +175,12 @@ export default function PerfilScreen({ navigation }) {
 
           {!editando && (
             <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#111' }}>
-              {usuario?.username ?? '—'}
+              {usuario?.username ?? 'â€”'}
             </Text>
           )}
         </View>
 
-        {/* ── DATOS DEL PERFIL ── */}
+        {/* â”€â”€ DATOS DEL PERFIL â”€â”€ */}
         <View style={{ gap: 16 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111' }}>Datos del perfil</Text>
@@ -212,7 +217,7 @@ export default function PerfilScreen({ navigation }) {
                 borderWidth: 1, borderColor: '#EFEFEF', borderRadius: 10,
                 backgroundColor: '#FAFAFA',
               }}>
-                {usuario?.username ?? '—'}
+                {usuario?.username ?? 'â€”'}
               </Text>
             )}
           </View>
@@ -221,7 +226,7 @@ export default function PerfilScreen({ navigation }) {
           <View style={{ gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Ionicons name="mail-outline" size={16} color={PURPLE} />
-              <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CORREO ELECTRÓNICO</Text>
+              <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CORREO ELECTRÃ“NICO</Text>
             </View>
             <Text style={{
               fontSize: 15, color: '#888',
@@ -229,7 +234,7 @@ export default function PerfilScreen({ navigation }) {
               borderWidth: 1, borderColor: '#EFEFEF', borderRadius: 10,
               backgroundColor: '#FAFAFA',
             }}>
-              {usuario?.email ?? '—'}
+              {usuario?.email ?? 'â€”'}
             </Text>
           </View>
 
@@ -237,7 +242,7 @@ export default function PerfilScreen({ navigation }) {
             <Text style={{ color: '#e74c3c', fontSize: 13, textAlign: 'center' }}>{errorPerfil}</Text>
           ) : null}
 
-          {/* Botones edición */}
+          {/* Botones ediciÃ³n */}
           {editando && (
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
               <TouchableOpacity
@@ -265,7 +270,7 @@ export default function PerfilScreen({ navigation }) {
           )}
         </View>
 
-        {/* ── CAMBIAR CONTRASEÑA ── */}
+        {/* â”€â”€ CAMBIAR CONTRASEÃ‘A â”€â”€ */}
         <View style={{ borderTopWidth: 1, borderTopColor: '#EFEFEF', paddingTop: 20, gap: 14 }}>
           <TouchableOpacity
             onPress={() => { setExpandirPass(v => !v); setErrorPass(''); setExitoPass(''); }}
@@ -273,16 +278,16 @@ export default function PerfilScreen({ navigation }) {
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Ionicons name="lock-closed-outline" size={18} color={PURPLE} />
-              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111' }}>Cambiar contraseña</Text>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111' }}>Cambiar contraseÃ±a</Text>
             </View>
             <Ionicons name={expandirPass ? 'chevron-up' : 'chevron-down'} size={20} color="#999" />
           </TouchableOpacity>
 
           {expandirPass && (
             <View style={{ gap: 12 }}>
-              {/* Contraseña actual */}
+              {/* ContraseÃ±a actual */}
               <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CONTRASEÑA ACTUAL</Text>
+                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CONTRASEÃ‘A ACTUAL</Text>
                 <View style={{
                   flexDirection: 'row', alignItems: 'center',
                   borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
@@ -294,7 +299,7 @@ export default function PerfilScreen({ navigation }) {
                     secureTextEntry={!mostrarActual}
                     autoCapitalize="none"
                     style={{ flex: 1, fontSize: 15, color: '#111' }}
-                    placeholder="Contraseña actual"
+                    placeholder="ContraseÃ±a actual"
                     placeholderTextColor="#BBB"
                   />
                   <TouchableOpacity onPress={() => setMostrarActual(v => !v)}>
@@ -303,9 +308,9 @@ export default function PerfilScreen({ navigation }) {
                 </View>
               </View>
 
-              {/* Nueva contraseña */}
+              {/* Nueva contraseÃ±a */}
               <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>NUEVA CONTRASEÑA</Text>
+                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>NUEVA CONTRASEÃ‘A</Text>
                 <View style={{
                   flexDirection: 'row', alignItems: 'center',
                   borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
@@ -317,7 +322,7 @@ export default function PerfilScreen({ navigation }) {
                     secureTextEntry={!mostrarNueva}
                     autoCapitalize="none"
                     style={{ flex: 1, fontSize: 15, color: '#111' }}
-                    placeholder="Nueva contraseña"
+                    placeholder="Nueva contraseÃ±a"
                     placeholderTextColor="#BBB"
                   />
                   <TouchableOpacity onPress={() => setMostrarNueva(v => !v)}>
@@ -328,7 +333,7 @@ export default function PerfilScreen({ navigation }) {
 
               {/* Confirmar nueva */}
               <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CONFIRMAR NUEVA CONTRASEÑA</Text>
+                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CONFIRMAR NUEVA CONTRASEÃ‘A</Text>
                 <View style={{
                   flexDirection: 'row', alignItems: 'center',
                   borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
@@ -340,7 +345,7 @@ export default function PerfilScreen({ navigation }) {
                     secureTextEntry={!mostrarConfirmar}
                     autoCapitalize="none"
                     style={{ flex: 1, fontSize: 15, color: '#111' }}
-                    placeholder="Repite la nueva contraseña"
+                    placeholder="Repite la nueva contraseÃ±a"
                     placeholderTextColor="#BBB"
                   />
                   <TouchableOpacity onPress={() => setMostrarConfirmar(v => !v)}>
@@ -365,14 +370,14 @@ export default function PerfilScreen({ navigation }) {
                 }}
               >
                 <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>
-                  {loadingPass ? 'Actualizando...' : 'Actualizar contraseña'}
+                  {loadingPass ? 'Actualizando...' : 'Actualizar contraseÃ±a'}
                 </Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
 
-        {/* ── CERRAR SESIÓN ── */}
+        {/* â”€â”€ CERRAR SESIÃ“N â”€â”€ */}
         <TouchableOpacity
           onPress={handleLogout}
           style={{
@@ -383,10 +388,11 @@ export default function PerfilScreen({ navigation }) {
           }}
         >
           <Ionicons name="log-out-outline" size={20} color={PURPLE} />
-          <Text style={{ color: PURPLE, fontSize: 15, fontWeight: 'bold' }}>Cerrar sesión</Text>
+          <Text style={{ color: PURPLE, fontSize: 15, fontWeight: 'bold' }}>Cerrar sesiÃ³n</Text>
         </TouchableOpacity>
 
       </ScrollView>
     </SafeAreaView>
   );
 }
+
