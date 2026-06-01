@@ -1,14 +1,12 @@
-import AuthRepository from '../../data/repositories/AuthRepository';
+import AuthRepository, { type AuthResult } from '../../data/repositories/AuthRepository';
 import { validateUsername, validateEmail, validatePassword } from '../models/User';
 
-/**
- * @param { string } username
- * @param { string } email
- * @param { string } password
- * @param { string } confirmPassword
- * @returns { Promise<{ success: boolean, data?: string, error?: string }>}
- */
-async function execute(username, email, password, confirmPassword) {
+async function execute(
+    username: string,
+    email: string,
+    password: string,
+    confirmPassword: string,
+): Promise<AuthResult> {
     const usernameValidation = validateUsername(username);
     if (!usernameValidation.isValid) {
         return { success: false, error: usernameValidation.message };
@@ -34,10 +32,11 @@ async function execute(username, email, password, confirmPassword) {
         if (response.success) {
             return { success: true, data: response.data || 'Cuenta creada exitosamente' };
         } else {
-            return { success: false, error: response.data || 'Error al crear la cuenta' };
+            return { success: false, error: response.error || 'Error al crear la cuenta' };
         }
-    } catch (error) {
-        return { success: false, error: error.message || 'Error al crear la cuenta' };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Error al crear la cuenta';
+        return { success: false, error: message };
     }
 }
 

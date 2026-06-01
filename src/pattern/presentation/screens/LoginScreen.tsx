@@ -3,11 +3,15 @@ import {
     View, Text, TextInput, TouchableOpacity,
     KeyboardAvoidingView, Platform, ScrollView, Alert,
 } from 'react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../../../ui/theme/Theme';
 import { createLoginStyles } from '../styles/LoginStyles';
 import LoginUseCase from '../../domain/usecases/LoginUseCase';
+import type { RootStackParamList } from '../../../core/navigation/types';
 
-export default function LoginScreen({ navigation }) {
+type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
+
+export default function LoginScreen({ navigation }: Props) {
     const { colors } = useAppTheme();
     const styles = useMemo(() => createLoginStyles(colors), [colors]);
 
@@ -29,9 +33,9 @@ export default function LoginScreen({ navigation }) {
                     routes: [{ name: 'Home' }],
                 });
             } else {
-                Alert.alert('Error', result.error);
+                Alert.alert('Error', result.error || 'Error desconocido');
             }
-        } catch (error) {
+        } catch {
             Alert.alert('Error', 'Ocurrió un error inesperado. Intenta de nuevo.');
         } finally {
             setLoading(false);

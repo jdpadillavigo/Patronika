@@ -1,10 +1,7 @@
 import { StyleSheet, Platform } from 'react-native';
+import type { AppColors } from '../../../ui/theme/Theme';
 
-/**
- * @param {object} colors
- * @returns {object}
- */
-export function createLoginStyles(colors) {
+export function createRegisterStyles(colors: AppColors) {
     return StyleSheet.create({
         container: {
             flex: 1,
@@ -12,43 +9,35 @@ export function createLoginStyles(colors) {
         },
         scrollContent: {
             flexGrow: 1,
-            justifyContent: 'center',
             paddingHorizontal: 24,
-            paddingVertical: 40,
+            paddingBottom: 40,
+            paddingTop: 20,
+        },
+        backButton: {
+            alignSelf: 'flex-start',
+            paddingVertical: 8,
+            paddingRight: 16,
+            marginBottom: 16,
+        },
+        backButtonText: {
+            color: colors.textSecondary,
+            fontSize: 15,
+            fontWeight: '500',
         },
         headerContainer: {
-            alignItems: 'center',
-            marginBottom: 40,
-        },
-        logoCircle: {
-            width: 72,
-            height: 72,
-            borderRadius: 36,
-            backgroundColor: colors.primary,
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: 20,
-            elevation: 10,
-            shadowColor: colors.primary,
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.4,
-            shadowRadius: 16,
-        },
-        logoText: {
-            color: colors.white,
-            fontSize: 32,
-            fontWeight: '800',
+            marginBottom: 32,
         },
         title: {
-            fontSize: 30,
-            fontWeight: '700',
+            fontSize: 32,
+            fontWeight: '800',
             color: colors.text,
+            letterSpacing: -1,
             marginBottom: 8,
         },
         subtitle: {
             fontSize: 15,
             color: colors.textSecondary,
-            textAlign: 'center',
+            lineHeight: 22,
         },
         formContainer: {
             backgroundColor: colors.surface,
@@ -81,9 +70,19 @@ export function createLoginStyles(colors) {
             fontSize: 15,
             color: colors.text,
         },
+        inputError: {
+            borderColor: colors.error,
+            backgroundColor: colors.errorBg,
+        },
+        errorText: {
+            color: colors.error,
+            fontSize: 12,
+            marginTop: 6,
+            fontWeight: '500',
+        },
         passwordContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
+            flexDirection: 'row' as const,
+            alignItems: 'center' as const,
             backgroundColor: colors.inputBackground,
             borderWidth: 1.5,
             borderColor: colors.inputBorder,
@@ -103,61 +102,61 @@ export function createLoginStyles(colors) {
         eyeIcon: {
             fontSize: 18,
         },
-        forgotContainer: {
-            alignItems: 'flex-end',
-            marginTop: -8,
-            marginBottom: 24,
+        strengthContainer: {
+            flexDirection: 'row' as const,
+            alignItems: 'center' as const,
+            marginTop: 10,
+            gap: 10,
         },
-        forgotText: {
-            color: colors.primary,
-            fontSize: 13,
+        strengthBar: {
+            flex: 1,
+            height: 4,
+            backgroundColor: colors.inputBorder,
+            borderRadius: 2,
+            overflow: 'hidden' as const,
+        },
+        strengthFill: {
+            height: '100%',
+            borderRadius: 2,
+        },
+        strengthLabel: {
+            fontSize: 12,
             fontWeight: '600',
+            minWidth: 50,
+            textAlign: 'right' as const,
         },
-        loginButton: {
+        registerButton: {
             backgroundColor: colors.primary,
             borderRadius: 12,
             paddingVertical: 16,
-            alignItems: 'center',
+            alignItems: 'center' as const,
+            marginTop: 8,
             elevation: 6,
             shadowColor: colors.primary,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.4,
             shadowRadius: 12,
         },
-        loginButtonDisabled: {
+        registerButtonDisabled: {
             opacity: 0.6,
         },
-        loginButtonText: {
+        registerButtonText: {
             color: colors.white,
             fontSize: 16,
             fontWeight: '700',
             letterSpacing: 0.3,
         },
-        dividerContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginVertical: 24,
+        loginContainer: {
+            flexDirection: 'row' as const,
+            justifyContent: 'center' as const,
+            alignItems: 'center' as const,
+            marginTop: 24,
         },
-        dividerLine: {
-            flex: 1,
-            height: 1,
-            backgroundColor: colors.inputBorder,
-        },
-        dividerText: {
-            color: colors.textSecondary,
-            paddingHorizontal: 12,
-            fontSize: 13,
-        },
-        registerContainer: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        registerText: {
+        loginText: {
             color: colors.textSecondary,
             fontSize: 14,
         },
-        registerLink: {
+        loginLink: {
             color: colors.primary,
             fontSize: 14,
             fontWeight: '700',

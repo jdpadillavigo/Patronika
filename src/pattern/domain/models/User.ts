@@ -1,8 +1,21 @@
-/**
- * @param {object} apiData
- * @returns {object}
- */
-export function createUser(apiData) {
+export interface User {
+    id: string | null;
+    username: string;
+    email: string;
+    isAdmin: boolean;
+    loggedIn: boolean;
+    status: number;
+    registeredDate: string | null;
+    activateNotification: boolean;
+}
+
+export interface ValidationResult {
+    isValid: boolean;
+    message: string;
+}
+
+/** Crea un modelo User a partir de datos del API. */
+export function createUser(apiData: Partial<User>): User {
     return {
         id: apiData.id || null,
         username: apiData.username || '',
@@ -15,11 +28,7 @@ export function createUser(apiData) {
     };
 }
 
-/**
- * @param {string} username
- * @returns {{ isValid: boolean, message: string }}
- */
-export function validateUsername(username) {
+export function validateUsername(username: string): ValidationResult {
     if (!username.trim()) {
         return { isValid: false, message: 'Por favor ingresa tu nombre de usuario' };
     }
@@ -29,11 +38,7 @@ export function validateUsername(username) {
     return { isValid: true, message: '' };
 }
 
-/**
- * @param {string} email
- * @returns {{ isValid: boolean, message: string }}
- */
-export function validateEmail(email) {
+export function validateEmail(email: string): ValidationResult {
     if (!email.trim()) {
         return { isValid: false, message: 'Por favor ingresa tu correo electrónico' };
     }
@@ -43,11 +48,7 @@ export function validateEmail(email) {
     return { isValid: true, message: '' };
 }
 
-/**
- * @param {string} password
- * @returns {{ isValid: boolean, message: string }}
- */
-export function validatePassword(password) {
+export function validatePassword(password: string): ValidationResult {
     if (!password.trim()) {
         return { isValid: false, message: 'Por favor ingresa tu contraseña' };
     }

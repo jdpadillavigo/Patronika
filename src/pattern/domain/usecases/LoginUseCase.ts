@@ -1,12 +1,7 @@
-import AuthRepository from '../../data/repositories/AuthRepository';
+import AuthRepository, { type AuthResult } from '../../data/repositories/AuthRepository';
 import { validateUsername, validatePassword } from '../models/User';
 
-/**
- * @param {string} username
- * @param {string} password
- * @returns {Promise<{ success: boolean, data?: object, error?: string }>}
- */
-async function execute(username, password) {
+async function execute(username: string, password: string): Promise<AuthResult> {
     // Validar campos
     const usernameValidation = validateUsername(username);
     if (!usernameValidation.isValid) {
@@ -24,10 +19,11 @@ async function execute(username, password) {
         if (response.success) {
             return { success: true, data: response.data };
         } else {
-            return { success: false, error: response.data || 'Error al iniciar sesión' };
+            return { success: false, error: response.error || 'Error al iniciar sesión' };
         }
-    } catch (error) {
-        return { success: false, error: error.message || 'Error al iniciar sesión' };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Error al iniciar sesión';
+        return { success: false, error: message };
     }
 }
 

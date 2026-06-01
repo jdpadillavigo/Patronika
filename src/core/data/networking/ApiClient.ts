@@ -1,23 +1,23 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+const BASE_URL: string = process.env.EXPO_PUBLIC_API_URL || '';
 
 // Claves de AsyncStorage
 const TOKEN_KEY = '@patronika_auth_token';
 const REFRESH_TOKEN_KEY = '@patronika_refresh_token';
 
+/** Opciones para las peticiones HTTP. */
+interface RequestOptions {
+    method?: string;
+    body?: Record<string, unknown> | null;
+    requiresAuth?: boolean;
+    headers?: Record<string, string>;
+}
+
 /**
  * Realiza una petición HTTP al backend.
- *
- * @param {string} endpoint - Ruta del endpoint (ej: '/api/auth/login')
- * @param {object} options
- * @param {string} options.method - Método HTTP (GET, POST, PUT, DELETE)
- * @param {object} options.body - Cuerpo de la petición (se convierte a JSON)
- * @param {boolean} options.requiresAuth - Si necesita enviar el token JWT (default: true)
- * @param {object} options.headers - Headers adicionales
- * @returns {Promise<object>} - Respuesta parseada como JSON
  */
-async function request(endpoint, options = {}) {
+async function request<T = unknown>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const {
         method = 'GET',
         body = null,
@@ -26,7 +26,7 @@ async function request(endpoint, options = {}) {
     } = options;
 
     // Construir headers
-    const requestHeaders = {
+    const requestHeaders: Record<string, string> = {
         'Content-Type': 'application/json',
         ...headers,
     };
@@ -40,7 +40,7 @@ async function request(endpoint, options = {}) {
     }
 
     // Configurar la petición
-    const config = {
+    const config: RequestInit = {
         method,
         headers: requestHeaders,
     };
@@ -51,18 +51,19 @@ async function request(endpoint, options = {}) {
 
     try {
         const response = await fetch(`${BASE_URL}${endpoint}`, config);
-        const data = await response.json();
-
+        const data: T = await response.json();
+        console.log(data);
         if (!response.ok) {
             // El backend envuelve errores en { success: false, data: "mensaje" }
-            const errorMessage = data?.data || data?.message || 'Error en la solicitud';
+            const errorData = data as Record<string, unknown>;
+            const errorMessage = (errorData?.data as string) || (errorData?.message as string) || 'Error en la solicitud';
             throw new Error(errorMessage);
         }
 
         return data;
-    } catch (error) {
+    } catch (error: unknown) {
         // Si es un error de red (no de la API)
-        if (error.message === 'Network request failed') {
+        if (error instanceof Error && error.message === 'Network request failed') {
             throw new Error('Sin conexión a internet. Verifica tu conexión e intenta de nuevo.');
         }
         throw error;
@@ -71,40 +72,40 @@ async function request(endpoint, options = {}) {
 
 // --- Métodos de conveniencia ---
 
-function get(endpoint, options = {}) {
-    return request(endpoint, { ...options, method: 'GET' });
+function get<T = unknown>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+    return request<T>(endpoint, { ...options, method: 'GET' });
 }
 
-function post(endpoint, body, options = {}) {
-    return request(endpoint, { ...options, method: 'POST', body });
+function post<T = unknown>(endpoint: string, body: Record<string, unknown>, options: RequestOptions = {}): Promise<T> {
+    return request<T>(endpoint, { ...options, method: 'POST', body });
 }
 
-function put(endpoint, body, options = {}) {
-    return request(endpoint, { ...options, method: 'PUT', body });
+function put<T = unknown>(endpoint: string, body: Record<string, unknown>, options: RequestOptions = {}): Promise<T> {
+    return request<T>(endpoint, { ...options, method: 'PUT', body });
 }
 
-function del(endpoint, options = {}) {
-    return request(endpoint, { ...options, method: 'DELETE' });
+function del<T = unknown>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+    return request<T>(endpoint, { ...options, method: 'DELETE' });
 }
 
 // --- Gestión de tokens ---
 
-async function saveTokens(accessToken, refreshToken) {
+async function saveTokens(accessToken: string, refreshToken?: string | null): Promise<void> {
     await AsyncStorage.setItem(TOKEN_KEY, accessToken);
     if (refreshToken) {
         await AsyncStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
     }
 }
 
-async function getAccessToken() {
+async function getAccessToken(): Promise<string | null> {
     return await AsyncStorage.getItem(TOKEN_KEY);
 }
 
-async function getRefreshToken() {
+async function getRefreshToken(): Promise<string | null> {
     return await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
 }
 
-async function clearTokens() {
+async function clearTokens(): Promise<void> {
     await AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_TOKEN_KEY]);
 }
 

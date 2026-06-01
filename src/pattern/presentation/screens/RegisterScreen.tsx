@@ -3,11 +3,21 @@ import {
     View, Text, TextInput, TouchableOpacity,
     KeyboardAvoidingView, Platform, ScrollView, Alert,
 } from 'react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../../../ui/theme/Theme';
 import { createRegisterStyles } from '../styles/RegisterStyles';
 import RegisterUseCase from '../../domain/usecases/RegisterUseCase';
+import type { RootStackParamList } from '../../../core/navigation/types';
 
-export default function RegisterScreen({ navigation }) {
+type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
+
+interface PasswordStrength {
+    label: string;
+    color: string;
+    width: string;
+}
+
+export default function RegisterScreen({ navigation }: Props) {
     const { colors } = useAppTheme();
     const styles = useMemo(() => createRegisterStyles(colors), [colors]);
 
@@ -18,7 +28,7 @@ export default function RegisterScreen({ navigation }) {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const getPasswordStrength = () => {
+    const getPasswordStrength = (): PasswordStrength => {
         if (password.length === 0) return { label: '', color: colors.inputBorder, width: '0%' };
         if (password.length < 6) return { label: 'Débil', color: colors.error, width: '25%' };
         if (password.length < 8) return { label: 'Regular', color: colors.warning, width: '50%' };
@@ -36,12 +46,12 @@ export default function RegisterScreen({ navigation }) {
                 Alert.alert(
                     '¡Cuenta creada!',
                     `Bienvenido ${username}.\nTu cuenta ha sido creada exitosamente.`,
-                    [{ text: 'Iniciar sesión', onPress: () => navigation.navigate('Login') }]
+                    [{ text: 'Iniciar sesión', onPress: () => navigation.navigate('Login') }],
                 );
             } else {
-                Alert.alert('Error', result.error);
+                Alert.alert('Error', result.error || 'Error desconocido');
             }
-        } catch (error) {
+        } catch {
             Alert.alert('Error', 'Ocurrió un error inesperado. Intenta de nuevo.');
         } finally {
             setLoading(false);

@@ -1,5 +1,5 @@
 const Colors = {
-    // Colores principales de la marca
+    // Colores principales
     primary: '#763A6C',     // Morado
     gray: '#C8C7CC',        // Gris
     white: '#FFFFFF',       // Blanco
@@ -33,6 +33,6 @@ const Colors = {
         inputBorder: '#334155',
         divider: '#334155',
     },
-};
+} as const;
 
 export default Colors;
