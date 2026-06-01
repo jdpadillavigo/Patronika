@@ -24,23 +24,23 @@ const SLIDES: Slide[] = [
     {
         id: '1',
         icon: '👋',
-        title: 'Bienvenido a Patronika',
+        title: '¡Bienvenido a Patrónika!',
         description:
-            'Tu compañero ideal para descubrir, organizar y compartir patrones de diseño de forma sencilla.',
+            'Tu herramienta para crear patrones de tejido a partir de cualquier imagen',
     },
     {
         id: '2',
-        icon: '🧩',
-        title: 'Descubre Patrones',
+        icon: '📸',
+        title: 'Sube una imagen',
         description:
-            'Explora una amplia colección de patrones de diseño con ejemplos claros y guías paso a paso.',
+            'Toma una foto o selecciona de tu galería. Patrónika la convertirá en un patrón paso a paso',
     },
     {
         id: '3',
-        icon: '🚀',
-        title: '¡Empieza Ahora!',
+        icon: '🎨',
+        title: 'Genera tu patrón',
         description:
-            'Crea tu cuenta, personaliza tu experiencia y comienza tu viaje en el mundo de los patrones.',
+            'Obtén un patrón listo para tejer en técnicas como tapestry crochet, filet crochet e intarsia',
     },
 ];
 

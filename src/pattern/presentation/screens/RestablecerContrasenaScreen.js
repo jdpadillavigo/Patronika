@@ -22,7 +22,7 @@ export default function RestablecerContrasenaScreen({ navigation }) {
   const handleRestablecer = async () => {
     const result = await PasswordRecoveryUseCase.resetPassword(password, confirmar);
     if (!result.success) {
-      Alert.alert('Endpoint pendiente', result.error || 'No se pudo restablecer la contrasena');
+      Alert.alert('Endpoint pendiente', result.error || 'No se pudo restablecer la contraseña');
       return;
     }
     setModalVisible(true);
@@ -30,7 +30,7 @@ export default function RestablecerContrasenaScreen({ navigation }) {
 
   const handleIrALogin = () => {
     setModalVisible(false);
-    // Limpia el stack de navegaciÃ³n y va directo al Login
+    // Limpia el stack de navegación y va directo al Login
     navigation.reset({
       index: 0,
       routes: [{ name: 'Login' }],
@@ -40,7 +40,7 @@ export default function RestablecerContrasenaScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
 
-      {/* BotÃ³n Volver â€” regresa a la pantalla anterior del flujo */}
+      {/* Botón Volver regresa a la pantalla anterior del flujo */}
       <TouchableOpacity
         style={styles.volverBtn}
         onPress={() => navigation.goBack()}
@@ -50,15 +50,15 @@ export default function RestablecerContrasenaScreen({ navigation }) {
 
       <View style={styles.contenido}>
 
-        {/* TÃ­tulo y descripciÃ³n */}
-        <Text style={styles.titulo}>Restablecer{'\n'}contraseÃ±a</Text>
-        <Text style={styles.descripcion}>Ingrese su nueva contraseÃ±a.</Text>
+        {/* Tí­tulo y descripción */}
+        <Text style={styles.titulo}>Restablecer{'\n'}contraseña</Text>
+        <Text style={styles.descripcion}>Ingrese su nueva contraseña.</Text>
 
-        {/* Campo contraseÃ±a nueva */}
+        {/* Campo contraseña nueva */}
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="ContraseÃ±a"
+            placeholder="Contraseña"
             placeholderTextColor="#BDBDBD"
             value={password}
             onChangeText={setPassword}
@@ -74,11 +74,11 @@ export default function RestablecerContrasenaScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Campo confirmar contraseÃ±a */}
+        {/* Campo confirmar contraseña */}
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Repetir contraseÃ±a"
+            placeholder="Repetir contraseña"
             placeholderTextColor="#BDBDBD"
             value={confirmar}
             onChangeText={setConfirmar}
@@ -94,14 +94,14 @@ export default function RestablecerContrasenaScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* BotÃ³n restablecer */}
+        {/* Botón restablecer */}
         <TouchableOpacity style={styles.boton} onPress={handleRestablecer}>
           <Text style={styles.botonText}>Restablecer</Text>
         </TouchableOpacity>
 
       </View>
 
-      {/* Modal de confirmaciÃ³n â€” se muestra al restablecer con Ã©xito */}
+      {/* Modal de confirmación se muestra al restablecer con éxito */}
       <Modal
         visible={modalVisible}
         transparent
@@ -111,7 +111,7 @@ export default function RestablecerContrasenaScreen({ navigation }) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
 
-            {/* Ãcono candado con flecha */}
+            {/* Ícono candado con flecha */}
             <View style={styles.modalIconContainer}>
               <Ionicons name="lock-closed-outline" size={36} color={PURPLE} />
               <View style={styles.modalIconBadge}>
@@ -119,11 +119,11 @@ export default function RestablecerContrasenaScreen({ navigation }) {
               </View>
             </View>
 
-            <Text style={styles.modalTitulo}>Â¡ContraseÃ±a{'\n'}restablecida!</Text>
+            <Text style={styles.modalTitulo}>¡Contraseña{'\n'}restablecida!</Text>
 
             {/* BotÃ³n para ir al login */}
             <TouchableOpacity style={styles.modalBoton} onPress={handleIrALogin}>
-              <Text style={styles.modalBotonText}>Iniciar sesiÃ³n</Text>
+              <Text style={styles.modalBotonText}>Iniciar sesión</Text>
             </TouchableOpacity>
 
           </View>
@@ -133,4 +133,3 @@ export default function RestablecerContrasenaScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-

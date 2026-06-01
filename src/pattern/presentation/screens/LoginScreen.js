@@ -50,7 +50,7 @@ export default function LoginScreen({ navigation }) {
     try {
       const result = await LoginUseCase.execute(usuario.trim(), contrasena);
       if (!result.success) {
-        Alert.alert('Error', result.error || 'No se pudo iniciar sesion');
+        Alert.alert('Error', result.error || 'No se pudo iniciar sesión');
         return;
       }
       navigation.replace('MisPatrones');
@@ -80,7 +80,7 @@ export default function LoginScreen({ navigation }) {
 
           <View style={styles.titleGroup}>
             <Text style={styles.title}>Bienvenido</Text>
-            <Text style={styles.subtitle}>Inicia sesiÃ³n para continuar</Text>
+            <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
           </View>
 
           <View style={styles.form}>
@@ -99,7 +99,7 @@ export default function LoginScreen({ navigation }) {
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="ContraseÃ±a"
+                placeholder="Contraseña"
                 placeholderTextColor="rgba(255,255,255,0.45)"
                 value={contrasena}
                 onChangeText={setContrasena}
@@ -124,19 +124,19 @@ export default function LoginScreen({ navigation }) {
               onPress={handleLogin}
             >
               <Text style={styles.buttonText}>
-                {loading ? 'Ingresando...' : 'INICIAR SESIÃ“N'}
+                {loading ? 'Ingresando...' : 'INICIAR SESIÓN'}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.linkCenter} onPress={() => navigation.navigate('OlvidasteContrasena')}>
-              <Text style={styles.linkText}>Â¿Olvidaste tu contraseÃ±a?</Text>
+              <Text style={styles.linkText}>¿Olvidaste tu contraseña?</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.bottom}>
-            <Text style={styles.bottomText}>Â¿AÃºn no tienes cuenta? </Text>
+            <Text style={styles.bottomText}>¿Aún no tienes cuenta? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Registro')}>
-              <Text style={styles.bottomLink}>RegÃ­strate ahora</Text>
+              <Text style={styles.bottomLink}>Regístrate ahora</Text>
             </TouchableOpacity>
           </View>
 

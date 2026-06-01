@@ -1,7 +1,4 @@
-﻿// screens/OlvidasteContrasenaScreen.js
-// NUEVO â€” Pantalla 1 del flujo de recuperaciÃ³n de contraseÃ±a
-
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -20,7 +17,7 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
   const handleEnviar = async () => {
     const result = await PasswordRecoveryUseCase.requestCode(email);
     if (!result.success) {
-      Alert.alert('Error', result.error || 'No se pudo enviar el codigo');
+      Alert.alert('Error', result.error || 'No se pudo enviar el código');
       return;
     }
     navigation.navigate('VerificarCorreo', { mode: 'recovery', email });
@@ -29,7 +26,6 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
 
-      {/* BotÃ³n Volver â€” regresa al Login (no a la pantalla anterior del stack) */}
       <TouchableOpacity
         style={styles.volverBtn}
         onPress={() => navigation.navigate('Login')}
@@ -39,17 +35,15 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
 
       <View style={styles.contenido}>
 
-        {/* TÃ­tulo y descripciÃ³n */}
-        <Text style={styles.titulo}>Â¿Olvidaste tu{'\n'}contraseÃ±a?</Text>
+        <Text style={styles.titulo}>¿Olvidaste tu{'\n'}contraseña?</Text>
         <Text style={styles.descripcion}>
-          Ingrese su direcciÃ³n de correo electrÃ³nico a continuaciÃ³n y le
-          enviaremos un correo con instrucciones sobre cÃ³mo cambiar su contraseÃ±a.
+          Ingrese su dirección de correo electrónico a continuación y le
+          enviaremos un correo con instrucciones sobre cómo cambiar su contraseña.
         </Text>
 
-        {/* Campo email con solo lÃ­nea inferior */}
         <TextInput
           style={styles.input}
-          placeholder="Correo electrÃ³nico"
+          placeholder="Correo electrónico"
           placeholderTextColor="#BDBDBD"
           value={email}
           onChangeText={setEmail}
@@ -58,7 +52,6 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
           autoCorrect={false}
         />
 
-        {/* BotÃ³n enviar */}
         <TouchableOpacity style={styles.boton} onPress={handleEnviar}>
           <Text style={styles.botonText}>Enviar</Text>
         </TouchableOpacity>

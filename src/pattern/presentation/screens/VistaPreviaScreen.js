@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,56 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { vistaPreviaStyles as styles, PURPLE } from '../styles/VistaPreviaStyles';
+import { useGeneratePatternFlow } from '../../../core/navigation/GeneratePatternFlowContext';
+import { gridDataToImageUri } from '../utils/GridImage';
+import PatternUseCase from '../../domain/usecases/PatternUseCase';
 
 export default function VistaPreviaScreen({ navigation, route }) {
-  const { patronUrl, imageUri, nombre } = route?.params || {};
-  const previewUri = patronUrl || imageUri;
+  const { closeFlow, acceptPattern } = useGeneratePatternFlow();
+  const { patronUrl, imageUri, pattern } = route?.params || {};
+  const [generatedUri, setGeneratedUri] = useState(null);
+  const [isRenderingPattern, setIsRenderingPattern] = useState(Boolean(pattern?.gridData));
+  const previewUri = generatedUri || patronUrl || (!isRenderingPattern ? imageUri : null);
+
+  const discardPattern = async () => {
+    if (pattern?.id) {
+      await PatternUseCase.discard(pattern.id);
+    }
+  };
+
+  const closeAndDiscard = async () => {
+    await discardPattern();
+    closeFlow();
+  };
+
+  const cancelAndDiscard = async () => {
+    await discardPattern();
+    navigation.goBack();
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (!pattern?.gridData) {
+      setIsRenderingPattern(false);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    setIsRenderingPattern(true);
+    setTimeout(() => {
+      const uri = gridDataToImageUri(pattern.gridData);
+      if (mounted) {
+        setGeneratedUri(uri);
+        setIsRenderingPattern(false);
+      }
+    }, 0);
+
+    return () => {
+      mounted = false;
+    };
+  }, [pattern?.gridData]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -22,7 +68,7 @@ export default function VistaPreviaScreen({ navigation, route }) {
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Vista previa</Text>
-        <TouchableOpacity onPress={() => navigation.popTo('GenerarPatron')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity onPress={closeAndDiscard} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <Ionicons name="close" size={26} color="white" />
         </TouchableOpacity>
       </View>
@@ -38,7 +84,9 @@ export default function VistaPreviaScreen({ navigation, route }) {
           ) : (
             <View style={styles.patternPlaceholder}>
               <ActivityIndicator size="large" color={PURPLE} />
-              <Text style={styles.placeholderText}>Generando patrÃ³n...</Text>
+              <Text style={styles.placeholderText}>
+                {isRenderingPattern ? 'Preparando vista previa...' : 'Generando patrón...'}
+              </Text>
             </View>
           )}
         </View>
@@ -46,14 +94,14 @@ export default function VistaPreviaScreen({ navigation, route }) {
         <View style={styles.buttons}>
           <TouchableOpacity
             style={styles.buttonSolid}
-            onPress={() => navigation.popTo('GenerarPatron')}
+            onPress={acceptPattern}
           >
-            <Text style={styles.buttonSolidText}>Guardar</Text>
+            <Text style={styles.buttonSolidText}>Aceptar</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.buttonOutline}
-            onPress={() => navigation.goBack()}
+            onPress={cancelAndDiscard}
           >
             <Text style={styles.buttonOutlineText}>Cancelar</Text>
           </TouchableOpacity>
@@ -62,4 +110,3 @@ export default function VistaPreviaScreen({ navigation, route }) {
     </SafeAreaView>
   );
 }
-
