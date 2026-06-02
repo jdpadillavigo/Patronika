@@ -18,6 +18,8 @@ export default function GenerarPatronScreen({ navigation }) {
   const { closeFlow } = useGeneratePatternFlow();
   const [image, setImage] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  // NUEVO: estado para mostrar el modal de selección de fuente (galería o cámara)
+  const [showSourceModal, setShowSourceModal] = useState(false);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -26,6 +28,26 @@ export default function GenerarPatronScreen({ navigation }) {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      setShowConfirmModal(true);
+    }
+  };
+
+    const takePhoto = async () => {
+    // Solicitar permiso de cámara
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Se necesita permiso para acceder a la cámara');
+      return;
+    }
+    // Abrir la cámara con los mismos parámetros de edición que la galería
+    const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
@@ -51,7 +73,7 @@ export default function GenerarPatronScreen({ navigation }) {
       </View>
 
       <View style={styles.subtitleContainer}>
-        <Text style={styles.subtitle}>Adjunta una imagen desde tu galería</Text>
+        <Text style={styles.subtitle}>Adjunta una imagen desde tu galería o toma una foto</Text>
       </View>
 
       <View style={styles.banner}>
@@ -62,13 +84,13 @@ export default function GenerarPatronScreen({ navigation }) {
       <View style={styles.content}>
         <TouchableOpacity
           style={styles.imageContainer}
-          onPress={pickImage}
+          onPress={() => setShowSourceModal(true)}
           activeOpacity={0.85}
         >
           {image ? (
             <>
               <Image source={{ uri: image }} style={styles.image} resizeMode="cover" />
-              <TouchableOpacity style={styles.editBadge} onPress={pickImage}>
+              <TouchableOpacity style={styles.editBadge} onPress={() => setShowSourceModal(true)}>
                 <Ionicons name="pencil" size={14} color="white" />
               </TouchableOpacity>
             </>
@@ -88,6 +110,45 @@ export default function GenerarPatronScreen({ navigation }) {
           <Text style={styles.buttonText}>Siguiente</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal visible={showSourceModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <MaterialCommunityIcons name="image-search-outline" size={52} color={PURPLE} />
+            <Text style={styles.modalTitle}>{'¿Cómo quieres\nagregar tu imagen?'}</Text>
+ 
+            {/* Botón: abrir galería */}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                setShowSourceModal(false);
+                pickImage();
+              }}
+            >
+              <Text style={styles.buttonText}>Desde la galería</Text>
+            </TouchableOpacity>
+ 
+            {/* Botón: abrir cámara */}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                setShowSourceModal(false);
+                takePhoto();
+              }}
+            >
+              <Text style={styles.buttonText}>Tomar una foto</Text>
+            </TouchableOpacity>
+ 
+            {/* Botón: cancelar */}
+            <TouchableOpacity
+              style={[styles.button, styles.buttonDisabled]}
+              onPress={() => setShowSourceModal(false)}
+            >
+              <Text style={styles.buttonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={showConfirmModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
