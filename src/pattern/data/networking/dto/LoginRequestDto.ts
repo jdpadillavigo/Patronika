@@ -1,8 +1,2 @@
-export interface LoginRequestDto {
-    username: string;
-    password: string;
-}
-
-export function createLoginRequest(username: string, password: string): LoginRequestDto {
-    return { username, password };
-}
+export type { AuthRequestDto as LoginRequestDto } from './AuthDto';
+export { createAuthRequest as createLoginRequest } from './AuthDto';

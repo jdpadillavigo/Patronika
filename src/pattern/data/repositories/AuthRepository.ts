@@ -7,6 +7,7 @@ export interface AuthResult {
     success: boolean;
     data?: unknown;
     error?: string;
+    sessionExpired?: boolean;
 }
 
 async function findUserByUsername(username: string): Promise<User | null> {
@@ -70,16 +71,22 @@ async function requestRegisterCode(email: string): Promise<AuthResult> {
     return { success: true, data: message };
 }
 
-async function verifyRegisterCode(email: string, code: string): Promise<AuthResult> {
-    const verificationToken = await AuthRemoteDataSource.verifyRegisterCode(email, code);
-    return { success: true, data: verificationToken };
+async function requestPasswordRecoveryCode(email: string): Promise<AuthResult> {
+    const message = await AuthRemoteDataSource.requestPasswordRecoveryCode(email);
+    return { success: true, data: message };
 }
 
-async function register(verificationToken: string, username: string, email: string, password: string): Promise<AuthResult> {
-    const tokens = await AuthRemoteDataSource.register(verificationToken, username, email, password);
+async function verifyRegisterCode(email: string, code: string): Promise<AuthResult> {
+    const message = await AuthRemoteDataSource.verifyCode(email, code);
+    return { success: true, data: message };
+}
+
+async function register(username: string, email: string, password: string, profileImageUri?: string | null): Promise<AuthResult> {
+    const registeredUser = await AuthRemoteDataSource.register(username, email, password, profileImageUri);
+    const tokens = await AuthRemoteDataSource.login(username, password);
     await ApiClient.saveTokens(tokens.accessToken, tokens.refreshToken);
 
-    const user = await resolveCurrentUser(username, tokens.accessToken);
+    const user = createUser(registeredUser) || await resolveCurrentUser(username, tokens.accessToken);
     if (user) {
         await ApiClient.saveCurrentUser(user);
     }
@@ -99,7 +106,7 @@ async function logout(userId?: string | null): Promise<void> {
             await AuthRemoteDataSource.logout(userId, refreshToken);
         }
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
+        const message = error instanceof Error ? error.message : 'Error desconocido';
         console.warn('Error en logout del servidor:', message);
     }
 
@@ -109,6 +116,7 @@ async function logout(userId?: string | null): Promise<void> {
 const AuthRepository = {
     login,
     requestRegisterCode,
+    requestPasswordRecoveryCode,
     verifyRegisterCode,
     register,
     getSession,

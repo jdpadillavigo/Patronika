@@ -1,3 +1,4 @@
+import { isSessionExpiredError } from '../../../core/data/networking/ApiClient';
 import PatternRepository from '../../data/repositories/PatternRepository';
 
 async function listMine() {
@@ -5,6 +6,10 @@ async function listMine() {
         const patterns = await PatternRepository.listMine();
         return { success: true, data: patterns };
     } catch (error: unknown) {
+        if (isSessionExpiredError(error)) {
+            return { success: false, sessionExpired: true, data: [] };
+        }
+
         const message = error instanceof Error ? error.message : 'Error al cargar patrones';
         return { success: false, error: message, data: [] };
     }
@@ -22,6 +27,10 @@ async function create(name: string, size: number, imageUri?: string | null) {
         const pattern = await PatternRepository.create(name.trim(), size, imageUri);
         return { success: true, data: pattern };
     } catch (error: unknown) {
+        if (isSessionExpiredError(error)) {
+            return { success: false, sessionExpired: true };
+        }
+
         const message = error instanceof Error ? error.message : 'Error al crear el patrón';
         return { success: false, error: message };
     }
@@ -34,6 +43,10 @@ async function discard(id?: string | null) {
         await PatternRepository.remove(id);
         return { success: true };
     } catch (error: unknown) {
+        if (isSessionExpiredError(error)) {
+            return { success: false, sessionExpired: true };
+        }
+
         const message = error instanceof Error ? error.message : 'Error al descartar el patrón';
         return { success: false, error: message };
     }

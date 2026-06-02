@@ -62,6 +62,8 @@ export default function MisPatronesScreen({ navigation }) {
     const result = await PatternUseCase.listMine();
     if (result.success) {
       setPatrones(result.data || []);
+    } else if (result.sessionExpired) {
+      setPatrones([]);
     } else {
       Alert.alert('Error', result.error || 'No se pudieron cargar tus patrones');
     }

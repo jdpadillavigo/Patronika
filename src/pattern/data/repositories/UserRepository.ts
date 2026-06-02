@@ -46,7 +46,7 @@ async function updateProfile(username: string, avatar?: string | null): Promise<
 async function changePassword(currentPassword: string, newPassword: string): Promise<User> {
     const currentUser = await ApiClient.getCurrentUser<User>();
     if (!currentUser?.id) {
-        throw new Error('Inicia sesion nuevamente para cambiar tu contrasena');
+        throw new Error('Inicia sesión nuevamente para cambiar tu contraseña');
     }
 
     const tokens = await AuthRemoteDataSource.login(currentUser.username, currentPassword);

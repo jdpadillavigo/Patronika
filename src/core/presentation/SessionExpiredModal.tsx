@@ -1,0 +1,94 @@
+import React from 'react';
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { PURPLE } from '../../pattern/presentation/styles/CommonStyles';
+
+interface Props {
+    visible: boolean;
+    onAccept: () => void;
+}
+
+export default function SessionExpiredModal({ visible, onAccept }: Props) {
+    return (
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={onAccept}>
+            <View style={styles.modalOverlay}>
+                <View style={styles.modalCard}>
+                    <View style={styles.modalIconContainer}>
+                        <Ionicons name="time-outline" size={36} color={PURPLE} />
+                    </View>
+
+                    <Text style={styles.modalTitle}>Sesión cerrada</Text>
+                    <Text style={styles.modalMessage}>Se le cerró la sesión por inactividad.</Text>
+
+                    <TouchableOpacity style={styles.modalButton} onPress={onAccept}>
+                        <Text style={styles.modalButtonText}>Iniciar sesión</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
+}
+
+const styles = StyleSheet.create({
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.45)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+    },
+    modalCard: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 32,
+        alignItems: 'center',
+        width: '100%',
+        elevation: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.2,
+        shadowRadius: 16,
+    },
+    modalIconContainer: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        borderWidth: 2.5,
+        borderColor: PURPLE,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '800',
+        color: '#1A1A1A',
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    modalMessage: {
+        color: '#555',
+        fontSize: 14,
+        lineHeight: 22,
+        textAlign: 'center',
+        marginBottom: 24,
+    },
+    modalButton: {
+        backgroundColor: PURPLE,
+        borderRadius: 10,
+        paddingVertical: 14,
+        paddingHorizontal: 40,
+        alignItems: 'center',
+        width: '100%',
+        elevation: 3,
+        shadowColor: PURPLE,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+    },
+    modalButtonText: {
+        color: 'white',
+        fontSize: 15,
+        fontWeight: '700',
+    },
+});

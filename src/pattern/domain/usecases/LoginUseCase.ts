@@ -11,7 +11,7 @@ async function execute(username: string, password: string): Promise<AuthResult> 
     try {
         return await AuthRepository.login(username.trim(), password);
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Error al iniciar sesion';
+        const message = error instanceof Error ? error.message : 'Error al iniciar sesión';
         return { success: false, error: message };
     }
 }

@@ -87,6 +87,7 @@ export default function RegistroScreen({ navigation }) {
         email: correo.trim(),
         username: usuario.trim(),
         password: contrasena,
+        profileImageUri: avatar,
       });
     } catch (e) {
       setError(e.message);

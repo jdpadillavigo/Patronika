@@ -21,9 +21,9 @@ export type RootStackParamList = {
         email?: string;
         username?: string;
         password?: string;
+        profileImageUri?: string | null;
     };
     RestablecerContrasena: {
-        verificationToken?: string;
         email?: string;
     };
 };
