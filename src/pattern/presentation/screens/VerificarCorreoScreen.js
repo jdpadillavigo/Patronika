@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  Modal,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { verificarCorreoStyles as styles, PURPLE } from '../styles/VerificarCorreoStyles';
 import RegisterUseCase from '../../domain/usecases/RegisterUseCase';
 import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
@@ -17,6 +19,7 @@ export default function VerificarCorreoScreen({ navigation, route }) {
   // 4 inputs separados para el código de verificación
   const [codigo, setCodigo] = useState(['', '', '', '']);
   const inputs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Maneja el cambio en cada casilla del código
   const handleCambioDigito = (texto, index) => {
@@ -49,7 +52,7 @@ export default function VerificarCorreoScreen({ navigation, route }) {
         return;
       }
 
-      navigation.replace('MisPatrones');
+      setModalVisible(true);
       return;
     }
 
@@ -60,6 +63,11 @@ export default function VerificarCorreoScreen({ navigation, route }) {
     }
 
     navigation.navigate('RestablecerContrasena', { email });
+  };
+
+  const handleIrAMisPatrones = () => {
+    setModalVisible(false);
+    navigation.replace('MisPatrones');
   };
 
   const handleReenviar = async () => {
@@ -121,6 +129,29 @@ export default function VerificarCorreoScreen({ navigation, route }) {
         </TouchableOpacity>
 
       </View>
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+
+            <View style={styles.modalIconContainer}>
+              <Ionicons name="checkmark-circle-outline" size={36} color={PURPLE} />
+            </View>
+
+            <Text style={styles.modalTitulo}>Cuenta creada{'\n'}exitosamente</Text>
+
+            <TouchableOpacity style={styles.modalBoton} onPress={handleIrAMisPatrones}>
+              <Text style={styles.modalBotonText}>Continuar</Text>
+            </TouchableOpacity>
+
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }

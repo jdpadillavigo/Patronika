@@ -8,6 +8,7 @@ import {
   StatusBar,
   ScrollView,
   Image,
+  Modal,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -130,7 +131,14 @@ export default function PerfilScreen({ navigation }) {
     }
   };
 
-  const handleLogout = async () => {
+  const [modalLogout, setModalLogout] = useState(false);
+
+  const handleLogout = () => {
+    setModalLogout(true);
+  };
+
+  const handleConfirmarLogout = async () => {
+    setModalLogout(false);
     await SessionUseCase.logout(usuario?.id);
     navigation.replace('Login');
   };
@@ -426,6 +434,84 @@ export default function PerfilScreen({ navigation }) {
           <MaterialCommunityIcons name="camera-plus" size={30} color="white" />
         </TouchableOpacity>
       </View>
+
+      {/* Modal de confirmación de cierre de sesión */}
+      <Modal
+        visible={modalLogout}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalLogout(false)}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.45)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingHorizontal: 40,
+        }}>
+          <View style={{
+            backgroundColor: 'white',
+            borderRadius: 20,
+            padding: 32,
+            alignItems: 'center',
+            width: '100%',
+            elevation: 10,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.2,
+            shadowRadius: 16,
+          }}>
+            <View style={{
+              width: 64, height: 64, borderRadius: 32,
+              borderWidth: 2.5, borderColor: PURPLE,
+              justifyContent: 'center', alignItems: 'center',
+              marginBottom: 16,
+            }}>
+              <Ionicons name="log-out-outline" size={30} color={PURPLE} />
+            </View>
+
+            <Text style={{
+              fontSize: 18, fontWeight: '800', color: '#1A1A1A',
+              textAlign: 'center', lineHeight: 26, marginBottom: 8,
+            }}>
+              ¿Cerrar sesión?
+            </Text>
+
+            <Text style={{
+              fontSize: 14, color: '#666',
+              textAlign: 'center', marginBottom: 28,
+            }}>
+              ¿Estás seguro de que deseas cerrar sesión?
+            </Text>
+
+            <TouchableOpacity
+              onPress={handleConfirmarLogout}
+              style={{
+                backgroundColor: PURPLE, borderRadius: 10,
+                paddingVertical: 14, width: '100%',
+                alignItems: 'center', marginBottom: 12,
+              }}
+            >
+              <Text style={{ color: 'white', fontSize: 15, fontWeight: '700' }}>
+                Cerrar sesión
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setModalLogout(false)}
+              style={{
+                borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
+                paddingVertical: 14, width: '100%', alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: PURPLE, fontSize: 15, fontWeight: '700' }}>
+                Cancelar
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
