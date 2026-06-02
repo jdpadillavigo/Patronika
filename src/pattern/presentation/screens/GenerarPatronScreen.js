@@ -8,6 +8,7 @@ import {
   Image,
   Platform,
   Modal,
+  Alert,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -18,8 +19,6 @@ export default function GenerarPatronScreen({ navigation }) {
   const { closeFlow } = useGeneratePatternFlow();
   const [image, setImage] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  // NUEVO: estado para mostrar el modal de selección de fuente (galería o cámara)
-  const [showSourceModal, setShowSourceModal] = useState(false);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -39,14 +38,13 @@ export default function GenerarPatronScreen({ navigation }) {
     }
   };
 
-    const takePhoto = async () => {
-    // Solicitar permiso de cámara
+  // NUEVO: función para tomar foto con la cámara
+  const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       alert('Se necesita permiso para acceder a la cámara');
       return;
     }
-    // Abrir la cámara con los mismos parámetros de edición que la galería
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -57,6 +55,20 @@ export default function GenerarPatronScreen({ navigation }) {
       setImage(result.assets[0].uri);
       setShowConfirmModal(true);
     }
+  };
+
+  // NUEVO: en lugar de un modal de React Native (que conflictúa con las vistas nativas
+  // de cámara/galería en iOS), usamos Alert.alert nativo que no tiene ese problema
+  const handleSelectImage = () => {
+    Alert.alert(
+      '¿Cómo quieres agregar tu imagen?',
+      '',
+      [
+        { text: 'Desde la galería', onPress: pickImage },
+        { text: 'Tomar una foto',   onPress: takePhoto },
+        { text: 'Cancelar', style: 'cancel' },
+      ]
+    );
   };
 
   return (
@@ -73,6 +85,7 @@ export default function GenerarPatronScreen({ navigation }) {
       </View>
 
       <View style={styles.subtitleContainer}>
+        {/* NUEVO: subtítulo actualizado para reflejar las dos opciones disponibles */}
         <Text style={styles.subtitle}>Adjunta una imagen desde tu galería o toma una foto</Text>
       </View>
 
@@ -84,13 +97,15 @@ export default function GenerarPatronScreen({ navigation }) {
       <View style={styles.content}>
         <TouchableOpacity
           style={styles.imageContainer}
-          onPress={() => setShowSourceModal(true)}
+          // NUEVO: abre el Alert nativo de selección de fuente
+          onPress={handleSelectImage}
           activeOpacity={0.85}
         >
           {image ? (
             <>
               <Image source={{ uri: image }} style={styles.image} resizeMode="cover" />
-              <TouchableOpacity style={styles.editBadge} onPress={() => setShowSourceModal(true)}>
+              {/* NUEVO: el badge de edición también abre el Alert de selección */}
+              <TouchableOpacity style={styles.editBadge} onPress={handleSelectImage}>
                 <Ionicons name="pencil" size={14} color="white" />
               </TouchableOpacity>
             </>
@@ -111,45 +126,6 @@ export default function GenerarPatronScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <Modal visible={showSourceModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <MaterialCommunityIcons name="image-search-outline" size={52} color={PURPLE} />
-            <Text style={styles.modalTitle}>{'¿Cómo quieres\nagregar tu imagen?'}</Text>
- 
-            {/* Botón: abrir galería */}
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                setShowSourceModal(false);
-                pickImage();
-              }}
-            >
-              <Text style={styles.buttonText}>Desde la galería</Text>
-            </TouchableOpacity>
- 
-            {/* Botón: abrir cámara */}
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                setShowSourceModal(false);
-                takePhoto();
-              }}
-            >
-              <Text style={styles.buttonText}>Tomar una foto</Text>
-            </TouchableOpacity>
- 
-            {/* Botón: cancelar */}
-            <TouchableOpacity
-              style={[styles.button, styles.buttonDisabled]}
-              onPress={() => setShowSourceModal(false)}
-            >
-              <Text style={styles.buttonText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
       <Modal visible={showConfirmModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -169,4 +145,3 @@ export default function GenerarPatronScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-
