@@ -1,0 +1,63 @@
+﻿import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  Platform,
+  Alert,
+} from 'react-native';
+import { olvidasteStyles as styles, PURPLE } from '../styles/OlvidasteContrasenaStyles';
+import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
+
+export default function OlvidasteContrasenaScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+
+  const handleEnviar = async () => {
+    const result = await PasswordRecoveryUseCase.requestCode(email);
+    if (!result.success) {
+      Alert.alert('Error', result.error || 'No se pudo enviar el código');
+      return;
+    }
+    navigation.navigate('VerificarCorreo', { mode: 'recovery', email });
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+
+      <TouchableOpacity
+        style={styles.volverBtn}
+        onPress={() => navigation.navigate('Login')}
+      >
+        <Text style={styles.volverText}>{'< Volver'}</Text>
+      </TouchableOpacity>
+
+      <View style={styles.contenido}>
+
+        <Text style={styles.titulo}>¿Olvidaste tu{'\n'}contraseña?</Text>
+        <Text style={styles.descripcion}>
+          Ingrese su dirección de correo electrónico a continuación y le
+          enviaremos un correo con instrucciones sobre cómo cambiar su contraseña.
+        </Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Correo electrónico"
+          placeholderTextColor="#BDBDBD"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+
+        <TouchableOpacity style={styles.boton} onPress={handleEnviar}>
+          <Text style={styles.botonText}>Enviar</Text>
+        </TouchableOpacity>
+
+      </View>
+    </SafeAreaView>
+  );
+}
+
