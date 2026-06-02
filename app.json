@@ -13,7 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Patronika necesita acceso a tu cámara para que puedas tomar fotos y convertirlas en patrones de tejido.",
+        "NSPhotoLibraryUsageDescription": "Patronika necesita acceso a tu galería para que puedas seleccionar imágenes y convertirlas en patrones de tejido."
+      }
     },
     "android": {
       "adaptiveIcon": {
