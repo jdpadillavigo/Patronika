@@ -29,6 +29,7 @@ export default function RegistroScreen({ navigation }) {
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [errorCorreo, setErrorCorreo] = useState('');
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
@@ -71,6 +72,7 @@ export default function RegistroScreen({ navigation }) {
 
   const handleCrearCuenta = async () => {
     setError('');
+    setErrorCorreo('');
     if (contrasena !== confirmar) {
       setError('Las contraseñas no coinciden');
       return;
@@ -79,7 +81,11 @@ export default function RegistroScreen({ navigation }) {
     try {
       const result = await RegisterUseCase.requestCode(usuario.trim(), correo.trim(), contrasena, confirmar);
       if (!result.success) {
-        setError(result.error || 'No se pudo enviar el código');
+        if (result.error?.toLowerCase().includes('correo')) {
+          setErrorCorreo(result.error);
+        } else {
+          setError(result.error || 'No se pudo enviar el código');
+        }
         return;
       }
       navigation.navigate('VerificarCorreo', {
@@ -146,18 +152,23 @@ export default function RegistroScreen({ navigation }) {
               />
             </View>
 
-            <View style={styles.inputWrapper}>
+            <View style={[styles.inputWrapper, errorCorreo ? { borderBottomColor: '#ff6b6b' } : null]}>
               <TextInput
                 style={styles.input}
                 placeholder="Correo electrónico"
                 placeholderTextColor="rgba(255,255,255,0.45)"
                 value={correo}
-                onChangeText={setCorreo}
+                onChangeText={v => { setCorreo(v); setErrorCorreo(''); }}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 autoCorrect={false}
               />
             </View>
+            {errorCorreo ? (
+              <Text style={{ color: '#ff6b6b', fontSize: 13, marginTop: -14 }}>
+                {errorCorreo}
+              </Text>
+            ) : null}
 
             <View style={styles.inputWrapper}>
               <TextInput
