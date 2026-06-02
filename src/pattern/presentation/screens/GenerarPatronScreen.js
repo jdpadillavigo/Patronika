@@ -49,7 +49,7 @@ export default function GenerarPatronScreen({ navigation }) {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 0.8,
     });
     if (!result.canceled) {
       setImage(result.assets[0].uri);
