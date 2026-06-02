@@ -82,11 +82,11 @@ async function verifyRegisterCode(email: string, code: string): Promise<AuthResu
 }
 
 async function register(username: string, email: string, password: string, profileImageUri?: string | null): Promise<AuthResult> {
-    const registeredUser = await AuthRemoteDataSource.register(username, email, password, profileImageUri);
+    await AuthRemoteDataSource.register(username, email, password, profileImageUri);
     const tokens = await AuthRemoteDataSource.login(username, password);
     await ApiClient.saveTokens(tokens.accessToken, tokens.refreshToken);
 
-    const user = createUser(registeredUser) || await resolveCurrentUser(username, tokens.accessToken);
+    const user = await resolveCurrentUser(username, tokens.accessToken);
     if (user) {
         await ApiClient.saveCurrentUser(user);
     }

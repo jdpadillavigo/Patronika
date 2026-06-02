@@ -80,7 +80,15 @@ async function verifyCode(email: string, code: string): Promise<string> {
 
 async function register(username: string, email: string, password: string, profileImageUri?: string | null): Promise<User> {
     const formData = new FormData();
-    formData.append('userRequest', JSON.stringify(createUserRequest(username, email, password)));
+
+    // Spring Boot @RequestPart necesita Content-Type: application/json para deserializar el objeto.
+    // React Native envía strings como text/plain, así que usamos el formato { string, type, name }
+    // que el XHR de React Native convierte a un part con el Content-Type correcto.
+    formData.append('userRequest', {
+        string: JSON.stringify(createUserRequest(username, email, password)),
+        type: 'application/json',
+        name: 'userRequest',
+    } as unknown as Blob);
 
     if (profileImageUri) {
         formData.append('file', {
