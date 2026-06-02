@@ -8,6 +8,8 @@ export interface User {
     registeredDate: string | null;
     activateNotification: boolean;
     suspensionEndDate?: string | null;
+    profileImageUrl?: string | null;
+    token?: string | null;
     avatar?: string | null;
 }
 
@@ -27,7 +29,9 @@ export function createUser(apiData: Partial<User>): User {
         registeredDate: apiData.registeredDate || null,
         activateNotification: apiData.activateNotification ?? true,
         suspensionEndDate: apiData.suspensionEndDate || null,
-        avatar: apiData.avatar || null,
+        profileImageUrl: apiData.profileImageUrl || null,
+        token: apiData.token || null,
+        avatar: apiData.avatar || apiData.profileImageUrl || null,
     };
 }
 
@@ -43,20 +47,20 @@ export function validateUsername(username: string): ValidationResult {
 
 export function validateEmail(email: string): ValidationResult {
     if (!email.trim()) {
-        return { isValid: false, message: 'Por favor ingresa tu correo electronico' };
+        return { isValid: false, message: 'Por favor ingresa tu correo electrónico' };
     }
     if (!email.includes('@')) {
-        return { isValid: false, message: 'Por favor ingresa un correo valido' };
+        return { isValid: false, message: 'Por favor ingresa un correo válido' };
     }
     return { isValid: true, message: '' };
 }
 
 export function validatePassword(password: string): ValidationResult {
     if (!password.trim()) {
-        return { isValid: false, message: 'Por favor ingresa tu contrasena' };
+        return { isValid: false, message: 'Por favor ingresa tu contraseña' };
     }
     if (password.length < 4) {
-        return { isValid: false, message: 'La contrasena debe tener al menos 4 caracteres' };
+        return { isValid: false, message: 'La contraseña debe tener al menos 4 caracteres' };
     }
     return { isValid: true, message: '' };
 }

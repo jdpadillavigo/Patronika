@@ -1,27 +1,22 @@
 import ApiClient, { type ApiResponse } from '../../../core/data/networking/ApiClient';
 import type { User } from '../../domain/models/User';
+import { assertApiSuccess } from './dto/ApiResponseDto';
+import type { UserRequestDto } from './dto/UserDto';
 
-export interface UserRequest {
-    username: string;
-    email: string;
-    password?: string;
-    isAdmin: boolean;
-    status: number;
-    activateNotification: boolean;
-    suspensionEndDate: string | null;
-}
+export type UserRequest = UserRequestDto;
 
 async function loadAll(): Promise<User[]> {
     const response = await ApiClient.get<ApiResponse<User[]>>('/api/users');
-    return response.data || [];
+    return assertApiSuccess(response, 'No se pudieron cargar los usuarios') || [];
 }
 
 async function loadById(id: string): Promise<User> {
     const response = await ApiClient.get<ApiResponse<User>>(`/api/users/${id}`);
-    if (!response.data) {
+    const user = assertApiSuccess(response, 'Usuario no encontrado');
+    if (!user) {
         throw new Error('Usuario no encontrado');
     }
-    return response.data;
+    return user;
 }
 
 async function update(id: string, request: UserRequest): Promise<void> {

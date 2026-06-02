@@ -1,25 +1,41 @@
 import ApiClient, { type ApiResponse } from '../../../core/data/networking/ApiClient';
+import type { User } from '../../domain/models/User';
+import {
+    createAuthRequest,
+    createRefreshTokenRequest,
+    createVerificationCodeRequest,
+    createVerifyCodeRequest,
+    type AuthTokensDto,
+} from './dto/AuthDto';
+import { createUserRequest } from './dto/UserDto';
 
 export interface TokenPair {
     accessToken: string;
     refreshToken: string;
 }
 
-function readTokens(response: ApiResponse<Record<string, string>>): TokenPair {
-    const accessToken = response.data?.accessToken || response.data?.token || '';
-    const refreshToken = response.data?.refreshToken || '';
+function getBackendMessage(response: ApiResponse<unknown>, fallback: string): string {
+    return typeof response.data === 'string' && response.data.trim()
+        ? response.data
+        : fallback;
+}
+
+function readTokens(response: ApiResponse<AuthTokensDto>): TokenPair {
+    const data = typeof response.data === 'string' ? null : response.data;
+    const accessToken = data?.accessToken || data?.token || '';
+    const refreshToken = data?.refreshToken || '';
 
     if (!response.success || !accessToken) {
-        throw new Error(response.message || 'No se pudo autenticar la sesion');
+        throw new Error(getBackendMessage(response, 'No se pudo autenticar la sesión'));
     }
 
     return { accessToken, refreshToken };
 }
 
 async function login(username: string, password: string): Promise<TokenPair> {
-    const response = await ApiClient.post<ApiResponse<Record<string, string>>>(
+    const response = await ApiClient.post<ApiResponse<AuthTokensDto>>(
         '/api/auth/login',
-        { username, password },
+        createAuthRequest(username, password),
         { requiresAuth: false },
     );
 
@@ -29,53 +45,68 @@ async function login(username: string, password: string): Promise<TokenPair> {
 async function requestRegisterCode(email: string): Promise<string> {
     const response = await ApiClient.post<ApiResponse<string>>(
         '/api/auth/register/request-code',
-        { email },
+        createVerificationCodeRequest(email),
         { requiresAuth: false },
     );
 
-    return response.data || 'Codigo enviado al correo';
+    return typeof response.data === 'string' && response.data.trim()
+        ? response.data
+        : 'Código enviado al correo';
 }
 
-async function verifyRegisterCode(email: string, code: string): Promise<string> {
-    const response = await ApiClient.post<ApiResponse<Record<string, string>>>(
-        '/api/auth/register/verify-code',
-        { email, code },
+async function requestPasswordRecoveryCode(email: string): Promise<string> {
+    const response = await ApiClient.post<ApiResponse<string>>(
+        '/api/auth/change-password/request-code',
+        createVerificationCodeRequest(email),
         { requiresAuth: false },
     );
 
-    const verificationToken = response.data?.verificationToken || '';
-    if (!response.success || !verificationToken) {
-        throw new Error(response.message || 'No se pudo verificar el codigo');
+    return typeof response.data === 'string' && response.data.trim()
+        ? response.data
+        : 'Código enviado al correo';
+}
+
+async function verifyCode(email: string, code: string): Promise<string> {
+    const response = await ApiClient.post<ApiResponse<string>>(
+        '/api/auth/verify-code',
+        createVerifyCodeRequest(email, code),
+        { requiresAuth: false },
+    );
+
+    return typeof response.data === 'string' && response.data.trim()
+        ? response.data
+        : 'Código verificado correctamente';
+}
+
+async function register(username: string, email: string, password: string, profileImageUri?: string | null): Promise<User> {
+    const formData = new FormData();
+    formData.append('userRequest', JSON.stringify(createUserRequest(username, email, password)));
+
+    if (profileImageUri) {
+        formData.append('file', {
+            uri: profileImageUri,
+            name: profileImageUri.split('/').pop() || `profile-${Date.now()}.jpg`,
+            type: 'image/jpeg',
+        } as unknown as Blob);
     }
 
-    return verificationToken;
-}
-
-async function register(verificationToken: string, username: string, email: string, password: string): Promise<TokenPair> {
-    const response = await ApiClient.post<ApiResponse<Record<string, string>>>(
+    const response = await ApiClient.post<ApiResponse<User>>(
         '/api/auth/register',
-        {
-            verificationToken,
-            user: {
-                username,
-                email,
-                password,
-                isAdmin: false,
-                status: 0,
-                activateNotification: true,
-                suspensionEndDate: null,
-            },
-        },
+        formData,
         { requiresAuth: false },
     );
 
-    return readTokens(response);
+    if (!response.data || typeof response.data === 'string') {
+        throw new Error(getBackendMessage(response, 'No se pudo crear la cuenta'));
+    }
+
+    return response.data;
 }
 
 async function refresh(refreshToken: string): Promise<TokenPair> {
-    const response = await ApiClient.post<ApiResponse<Record<string, string>>>(
+    const response = await ApiClient.post<ApiResponse<AuthTokensDto>>(
         '/api/auth/refresh',
-        { refreshToken },
+        createRefreshTokenRequest(refreshToken),
         { requiresAuth: false },
     );
 
@@ -83,13 +114,17 @@ async function refresh(refreshToken: string): Promise<TokenPair> {
 }
 
 async function logout(userId: string, refreshToken: string): Promise<void> {
-    await ApiClient.post<ApiResponse<string>>(`/api/auth/logout/${userId}`, { refreshToken });
+    await ApiClient.post<ApiResponse<string>>(
+        `/api/auth/logout/${userId}`,
+        createRefreshTokenRequest(refreshToken),
+    );
 }
 
 const AuthRemoteDataSource = {
     login,
     requestRegisterCode,
-    verifyRegisterCode,
+    requestPasswordRecoveryCode,
+    verifyCode,
     register,
     refresh,
     logout,

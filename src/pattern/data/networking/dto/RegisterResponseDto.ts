@@ -1,27 +1,24 @@
+import { getApiErrorMessage, type ApiResponseDto } from './ApiResponseDto';
+import type { UserDto } from './UserDto';
+
 export interface RegisterResponseDto {
     success: boolean;
-    message: string | null;
+    user: UserDto | null;
     error: string | null;
 }
 
-interface ApiRegisterRawResponse {
-    success: boolean;
-    data?: string;
-    message?: string;
-}
-
-export function fromApiRegisterResponse(apiResponse: ApiRegisterRawResponse): RegisterResponseDto {
-    if (apiResponse.success) {
+export function fromApiRegisterResponse(apiResponse: ApiResponseDto<UserDto>): RegisterResponseDto {
+    if (apiResponse.success && apiResponse.data && typeof apiResponse.data !== 'string') {
         return {
             success: true,
-            message: apiResponse.data || 'Cuenta creada exitosamente',
+            user: apiResponse.data,
             error: null,
         };
     }
 
     return {
         success: false,
-        message: null,
-        error: apiResponse.data || apiResponse.message || 'Error al crear la cuenta',
+        user: null,
+        error: getApiErrorMessage(apiResponse, 'Error al crear la cuenta'),
     };
 }

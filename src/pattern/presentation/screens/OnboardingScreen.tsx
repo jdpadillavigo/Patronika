@@ -26,21 +26,21 @@ const SLIDES: Slide[] = [
         icon: '👋',
         title: '¡Bienvenido a Patrónika!',
         description:
-            'Tu herramienta para crear patrones de tejido a partir de cualquier imagen',
+            'Tu herramienta para crear patrones de tejido a partir de cualquier imagen.',
     },
     {
         id: '2',
         icon: '📸',
         title: 'Sube una imagen',
         description:
-            'Toma una foto o selecciona de tu galería. Patrónika la convertirá en un patrón paso a paso',
+            'Toma una foto o selecciona de tu galería. Patrónika la convertirá en un patrón paso a paso.',
     },
     {
         id: '3',
         icon: '🎨',
         title: 'Genera tu patrón',
         description:
-            'Obtén un patrón listo para tejer en técnicas como tapestry crochet, filet crochet e intarsia',
+            'Obtén un patrón listo para tejer en técnicas como tapestry crochet, filet crochet e intarsia.',
     },
 ];
 

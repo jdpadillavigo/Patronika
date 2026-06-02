@@ -6,7 +6,7 @@ import PatternRemoteDataSource from '../networking/PatternRemoteDataSource';
 async function listMine(): Promise<Pattern[]> {
     const user = await ApiClient.getCurrentUser<User>();
     if (!user?.id) {
-        throw new Error('Inicia sesion nuevamente para ver tus patrones');
+        throw new Error('Inicia sesión nuevamente para ver tus patrones');
     }
 
     return PatternRemoteDataSource.loadByUser(user.id);
@@ -15,7 +15,7 @@ async function listMine(): Promise<Pattern[]> {
 async function create(name: string, size: number, imageUri?: string | null): Promise<Pattern> {
     const user = await ApiClient.getCurrentUser<User>();
     if (!user?.id) {
-        throw new Error('Inicia sesion nuevamente para crear patrones');
+        throw new Error('Inicia sesión nuevamente para crear patrones');
     }
 
     return PatternRemoteDataSource.create(user.id, name, size, imageUri);

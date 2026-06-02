@@ -1,5 +1,6 @@
 import UserRepository from '../../data/repositories/UserRepository';
 import { validatePassword, validateUsername } from '../models/User';
+import { isSessionExpiredError } from '../../../core/data/networking/ApiClient';
 
 async function getCurrent() {
     return UserRepository.getCurrent();
@@ -15,6 +16,10 @@ async function updateProfile(username: string, avatar?: string | null) {
         const user = await UserRepository.updateProfile(username.trim(), avatar);
         return { success: true, data: user };
     } catch (error: unknown) {
+        if (isSessionExpiredError(error)) {
+            return { success: false, sessionExpired: true };
+        }
+
         const message = error instanceof Error ? error.message : 'Error al actualizar el perfil';
         return { success: false, error: message };
     }
@@ -28,14 +33,18 @@ async function changePassword(currentPassword: string, newPassword: string, conf
     if (!newValidation.isValid) return { success: false, error: newValidation.message };
 
     if (newPassword !== confirmPassword) {
-        return { success: false, error: 'Las contrasenas nuevas no coinciden' };
+        return { success: false, error: 'Las contraseñas nuevas no coinciden' };
     }
 
     try {
         const user = await UserRepository.changePassword(currentPassword, newPassword);
         return { success: true, data: user };
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Error al cambiar la contrasena';
+        if (isSessionExpiredError(error)) {
+            return { success: false, sessionExpired: true };
+        }
+
+        const message = error instanceof Error ? error.message : 'Error al cambiar la contraseña';
         return { success: false, error: message };
     }
 }

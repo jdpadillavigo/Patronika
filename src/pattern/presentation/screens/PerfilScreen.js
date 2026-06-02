@@ -15,6 +15,7 @@ import { PURPLE } from '../styles/CommonStyles';
 import { misPatronesStyles as navStyles } from '../styles/MisPatronesStyles';
 import ProfileUseCase from '../../domain/usecases/ProfileUseCase';
 import SessionUseCase from '../../domain/usecases/SessionUseCase';
+import { isSessionExpiredError } from '../../../core/data/networking/ApiClient';
 
 export default function PerfilScreen({ navigation }) {
   const [usuario, setUsuario] = useState(null);
@@ -39,11 +40,17 @@ export default function PerfilScreen({ navigation }) {
   const [exitoPass, setExitoPass] = useState('');
 
   useEffect(() => {
-    ProfileUseCase.getCurrent().then(u => {
-      setUsuario(u);
-      setNuevoNombre(u?.username ?? '');
-      setNuevaFoto(u?.avatar ?? null);
-    });
+    ProfileUseCase.getCurrent()
+      .then(u => {
+        setUsuario(u);
+        setNuevoNombre(u?.username ?? '');
+        setNuevaFoto(u?.avatar ?? null);
+      })
+      .catch(error => {
+        if (!isSessionExpiredError(error)) {
+          setErrorPerfil(error.message);
+        }
+      });
   }, []);
 
   const handlePickFoto = async () => {
@@ -68,6 +75,7 @@ export default function PerfilScreen({ navigation }) {
     try {
       const result = await ProfileUseCase.updateProfile(nuevoNombre.trim(), nuevaFoto);
       if (!result.success) {
+        if (result.sessionExpired) return;
         setErrorPerfil(result.error || 'No se pudo actualizar el perfil');
         return;
       }
@@ -106,6 +114,7 @@ export default function PerfilScreen({ navigation }) {
     try {
       const result = await ProfileUseCase.changePassword(passActual, passNueva, passConfirmar);
       if (!result.success) {
+        if (result.sessionExpired) return;
         setErrorPass(result.error || 'No se pudo cambiar la contraseña');
         return;
       }

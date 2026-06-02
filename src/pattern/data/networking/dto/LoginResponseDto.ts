@@ -1,3 +1,6 @@
+import { getApiErrorMessage, type ApiResponseDto } from './ApiResponseDto';
+import type { AuthTokensDto } from './AuthDto';
+
 export interface LoginResponseDto {
     success: boolean;
     accessToken: string | null;
@@ -5,18 +8,8 @@ export interface LoginResponseDto {
     error: string | null;
 }
 
-interface ApiLoginRawResponse {
-    success: boolean;
-    data?: {
-        accessToken?: string;
-        token?: string;
-        refreshToken?: string;
-    };
-    message?: string;
-}
-
-export function fromApiLoginResponse(apiResponse: ApiLoginRawResponse): LoginResponseDto {
-    if (apiResponse.success && apiResponse.data) {
+export function fromApiLoginResponse(apiResponse: ApiResponseDto<AuthTokensDto>): LoginResponseDto {
+    if (apiResponse.success && apiResponse.data && typeof apiResponse.data !== 'string') {
         return {
             success: true,
             accessToken: apiResponse.data.accessToken || apiResponse.data.token || null,
@@ -29,6 +22,6 @@ export function fromApiLoginResponse(apiResponse: ApiLoginRawResponse): LoginRes
         success: false,
         accessToken: null,
         refreshToken: null,
-        error: (apiResponse.data as unknown as string) || apiResponse.message || 'Error al iniciar sesión',
+        error: getApiErrorMessage(apiResponse, 'Error al iniciar sesión'),
     };
 }

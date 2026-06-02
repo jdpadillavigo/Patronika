@@ -6,9 +6,9 @@ async function requestCode(email: string) {
     if (!emailValidation.isValid) return { success: false, error: emailValidation.message };
 
     try {
-        return await AuthRepository.requestRegisterCode(email.trim());
+        return await AuthRepository.requestPasswordRecoveryCode(email.trim());
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Error al enviar el codigo';
+        const message = error instanceof Error ? error.message : 'Error al enviar el código';
         return { success: false, error: message };
     }
 }
@@ -17,7 +17,7 @@ async function verifyCode(email: string, code: string) {
     try {
         return await AuthRepository.verifyRegisterCode(email.trim(), code);
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Error al verificar el codigo';
+        const message = error instanceof Error ? error.message : 'Error al verificar el código';
         return { success: false, error: message };
     }
 }
@@ -25,11 +25,11 @@ async function verifyCode(email: string, code: string) {
 async function resetPassword(password: string, confirmPassword: string) {
     const validation = validatePassword(password);
     if (!validation.isValid) return { success: false, error: validation.message };
-    if (password !== confirmPassword) return { success: false, error: 'Las contrasenas no coinciden' };
+    if (password !== confirmPassword) return { success: false, error: 'Las contraseñas no coinciden' };
 
     return {
         success: false,
-        error: 'El backend aun no expone un endpoint para restablecer contrasena.',
+        error: 'El backend aún no expone un endpoint para restablecer contraseña.',
     };
 }
 

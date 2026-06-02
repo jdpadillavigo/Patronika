@@ -62,6 +62,7 @@ export default function FormularioPatronScreen({ navigation, route }) {
     setLoading(false);
 
     if (!result.success) {
+      if (result.sessionExpired) return;
       Alert.alert('Error', result.error || 'No se pudo generar el patrón');
       return;
     }

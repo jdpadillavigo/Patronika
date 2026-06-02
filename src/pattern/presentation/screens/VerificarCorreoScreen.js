@@ -12,7 +12,7 @@ import RegisterUseCase from '../../domain/usecases/RegisterUseCase';
 import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
 
 export default function VerificarCorreoScreen({ navigation, route }) {
-  const { mode = 'recovery', email, username, password } = route.params || {};
+  const { mode = 'recovery', email, username, password, profileImageUri } = route.params || {};
 
   // 4 inputs separados para el código de verificación
   const [codigo, setCodigo] = useState(['', '', '', '']);
@@ -43,7 +43,7 @@ export default function VerificarCorreoScreen({ navigation, route }) {
         return;
       }
 
-      const registered = await RegisterUseCase.complete(verified.data, username, email, password);
+      const registered = await RegisterUseCase.complete(username, email, password, profileImageUri);
       if (!registered.success) {
         Alert.alert('Error', registered.error || 'No se pudo crear la cuenta');
         return;
@@ -59,7 +59,7 @@ export default function VerificarCorreoScreen({ navigation, route }) {
       return;
     }
 
-    navigation.navigate('RestablecerContrasena', { verificationToken: result.data, email });
+    navigation.navigate('RestablecerContrasena', { email });
   };
 
   const handleReenviar = async () => {

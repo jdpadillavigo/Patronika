@@ -1,12 +1,12 @@
 import type { User } from './User';
 
 export interface Pattern {
-    id: string;
+    id?: string;
     user?: User;
     name: string;
     gridData?: string | null;
     size: number;
-    isPublic?: boolean;
+    isPublic: boolean;
     publishedAt?: string | null;
-    createdAt?: string | null;
+    createdAt: string;
 }
