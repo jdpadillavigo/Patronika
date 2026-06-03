@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Patronika",
+    "name": "Patrónika",
     "slug": "Patronika",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,6 +20,7 @@
       }
     },
     "android": {
+      "package": "pe.edu.ulima.patronika",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -28,6 +29,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fce9316a-95fa-49e0-a5d4-5e3fd0194041"
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
