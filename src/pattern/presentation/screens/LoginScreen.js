@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,53 +9,33 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Animated,
-  Alert,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { loginStyles as styles, PURPLE, AUTH_GRADIENTS, absoluteFill } from '../styles/LoginStyles';
+import { loginStyles as styles } from '../styles/LoginStyles';
 import LoginUseCase from '../../domain/usecases/LoginUseCase';
+import AuthGradientBackground from '../components/AuthGradientBackground';
+import { useErrorPopup } from '../components/ErrorPopup';
 
 export default function LoginScreen({ navigation }) {
-  const [usuario, setUsuario] = useState('');
-  const [contrasena, setContrasena] = useState('');
-  const [mostrarContrasena, setMostrarContrasena] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { showError, errorPopup } = useErrorPopup();
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [nextIndex, setNextIndex] = useState(1);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const cycle = () => {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 2500,
-        useNativeDriver: true,
-      }).start(() => {
-        fadeAnim.setValue(0);
-        setCurrentIndex(c => (c + 1) % AUTH_GRADIENTS.length);
-        setNextIndex(n => (n + 1) % AUTH_GRADIENTS.length);
-      });
-    };
-    const timer = setInterval(cycle, 4500);
-    return () => clearInterval(timer);
-  }, []);
-
-  const puedeIngresar = usuario.trim().length > 0 && contrasena.length > 0;
+  const canLogin = username.trim().length > 0 && password.length > 0;
 
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const result = await LoginUseCase.execute(usuario.trim(), contrasena);
+      const result = await LoginUseCase.execute(username.trim(), password);
       if (!result.success) {
-        Alert.alert('Error', result.error || 'No se pudo iniciar sesión');
+        showError(result.error || 'No se pudo iniciar sesión');
         return;
       }
       navigation.replace('MisPatrones');
     } catch (error) {
-      Alert.alert('Error', error.message);
+      showError(error.message);
     } finally {
       setLoading(false);
     }
@@ -65,19 +45,13 @@ export default function LoginScreen({ navigation }) {
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#1A0B08" />
 
-      <View style={absoluteFill}>
-        <LinearGradient colors={AUTH_GRADIENTS[currentIndex]} style={absoluteFill} />
-        <Animated.View style={[absoluteFill, { opacity: fadeAnim }]}>
-          <LinearGradient colors={AUTH_GRADIENTS[nextIndex]} style={absoluteFill} />
-        </Animated.View>
-      </View>
+      <AuthGradientBackground />
 
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-
           <View style={styles.titleGroup}>
             <Text style={styles.title}>Bienvenido</Text>
             <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
@@ -89,8 +63,8 @@ export default function LoginScreen({ navigation }) {
                 style={styles.input}
                 placeholder="Nombre de usuario"
                 placeholderTextColor="rgba(255,255,255,0.45)"
-                value={usuario}
-                onChangeText={setUsuario}
+                value={username}
+                onChangeText={setUsername}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
@@ -101,17 +75,17 @@ export default function LoginScreen({ navigation }) {
                 style={styles.input}
                 placeholder="Contraseña"
                 placeholderTextColor="rgba(255,255,255,0.45)"
-                value={contrasena}
-                onChangeText={setContrasena}
-                secureTextEntry={!mostrarContrasena}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
                 autoCapitalize="none"
               />
               <TouchableOpacity
-                onPress={() => setMostrarContrasena(v => !v)}
+                onPress={() => setShowPassword(value => !value)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <Ionicons
-                  name={mostrarContrasena ? 'eye-outline' : 'eye-off-outline'}
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={22}
                   color="rgba(255,255,255,0.55)"
                 />
@@ -119,8 +93,8 @@ export default function LoginScreen({ navigation }) {
             </View>
 
             <TouchableOpacity
-              style={[styles.button, (!puedeIngresar || loading) && styles.buttonDisabled]}
-              disabled={!puedeIngresar || loading}
+              style={[styles.button, (!canLogin || loading) && styles.buttonDisabled]}
+              disabled={!canLogin || loading}
               onPress={handleLogin}
             >
               <Text style={styles.buttonText}>
@@ -139,10 +113,9 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.bottomLink}>Regístrate ahora</Text>
             </TouchableOpacity>
           </View>
-
         </ScrollView>
       </KeyboardAvoidingView>
+      {errorPopup}
     </SafeAreaView>
   );
 }
-

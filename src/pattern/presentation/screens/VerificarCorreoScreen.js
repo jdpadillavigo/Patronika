@@ -5,13 +5,13 @@ import {
   TextInput,
   TouchableOpacity,
   SafeAreaView,
-  Alert,
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { verificarCorreoStyles as styles, PURPLE } from '../styles/VerificarCorreoStyles';
 import RegisterUseCase from '../../domain/usecases/RegisterUseCase';
 import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
+import { useErrorPopup } from '../components/ErrorPopup';
 
 export default function VerificarCorreoScreen({ navigation, route }) {
   const { mode = 'recovery', email, username, password, profileImageUri } = route.params || {};
@@ -20,6 +20,8 @@ export default function VerificarCorreoScreen({ navigation, route }) {
   const [codigo, setCodigo] = useState(['', '', '', '']);
   const inputs = [useRef(null), useRef(null), useRef(null), useRef(null)];
   const [modalVisible, setModalVisible] = useState(false);
+  const [resendModalVisible, setResendModalVisible] = useState(false);
+  const { showError, errorPopup } = useErrorPopup();
 
   // Maneja el cambio en cada casilla del código
   const handleCambioDigito = (texto, index) => {
@@ -35,20 +37,20 @@ export default function VerificarCorreoScreen({ navigation, route }) {
   const handleVerificar = async () => {
     const codigoCompleto = codigo.join('');
     if (codigoCompleto.length < 4) {
-      Alert.alert('Error', 'Por favor ingresa el código completo');
+      showError('Por favor ingresa el código completo');
       return;
     }
 
     if (mode === 'register') {
       const verified = await RegisterUseCase.verifyCode(email, codigoCompleto);
       if (!verified.success) {
-        Alert.alert('Error', verified.error || 'No se pudo verificar el código');
+        showError(verified.error || 'No se pudo verificar el código');
         return;
       }
 
       const registered = await RegisterUseCase.complete(username, email, password, profileImageUri);
       if (!registered.success) {
-        Alert.alert('Error', registered.error || 'No se pudo crear la cuenta');
+        showError(registered.error || 'No se pudo crear la cuenta');
         return;
       }
 
@@ -58,7 +60,7 @@ export default function VerificarCorreoScreen({ navigation, route }) {
 
     const result = await PasswordRecoveryUseCase.verifyCode(email, codigoCompleto);
     if (!result.success) {
-      Alert.alert('Error', result.error || 'No se pudo verificar el código');
+      showError(result.error || 'No se pudo verificar el código');
       return;
     }
 
@@ -76,11 +78,11 @@ export default function VerificarCorreoScreen({ navigation, route }) {
       : await PasswordRecoveryUseCase.requestCode(email);
 
     if (!result.success) {
-      Alert.alert('Error', result.error || 'No se pudo reenviar el código');
+      showError(result.error || 'No se pudo reenviar el código');
       return;
     }
 
-    Alert.alert('Código reenviado', `Se envió un nuevo código a ${email}`);
+    setResendModalVisible(true);
   };
 
   return (
@@ -151,6 +153,30 @@ export default function VerificarCorreoScreen({ navigation, route }) {
           </View>
         </View>
       </Modal>
+
+      <Modal
+        visible={resendModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setResendModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+
+            <View style={styles.modalIconContainer}>
+              <Ionicons name="mail-outline" size={36} color={PURPLE} />
+            </View>
+
+            <Text style={styles.modalTitulo}>Código reenviado{'\n'}correctamente</Text>
+
+            <TouchableOpacity style={styles.modalBoton} onPress={() => setResendModalVisible(false)}>
+              <Text style={styles.modalBotonText}>Continuar</Text>
+            </TouchableOpacity>
+
+          </View>
+        </View>
+      </Modal>
+      {errorPopup}
 
     </SafeAreaView>
   );

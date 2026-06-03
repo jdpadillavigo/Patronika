@@ -11,6 +11,7 @@ import OlvidasteContrasenaScreen from '../../pattern/presentation/screens/Olvida
 import VerificarCorreoScreen from '../../pattern/presentation/screens/VerificarCorreoScreen.js';
 import RestablecerContrasenaScreen from '../../pattern/presentation/screens/RestablecerContrasenaScreen.js';
 import OnboardingScreen from '../../pattern/presentation/screens/OnboardingScreen';
+import TermsAndConditionsScreen from '../../pattern/presentation/screens/TermsAndConditionsScreen.js';
 import GeneratePatternNavigator from './GeneratePatternNavigator';
 import type { RootStackParamList } from './types';
 
@@ -65,6 +66,7 @@ export default function AppNavigator() {
             <Stack.Screen name="OlvidasteContrasena" component={OlvidasteContrasenaScreen} />
             <Stack.Screen name="VerificarCorreo" component={VerificarCorreoScreen} />
             <Stack.Screen name="RestablecerContrasena" component={RestablecerContrasenaScreen} />
+            <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
         </Stack.Navigator>
     );
 }

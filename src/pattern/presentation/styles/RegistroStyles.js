@@ -104,6 +104,17 @@ export const registroStyles = StyleSheet.create({
     textDecorationLine: 'underline',
     color: 'white',
   },
+  fieldError: {
+    color: '#ff6b6b',
+    fontSize: 13,
+    marginTop: -14,
+  },
+  formError: {
+    color: '#ff6b6b',
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: -8,
+  },
   button: {
     backgroundColor: PURPLE,
     borderRadius: 10,

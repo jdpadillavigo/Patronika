@@ -10,25 +10,27 @@ import {
   Image,
   Modal,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { PURPLE } from '../styles/CommonStyles';
 import { misPatronesStyles as navStyles } from '../styles/MisPatronesStyles';
+import { perfilStyles as styles } from '../styles/PerfilStyles';
 import ProfileUseCase from '../../domain/usecases/ProfileUseCase';
 import SessionUseCase from '../../domain/usecases/SessionUseCase';
 import { isSessionExpiredError } from '../../../core/data/networking/ApiClient';
+import BottomNavbar from '../components/BottomNavbar';
 
 export default function PerfilScreen({ navigation }) {
   const [usuario, setUsuario] = useState(null);
 
-  // EdiciÃ³n de datos
+  // Edición de datos
   const [editando, setEditando] = useState(false);
   const [nuevoNombre, setNuevoNombre] = useState('');
   const [nuevaFoto, setNuevaFoto] = useState(null);
   const [errorPerfil, setErrorPerfil] = useState('');
   const [loadingPerfil, setLoadingPerfil] = useState(false);
 
-  // Cambio de contraseÃ±a
+  // Cambio de contraseña
   const [expandirPass, setExpandirPass] = useState(false);
   const [passActual, setPassActual] = useState('');
   const [passNueva, setPassNueva] = useState('');
@@ -150,7 +152,7 @@ export default function PerfilScreen({ navigation }) {
   const fotoActual = editando ? nuevaFoto : usuario?.avatar;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+    <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={PURPLE} />
 
       <View style={navStyles.header}>
@@ -158,58 +160,50 @@ export default function PerfilScreen({ navigation }) {
       </View>
 
       <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingHorizontal: 28, paddingTop: 36, paddingBottom: 48, gap: 24 }}
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
       >
 
         {/* AVATAR */}
-        <View style={{ alignItems: 'center', gap: 12 }}>
+        <View style={styles.avatarSection}>
           <TouchableOpacity onPress={editando ? handlePickFoto : undefined} activeOpacity={editando ? 0.7 : 1}>
-            <View style={{
-              width: 100, height: 100, borderRadius: 50,
-              backgroundColor: '#F3EDF4', alignItems: 'center', justifyContent: 'center',
-              borderWidth: 2, borderColor: PURPLE, overflow: 'hidden',
-            }}>
+            <View style={styles.avatarFrame}>
               {fotoActual
-                ? <Image source={{ uri: fotoActual }} style={{ width: 100, height: 100 }} />
+                ? <Image source={{ uri: fotoActual }} style={styles.avatarImage} />
                 : <Ionicons name="person" size={56} color={PURPLE} />
               }
             </View>
             {editando && (
-              <View style={{
-                position: 'absolute', bottom: 2, right: 2,
-                backgroundColor: PURPLE, borderRadius: 12, padding: 5,
-                borderWidth: 2, borderColor: 'white',
-              }}>
+              <View style={styles.avatarEditBadge}>
                 <Ionicons name="camera" size={14} color="white" />
               </View>
             )}
           </TouchableOpacity>
 
           {!editando && (
-            <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#111' }}>
+            <Text style={styles.username}>
               {usuario?.username ?? 'Usuario'}
             </Text>
           )}
         </View>
 
         {/* DATOS DEL PERFIL */}
-        <View style={{ gap: 16 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111' }}>Datos del perfil</Text>
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Datos del perfil</Text>
             {!editando && (
-              <TouchableOpacity onPress={() => setEditando(true)} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <TouchableOpacity onPress={() => setEditando(true)} style={styles.editButton}>
                 <Ionicons name="pencil-outline" size={16} color={PURPLE} />
-                <Text style={{ color: PURPLE, fontSize: 14, fontWeight: '600' }}>Editar</Text>
+                <Text style={styles.editText}>Editar</Text>
               </TouchableOpacity>
             )}
           </View>
 
           {/* Nombre de usuario */}
-          <View style={{ gap: 6 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={styles.fieldGroup}>
+            <View style={styles.fieldHeader}>
               <Ionicons name="person-outline" size={16} color={PURPLE} />
-              <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>NOMBRE DE USUARIO</Text>
+              <Text style={styles.fieldLabel}>NOMBRE DE USUARIO</Text>
             </View>
             {editando ? (
               <TextInput
@@ -217,65 +211,45 @@ export default function PerfilScreen({ navigation }) {
                 onChangeText={setNuevoNombre}
                 autoCapitalize="none"
                 autoCorrect={false}
-                style={{
-                  borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
-                  paddingHorizontal: 14, paddingVertical: 12,
-                  fontSize: 15, color: '#111',
-                }}
+                style={styles.editableInput}
               />
             ) : (
-              <Text style={{
-                fontSize: 15, color: '#111',
-                paddingVertical: 12, paddingHorizontal: 14,
-                borderWidth: 1, borderColor: '#EFEFEF', borderRadius: 10,
-                backgroundColor: '#FAFAFA',
-              }}>
+              <Text style={styles.readonlyValue}>
                 {usuario?.username ?? 'Usuario'}
               </Text>
             )}
           </View>
 
           {/* Correo (solo lectura) */}
-          <View style={{ gap: 6 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={styles.fieldGroup}>
+            <View style={styles.fieldHeader}>
               <Ionicons name="mail-outline" size={16} color={PURPLE} />
-              <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CORREO ELECTRÓNICO</Text>
+              <Text style={styles.fieldLabel}>CORREO ELECTRÓNICO</Text>
             </View>
-            <Text style={{
-              fontSize: 15, color: '#888',
-              paddingVertical: 12, paddingHorizontal: 14,
-              borderWidth: 1, borderColor: '#EFEFEF', borderRadius: 10,
-              backgroundColor: '#FAFAFA',
-            }}>
+            <Text style={[styles.readonlyValue, styles.readonlyEmail]}>
               {usuario?.email ?? 'Email'}
             </Text>
           </View>
 
           {errorPerfil ? (
-            <Text style={{ color: '#e74c3c', fontSize: 13, textAlign: 'center' }}>{errorPerfil}</Text>
+            <Text style={styles.errorText}>{errorPerfil}</Text>
           ) : null}
 
           {/* Botones edición */}
           {editando && (
-            <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
+            <View style={styles.editActions}>
               <TouchableOpacity
                 onPress={handleCancelarEdicion}
-                style={{
-                  flex: 1, borderWidth: 1.5, borderColor: '#CCC',
-                  borderRadius: 10, paddingVertical: 13, alignItems: 'center',
-                }}
+                style={styles.outlineButton}
               >
-                <Text style={{ color: '#666', fontSize: 14, fontWeight: '600' }}>Cancelar</Text>
+                <Text style={styles.outlineButtonText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleGuardarPerfil}
                 disabled={loadingPerfil}
-                style={{
-                  flex: 1, backgroundColor: PURPLE,
-                  borderRadius: 10, paddingVertical: 13, alignItems: 'center',
-                }}
+                style={styles.solidButton}
               >
-                <Text style={{ color: 'white', fontSize: 14, fontWeight: '600' }}>
+                <Text style={styles.solidButtonText}>
                   {loadingPerfil ? 'Guardando...' : 'Guardar'}
                 </Text>
               </TouchableOpacity>
@@ -284,34 +258,30 @@ export default function PerfilScreen({ navigation }) {
         </View>
 
         {/* CAMBIAR CONTRASEÑA */}
-        <View style={{ borderTopWidth: 1, borderTopColor: '#EFEFEF', paddingTop: 20, gap: 14 }}>
+        <View style={styles.passwordSection}>
           <TouchableOpacity
             onPress={() => { setExpandirPass(v => !v); setErrorPass(''); setExitoPass(''); }}
-            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+            style={styles.passwordHeader}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={styles.passwordTitleGroup}>
               <Ionicons name="lock-closed-outline" size={18} color={PURPLE} />
-              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111' }}>Cambiar contraseña</Text>
+              <Text style={styles.sectionTitle}>Cambiar contraseña</Text>
             </View>
             <Ionicons name={expandirPass ? 'chevron-up' : 'chevron-down'} size={20} color="#999" />
           </TouchableOpacity>
 
           {expandirPass && (
-            <View style={{ gap: 12 }}>
+            <View style={styles.passwordFields}>
               {/* Contraseña actual */}
-              <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CONTRASEÑA ACTUAL</Text>
-                <View style={{
-                  flexDirection: 'row', alignItems: 'center',
-                  borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
-                  paddingHorizontal: 14, paddingVertical: 12,
-                }}>
+              <View style={styles.passwordField}>
+                <Text style={styles.fieldLabel}>CONTRASEÑA ACTUAL</Text>
+                <View style={styles.passwordInputContainer}>
                   <TextInput
                     value={passActual}
                     onChangeText={setPassActual}
                     secureTextEntry={!mostrarActual}
                     autoCapitalize="none"
-                    style={{ flex: 1, fontSize: 15, color: '#111' }}
+                    style={styles.passwordInput}
                     placeholder="Contraseña actual"
                     placeholderTextColor="#BBB"
                   />
@@ -321,20 +291,16 @@ export default function PerfilScreen({ navigation }) {
                 </View>
               </View>
 
-              {/* Nueva contraseÃ±a */}
-              <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>NUEVA CONTRASEÑA</Text>
-                <View style={{
-                  flexDirection: 'row', alignItems: 'center',
-                  borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
-                  paddingHorizontal: 14, paddingVertical: 12,
-                }}>
+              {/* Nueva contraseña */}
+              <View style={styles.passwordField}>
+                <Text style={styles.fieldLabel}>NUEVA CONTRASEÑA</Text>
+                <View style={styles.passwordInputContainer}>
                   <TextInput
                     value={passNueva}
                     onChangeText={setPassNueva}
                     secureTextEntry={!mostrarNueva}
                     autoCapitalize="none"
-                    style={{ flex: 1, fontSize: 15, color: '#111' }}
+                    style={styles.passwordInput}
                     placeholder="Nueva contraseña"
                     placeholderTextColor="#BBB"
                   />
@@ -345,19 +311,15 @@ export default function PerfilScreen({ navigation }) {
               </View>
 
               {/* Confirmar nueva */}
-              <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 12, color: '#999', fontWeight: '500' }}>CONFIRMAR NUEVA CONTRASEÑA</Text>
-                <View style={{
-                  flexDirection: 'row', alignItems: 'center',
-                  borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
-                  paddingHorizontal: 14, paddingVertical: 12,
-                }}>
+              <View style={styles.passwordField}>
+                <Text style={styles.fieldLabel}>CONFIRMAR NUEVA CONTRASEÑA</Text>
+                <View style={styles.passwordInputContainer}>
                   <TextInput
                     value={passConfirmar}
                     onChangeText={setPassConfirmar}
                     secureTextEntry={!mostrarConfirmar}
                     autoCapitalize="none"
-                    style={{ flex: 1, fontSize: 15, color: '#111' }}
+                    style={styles.passwordInput}
                     placeholder="Repite la nueva contraseña"
                     placeholderTextColor="#BBB"
                   />
@@ -368,21 +330,18 @@ export default function PerfilScreen({ navigation }) {
               </View>
 
               {errorPass ? (
-                <Text style={{ color: '#e74c3c', fontSize: 13, textAlign: 'center' }}>{errorPass}</Text>
+                <Text style={styles.errorText}>{errorPass}</Text>
               ) : null}
               {exitoPass ? (
-                <Text style={{ color: '#27ae60', fontSize: 13, textAlign: 'center' }}>{exitoPass}</Text>
+                <Text style={styles.successText}>{exitoPass}</Text>
               ) : null}
 
               <TouchableOpacity
                 onPress={handleCambiarPassword}
                 disabled={loadingPass}
-                style={{
-                  backgroundColor: PURPLE, borderRadius: 10,
-                  paddingVertical: 14, alignItems: 'center',
-                }}
+                style={styles.updatePasswordButton}
               >
-                <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>
+                <Text style={styles.updatePasswordText}>
                   {loadingPass ? 'Actualizando...' : 'Actualizar contraseña'}
                 </Text>
               </TouchableOpacity>
@@ -393,47 +352,20 @@ export default function PerfilScreen({ navigation }) {
         {/* CERRAR SESIÓN */}
         <TouchableOpacity
           onPress={handleLogout}
-          style={{
-            borderWidth: 1.5, borderColor: PURPLE,
-            borderRadius: 12, paddingVertical: 15,
-            alignItems: 'center', flexDirection: 'row',
-            justifyContent: 'center', gap: 8,
-          }}
+          style={styles.logoutButton}
         >
           <Ionicons name="log-out-outline" size={20} color={PURPLE} />
-          <Text style={{ color: PURPLE, fontSize: 15, fontWeight: 'bold' }}>Cerrar sesión</Text>
+          <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
 
       </ScrollView>
 
-      <View style={navStyles.navBar}>
-        <View style={navStyles.navLeft}>
-          <TouchableOpacity
-            style={navStyles.navItem}
-            onPress={() => navigation.navigate('MisPatrones')}
-          >
-            <Ionicons name="grid-outline" size={24} color="#AAA" />
-            <Text style={navStyles.navLabel}>Patrones</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={navStyles.navCenter} />
-
-        <View style={navStyles.navRight}>
-          <TouchableOpacity style={navStyles.navItem}>
-            <Ionicons name="person-outline" size={24} color={PURPLE} />
-            <Text style={[navStyles.navLabel, navStyles.navLabelActivo]}>Mi perfil</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={navStyles.fab}
-          onPress={handleFab}
-          activeOpacity={0.85}
-        >
-          <MaterialCommunityIcons name="camera-plus" size={30} color="white" />
-        </TouchableOpacity>
-      </View>
+      <BottomNavbar
+        activeItem="profile"
+        onPressPatterns={() => navigation.navigate('MisPatrones')}
+        onPressProfile={() => undefined}
+        onPressCamera={handleFab}
+      />
 
       {/* Modal de confirmación de cierre de sesión */}
       <Modal
@@ -442,69 +374,34 @@ export default function PerfilScreen({ navigation }) {
         animationType="fade"
         onRequestClose={() => setModalLogout(false)}
       >
-        <View style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.45)',
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingHorizontal: 40,
-        }}>
-          <View style={{
-            backgroundColor: 'white',
-            borderRadius: 20,
-            padding: 32,
-            alignItems: 'center',
-            width: '100%',
-            elevation: 10,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.2,
-            shadowRadius: 16,
-          }}>
-            <View style={{
-              width: 64, height: 64, borderRadius: 32,
-              borderWidth: 2.5, borderColor: PURPLE,
-              justifyContent: 'center', alignItems: 'center',
-              marginBottom: 16,
-            }}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalIconContainer}>
               <Ionicons name="log-out-outline" size={30} color={PURPLE} />
             </View>
 
-            <Text style={{
-              fontSize: 18, fontWeight: '800', color: '#1A1A1A',
-              textAlign: 'center', lineHeight: 26, marginBottom: 8,
-            }}>
+            <Text style={styles.modalTitle}>
               ¿Cerrar sesión?
             </Text>
 
-            <Text style={{
-              fontSize: 14, color: '#666',
-              textAlign: 'center', marginBottom: 28,
-            }}>
+            <Text style={styles.modalMessage}>
               ¿Estás seguro de que deseas cerrar sesión?
             </Text>
 
             <TouchableOpacity
               onPress={handleConfirmarLogout}
-              style={{
-                backgroundColor: PURPLE, borderRadius: 10,
-                paddingVertical: 14, width: '100%',
-                alignItems: 'center', marginBottom: 12,
-              }}
+              style={styles.modalPrimaryButton}
             >
-              <Text style={{ color: 'white', fontSize: 15, fontWeight: '700' }}>
+              <Text style={styles.modalPrimaryText}>
                 Cerrar sesión
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => setModalLogout(false)}
-              style={{
-                borderWidth: 1.5, borderColor: PURPLE, borderRadius: 10,
-                paddingVertical: 14, width: '100%', alignItems: 'center',
-              }}
+              style={styles.modalSecondaryButton}
             >
-              <Text style={{ color: PURPLE, fontSize: 15, fontWeight: '700' }}>
+              <Text style={styles.modalSecondaryText}>
                 Cancelar
               </Text>
             </TouchableOpacity>

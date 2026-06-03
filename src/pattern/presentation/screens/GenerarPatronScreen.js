@@ -14,16 +14,18 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { generarPatronStyles as styles, PURPLE } from '../styles/GenerarPatronStyles';
 import { useGeneratePatternFlow } from '../../../core/navigation/GeneratePatternFlowContext';
+import { useErrorPopup } from '../components/ErrorPopup';
 
 export default function GenerarPatronScreen({ navigation }) {
   const { closeFlow } = useGeneratePatternFlow();
   const [image, setImage] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { showError, errorPopup } = useErrorPopup();
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      alert('Se necesita permiso para acceder a la galería');
+      showError('Se necesita permiso para acceder a la galería');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -42,7 +44,7 @@ export default function GenerarPatronScreen({ navigation }) {
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      alert('Se necesita permiso para acceder a la cámara');
+      showError('Se necesita permiso para acceder a la cámara');
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
@@ -57,8 +59,7 @@ export default function GenerarPatronScreen({ navigation }) {
     }
   };
 
-  // NUEVO: en lugar de un modal de React Native (que conflictúa con las vistas nativas
-  // de cámara/galería en iOS), usamos Alert.alert nativo que no tiene ese problema
+  // Selector nativo para evitar conflictos con las vistas de cámara/galería en iOS.
   const handleSelectImage = () => {
     Alert.alert(
       '¿Cómo quieres agregar tu imagen?',
@@ -69,6 +70,16 @@ export default function GenerarPatronScreen({ navigation }) {
         { text: 'Cancelar', style: 'cancel' },
       ]
     );
+  };
+
+  const handleOpenTerms = () => {
+    const parentNavigation = navigation.getParent?.();
+    if (parentNavigation) {
+      parentNavigation.navigate('TermsAndConditions', { kind: 'camera' });
+      return;
+    }
+
+    navigation.navigate('TermsAndConditions', { kind: 'camera' });
   };
 
   return (
@@ -89,10 +100,10 @@ export default function GenerarPatronScreen({ navigation }) {
         <Text style={styles.subtitle}>Adjunta una imagen desde tu galería o toma una foto</Text>
       </View>
 
-      <View style={styles.banner}>
+      <TouchableOpacity style={styles.banner} onPress={handleOpenTerms} activeOpacity={0.8}>
         <Ionicons name="help-circle" size={22} color="#4A9EDB" />
         <Text style={styles.bannerText}>Lea los términos y condiciones de uso</Text>
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.content}>
         <TouchableOpacity
@@ -142,6 +153,7 @@ export default function GenerarPatronScreen({ navigation }) {
           </View>
         </View>
       </Modal>
+      {errorPopup}
     </SafeAreaView>
   );
 }

@@ -5,56 +5,59 @@ import {
   TextInput,
   TouchableOpacity,
   SafeAreaView,
-  Alert,
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { restablecerStyles as styles, PURPLE } from '../styles/RestablecerContrasenaStyles';
 import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
+import { useErrorPopup } from '../components/ErrorPopup';
 
-export default function RestablecerContrasenaScreen({ navigation }) {
+export default function RestablecerContrasenaScreen({ navigation, route }) {
+  const { email = '' } = route.params || {};
   const [password, setPassword] = useState('');
-  const [confirmar, setConfirmar] = useState('');
-  const [verPassword, setVerPassword] = useState(false);
-  const [verConfirmar, setVerConfirmar] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { showError, errorPopup } = useErrorPopup();
 
-  const handleRestablecer = async () => {
-    const result = await PasswordRecoveryUseCase.resetPassword(password, confirmar);
+  const handleResetPassword = async () => {
+    if (loading) return;
+
+    setLoading(true);
+    const result = await PasswordRecoveryUseCase.resetPassword(email, password, confirmPassword);
+    setLoading(false);
+
     if (!result.success) {
-      Alert.alert('Endpoint pendiente', result.error || 'No se pudo restablecer la contraseña');
+      showError(result.error || 'No se pudo restablecer la contraseña');
       return;
     }
+
     setModalVisible(true);
   };
- 
-  const handleIrALogin = () => {
+
+  const handleGoToLogin = () => {
     setModalVisible(false);
-    // Limpia el stack de navegación y va directo al Login
     navigation.reset({
       index: 0,
       routes: [{ name: 'Login' }],
     });
   };
- 
+
   return (
     <SafeAreaView style={styles.safeArea}>
- 
-      {/* Botón Volver — regresa a la pantalla anterior del flujo */}
       <TouchableOpacity
         style={styles.volverBtn}
         onPress={() => navigation.goBack()}
       >
         <Text style={styles.volverText}>{'< Volver'}</Text>
       </TouchableOpacity>
- 
-      <View style={styles.contenido}>
 
-        {/* Tí­tulo y descripción */}
+      <View style={styles.contenido}>
         <Text style={styles.titulo}>Restablecer{'\n'}contraseña</Text>
         <Text style={styles.descripcion}>Ingrese su nueva contraseña.</Text>
 
-        {/* Campo contraseña nueva */}
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -62,46 +65,46 @@ export default function RestablecerContrasenaScreen({ navigation }) {
             placeholderTextColor="#BDBDBD"
             value={password}
             onChangeText={setPassword}
-            secureTextEntry={!verPassword}
+            secureTextEntry={!showPassword}
             autoCapitalize="none"
           />
-          <TouchableOpacity onPress={() => setVerPassword(!verPassword)}>
+          <TouchableOpacity onPress={() => setShowPassword(value => !value)}>
             <Ionicons
-              name={verPassword ? 'eye-off-outline' : 'eye-outline'}
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               size={20}
               color="#BDBDBD"
             />
           </TouchableOpacity>
         </View>
-        
-        {/* Campo confirmar contraseña */}
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
             placeholder="Repetir contraseña"
             placeholderTextColor="#BDBDBD"
-            value={confirmar}
-            onChangeText={setConfirmar}
-            secureTextEntry={!verConfirmar}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showConfirmPassword}
             autoCapitalize="none"
           />
-          <TouchableOpacity onPress={() => setVerConfirmar(!verConfirmar)}>
+          <TouchableOpacity onPress={() => setShowConfirmPassword(value => !value)}>
             <Ionicons
-              name={verConfirmar ? 'eye-off-outline' : 'eye-outline'}
+              name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
               size={20}
               color="#BDBDBD"
             />
           </TouchableOpacity>
         </View>
- 
-        {/* Botón restablecer */}
-        <TouchableOpacity style={styles.boton} onPress={handleRestablecer}>
-          <Text style={styles.botonText}>Restablecer</Text>
+
+        <TouchableOpacity
+          style={[styles.boton, loading && styles.botonDisabled]}
+          onPress={handleResetPassword}
+          disabled={loading}
+        >
+          <Text style={styles.botonText}>{loading ? 'Restableciendo...' : 'Restablecer'}</Text>
         </TouchableOpacity>
- 
       </View>
- 
-      {/* Modal de confirmación — se muestra al restablecer con éxito */}
+
       <Modal
         visible={modalVisible}
         transparent
@@ -110,26 +113,22 @@ export default function RestablecerContrasenaScreen({ navigation }) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
- 
-            {/* Ícono candado con flecha */}
             <View style={styles.modalIconContainer}>
               <Ionicons name="lock-closed-outline" size={36} color={PURPLE} />
               <View style={styles.modalIconBadge}>
                 <Ionicons name="refresh-outline" size={14} color={PURPLE} />
               </View>
             </View>
- 
+
             <Text style={styles.modalTitulo}>¡Contraseña{'\n'}restablecida!</Text>
- 
-            {/* Botón para ir al login */}
-            <TouchableOpacity style={styles.modalBoton} onPress={handleIrALogin}>
+
+            <TouchableOpacity style={styles.modalBoton} onPress={handleGoToLogin}>
               <Text style={styles.modalBotonText}>Iniciar sesión</Text>
             </TouchableOpacity>
- 
           </View>
         </View>
       </Modal>
- 
+      {errorPopup}
     </SafeAreaView>
   );
 }

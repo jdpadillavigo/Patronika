@@ -16,6 +16,11 @@ export interface VerifyCodeRequestDto {
     code: string;
 }
 
+export interface ChangePasswordRequestDto {
+    email: string;
+    password: string;
+}
+
 export interface AuthTokensDto {
     accessToken?: string;
     refreshToken?: string;
@@ -36,4 +41,8 @@ export function createVerificationCodeRequest(email: string): VerificationCodeRe
 
 export function createVerifyCodeRequest(email: string, code: string): VerifyCodeRequestDto {
     return { email, code };
+}
+
+export function createChangePasswordRequest(email: string, password: string): ChangePasswordRequestDto {
+    return { email, password };
 }

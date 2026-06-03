@@ -64,7 +64,20 @@ export const misPatronesStyles = StyleSheet.create({
   },
   listaPatrones: {
     padding: 16,
-    gap: 16,
+  },
+  patternSeparator: {
+    height: 16,
+  },
+  listFooter: {
+    minHeight: 96,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  loadingMoreText: {
+    fontSize: 14,
+    color: '#999',
+    fontWeight: '600',
   },
   cardPatron: {
     borderRadius: 12,
@@ -81,10 +94,15 @@ export const misPatronesStyles = StyleSheet.create({
     height: 200,
     backgroundColor: '#F3EDF4',
   },
+  cardImagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   cardInfo: {
     backgroundColor: PURPLE,
+    height: 86,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
     gap: 4,
   },
   cardNombre: {
@@ -108,62 +126,6 @@ export const misPatronesStyles = StyleSheet.create({
   cardDificultad: {
     fontSize: 12,
     color: 'rgba(255,255,255,0.7)',
-  },
-  navBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#ECECEC',
-    paddingBottom: Platform.OS === 'ios' ? 18 : 25,
-    paddingTop: 8,
-    paddingHorizontal: 8,
-    position: 'relative',
-  },
-  navLeft: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  navCenter: {
-    width: 72,
-  },
-  navRight: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 3,
-    flex: 1,
-  },
-  navLabel: {
-    fontSize: 11,
-    color: '#AAA',
-  },
-  navLabelActivo: {
-    color: PURPLE,
-    fontWeight: '600',
-  },
-  fab: {
-    position: 'absolute',
-    alignSelf: 'center',
-    left: '50%',
-    marginLeft: -31,
-    bottom: Platform.OS === 'ios' ? 22 : 10,
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    backgroundColor: PURPLE,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: PURPLE,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
   },
 });
 

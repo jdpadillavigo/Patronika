@@ -26,4 +26,7 @@ export type RootStackParamList = {
     RestablecerContrasena: {
         email?: string;
     };
+    TermsAndConditions: {
+        kind?: 'app' | 'camera';
+    };
 };

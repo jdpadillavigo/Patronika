@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,94 +9,78 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Animated,
   Image,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { registroStyles as styles, AUTH_GRADIENTS, absoluteFill } from '../styles/RegistroStyles';
+import { registroStyles as styles } from '../styles/RegistroStyles';
 import RegisterUseCase from '../../domain/usecases/RegisterUseCase';
+import AuthGradientBackground from '../components/AuthGradientBackground';
 
 export default function RegistroScreen({ navigation }) {
-  const [avatar, setAvatar] = useState(null);
-  const [usuario, setUsuario] = useState('');
-  const [correo, setCorreo] = useState('');
-  const [contrasena, setContrasena] = useState('');
-  const [confirmar, setConfirmar] = useState('');
-  const [mostrarPass, setMostrarPass] = useState(false);
-  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
-  const [aceptaTerminos, setAceptaTerminos] = useState(false);
+  const [avatarUri, setAvatarUri] = useState(null);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [errorCorreo, setErrorCorreo] = useState('');
+  const [emailError, setEmailError] = useState('');
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [nextIndex, setNextIndex] = useState(1);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const cycle = () => {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 2500,
-        useNativeDriver: true,
-      }).start(() => {
-        fadeAnim.setValue(0);
-        setCurrentIndex(c => (c + 1) % AUTH_GRADIENTS.length);
-        setNextIndex(n => (n + 1) % AUTH_GRADIENTS.length);
-      });
-    };
-    const timer = setInterval(cycle, 4500);
-    return () => clearInterval(timer);
-  }, []);
-
-  const puedeCrear =
-    usuario.trim().length > 0 &&
-    correo.trim().length > 0 &&
-    contrasena.length > 0 &&
-    confirmar.length > 0 &&
-    aceptaTerminos;
+  const canCreateAccount =
+    username.trim().length > 0 &&
+    email.trim().length > 0 &&
+    password.length > 0 &&
+    confirmPassword.length > 0 &&
+    acceptedTerms;
 
   const pickAvatar = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') return;
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
     });
-    if (!result.canceled) setAvatar(result.assets[0].uri);
+
+    if (!result.canceled) setAvatarUri(result.assets[0].uri);
   };
 
-  const handleCrearCuenta = async () => {
+  const handleCreateAccount = async () => {
     setError('');
-    setErrorCorreo('');
-    if (contrasena !== confirmar) {
+    setEmailError('');
+
+    if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
     }
+
     setLoading(true);
     try {
-      const result = await RegisterUseCase.requestCode(usuario.trim(), correo.trim(), contrasena, confirmar);
+      const result = await RegisterUseCase.requestCode(username.trim(), email.trim(), password, confirmPassword);
       if (!result.success) {
         if (result.error?.toLowerCase().includes('correo')) {
-          setErrorCorreo(result.error);
+          setEmailError(result.error);
         } else {
           setError(result.error || 'No se pudo enviar el código');
         }
         return;
       }
+
       navigation.navigate('VerificarCorreo', {
         mode: 'register',
-        email: correo.trim(),
-        username: usuario.trim(),
-        password: contrasena,
-        profileImageUri: avatar,
+        email: email.trim(),
+        username: username.trim(),
+        password,
+        profileImageUri: avatarUri,
       });
-    } catch (e) {
-      setError(e.message);
+    } catch (exception) {
+      setError(exception.message);
     } finally {
       setLoading(false);
     }
@@ -106,19 +90,13 @@ export default function RegistroScreen({ navigation }) {
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#1A0B08" />
 
-      <View style={absoluteFill}>
-        <LinearGradient colors={AUTH_GRADIENTS[currentIndex]} style={absoluteFill} />
-        <Animated.View style={[absoluteFill, { opacity: fadeAnim }]}>
-          <LinearGradient colors={AUTH_GRADIENTS[nextIndex]} style={absoluteFill} />
-        </Animated.View>
-      </View>
+      <AuthGradientBackground />
 
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-
           <View style={styles.titleGroup}>
             <Text style={styles.title}>Crear una cuenta</Text>
             <Text style={styles.subtitle}>
@@ -127,8 +105,8 @@ export default function RegistroScreen({ navigation }) {
           </View>
 
           <TouchableOpacity style={styles.avatarWrapper} onPress={pickAvatar} activeOpacity={0.8}>
-            {avatar ? (
-              <Image source={{ uri: avatar }} style={styles.avatarImg} />
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatarImg} />
             ) : (
               <View style={styles.avatarPlaceholder}>
                 <Ionicons name="person" size={52} color="#888" />
@@ -145,28 +123,31 @@ export default function RegistroScreen({ navigation }) {
                 style={styles.input}
                 placeholder="Nombre de usuario"
                 placeholderTextColor="rgba(255,255,255,0.45)"
-                value={usuario}
-                onChangeText={setUsuario}
+                value={username}
+                onChangeText={setUsername}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
             </View>
 
-            <View style={[styles.inputWrapper, errorCorreo ? { borderBottomColor: '#ff6b6b' } : null]}>
+            <View style={[styles.inputWrapper, emailError ? { borderBottomColor: '#ff6b6b' } : null]}>
               <TextInput
                 style={styles.input}
                 placeholder="Correo electrónico"
                 placeholderTextColor="rgba(255,255,255,0.45)"
-                value={correo}
-                onChangeText={v => { setCorreo(v); setErrorCorreo(''); }}
+                value={email}
+                onChangeText={value => {
+                  setEmail(value);
+                  setEmailError('');
+                }}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 autoCorrect={false}
               />
             </View>
-            {errorCorreo ? (
-              <Text style={{ color: '#ff6b6b', fontSize: 13, marginTop: -14 }}>
-                {errorCorreo}
+            {emailError ? (
+              <Text style={styles.fieldError}>
+                {emailError}
               </Text>
             ) : null}
 
@@ -175,17 +156,17 @@ export default function RegistroScreen({ navigation }) {
                 style={styles.input}
                 placeholder="Contraseña"
                 placeholderTextColor="rgba(255,255,255,0.45)"
-                value={contrasena}
-                onChangeText={setContrasena}
-                secureTextEntry={!mostrarPass}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
                 autoCapitalize="none"
               />
               <TouchableOpacity
-                onPress={() => setMostrarPass(v => !v)}
+                onPress={() => setShowPassword(value => !value)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <Ionicons
-                  name={mostrarPass ? 'eye-outline' : 'eye-off-outline'}
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={22}
                   color="rgba(255,255,255,0.55)"
                 />
@@ -197,17 +178,17 @@ export default function RegistroScreen({ navigation }) {
                 style={styles.input}
                 placeholder="Confirmar contraseña"
                 placeholderTextColor="rgba(255,255,255,0.45)"
-                value={confirmar}
-                onChangeText={setConfirmar}
-                secureTextEntry={!mostrarConfirmar}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
               />
               <TouchableOpacity
-                onPress={() => setMostrarConfirmar(v => !v)}
+                onPress={() => setShowConfirmPassword(value => !value)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <Ionicons
-                  name={mostrarConfirmar ? 'eye-outline' : 'eye-off-outline'}
+                  name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={22}
                   color="rgba(255,255,255,0.55)"
                 />
@@ -216,27 +197,33 @@ export default function RegistroScreen({ navigation }) {
 
             <TouchableOpacity
               style={styles.checkRow}
-              onPress={() => setAceptaTerminos(v => !v)}
+              onPress={() => setAcceptedTerms(value => !value)}
               activeOpacity={0.7}
             >
-              <View style={[styles.checkbox, aceptaTerminos && styles.checkboxChecked]}>
-                {aceptaTerminos && <Ionicons name="checkmark" size={13} color="white" />}
+              <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
+                {acceptedTerms && <Ionicons name="checkmark" size={13} color="white" />}
               </View>
               <Text style={styles.checkLabel}>
-                Aceptar <Text style={styles.checkLabelLink}>términos y condiciones</Text>
+                Aceptar{' '}
+                <Text
+                  style={styles.checkLabelLink}
+                  onPress={() => navigation.navigate('TermsAndConditions', { kind: 'app' })}
+                >
+                  términos y condiciones
+                </Text>
               </Text>
             </TouchableOpacity>
 
             {error ? (
-              <Text style={{ color: '#ff6b6b', fontSize: 13, textAlign: 'center', marginTop: -8 }}>
+              <Text style={styles.formError}>
                 {error}
               </Text>
             ) : null}
 
             <TouchableOpacity
-              style={[styles.button, (!puedeCrear || loading) && styles.buttonDisabled]}
-              disabled={!puedeCrear || loading}
-              onPress={handleCrearCuenta}
+              style={[styles.button, (!canCreateAccount || loading) && styles.buttonDisabled]}
+              disabled={!canCreateAccount || loading}
+              onPress={handleCreateAccount}
             >
               <Text style={styles.buttonText}>
                 {loading ? 'Creando cuenta...' : 'Crear cuenta'}
@@ -250,10 +237,8 @@ export default function RegistroScreen({ navigation }) {
               <Text style={styles.bottomLink}>Inicia sesión</Text>
             </TouchableOpacity>
           </View>
-
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-

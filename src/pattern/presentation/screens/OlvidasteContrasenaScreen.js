@@ -5,19 +5,19 @@ import {
   TextInput,
   TouchableOpacity,
   SafeAreaView,
-  Platform,
-  Alert,
 } from 'react-native';
-import { olvidasteStyles as styles, PURPLE } from '../styles/OlvidasteContrasenaStyles';
+import { olvidasteStyles as styles } from '../styles/OlvidasteContrasenaStyles';
 import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
+import { useErrorPopup } from '../components/ErrorPopup';
 
 export default function OlvidasteContrasenaScreen({ navigation }) {
   const [email, setEmail] = useState('');
+  const { showError, errorPopup } = useErrorPopup();
 
   const handleEnviar = async () => {
     const result = await PasswordRecoveryUseCase.requestCode(email);
     if (!result.success) {
-      Alert.alert('Error', result.error || 'No se pudo enviar el código');
+      showError(result.error || 'No se pudo enviar el código');
       return;
     }
     navigation.navigate('VerificarCorreo', { mode: 'recovery', email });
@@ -57,6 +57,7 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
         </TouchableOpacity>
 
       </View>
+      {errorPopup}
     </SafeAreaView>
   );
 }

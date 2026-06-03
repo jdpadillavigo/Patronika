@@ -81,6 +81,11 @@ async function verifyRegisterCode(email: string, code: string): Promise<AuthResu
     return { success: true, data: message };
 }
 
+async function changePassword(email: string, password: string): Promise<AuthResult> {
+    const message = await AuthRemoteDataSource.changePassword(email, password);
+    return { success: true, data: message };
+}
+
 async function register(username: string, email: string, password: string, profileImageUri?: string | null): Promise<AuthResult> {
     await AuthRemoteDataSource.register(username, email, password, profileImageUri);
     const tokens = await AuthRemoteDataSource.login(username, password);
@@ -118,6 +123,7 @@ const AuthRepository = {
     requestRegisterCode,
     requestPasswordRecoveryCode,
     verifyRegisterCode,
+    changePassword,
     register,
     getSession,
     logout,

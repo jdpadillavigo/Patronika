@@ -1,22 +1,9 @@
-import { StyleSheet, Platform } from 'react-native';
-import { PURPLE, recuperarBase } from './CommonStyles';
+import { StyleSheet } from 'react-native';
+import { PURPLE } from './CommonStyles';
 
-export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from './CommonStyles';
+export { PURPLE } from './CommonStyles';
 
-export const restablecerStyles = StyleSheet.create({
-  ...recuperarBase,
-  // Fila con input y boton para mostrar/ocultar.
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#BDBDBD',
-    marginBottom: 20,
-  },
-  botonDisabled: {
-    opacity: 0.65,
-  },
-  // Modal overlay oscuro
+export const errorPopupStyles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
@@ -24,7 +11,6 @@ export const restablecerStyles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
   },
-  // Tarjeta blanca del modal
   modalCard: {
     backgroundColor: 'white',
     borderRadius: 20,
@@ -37,7 +23,6 @@ export const restablecerStyles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 16,
   },
-  // Contenedor del icono con badge de refresh.
   modalIconContainer: {
     width: 72,
     height: 72,
@@ -47,25 +32,23 @@ export const restablecerStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
-    position: 'relative',
   },
-  modalIconBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 2,
-  },
-  modalTitulo: {
+  modalTitle: {
     fontSize: 20,
     fontWeight: '800',
     color: '#1A1A1A',
     textAlign: 'center',
     lineHeight: 28,
+    marginBottom: 8,
+  },
+  modalMessage: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
     marginBottom: 24,
   },
-  modalBoton: {
+  modalButton: {
     backgroundColor: PURPLE,
     borderRadius: 10,
     paddingVertical: 14,
@@ -78,7 +61,7 @@ export const restablecerStyles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
   },
-  modalBotonText: {
+  modalButtonText: {
     color: 'white',
     fontSize: 15,
     fontWeight: '700',

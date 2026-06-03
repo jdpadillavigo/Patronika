@@ -2,6 +2,7 @@ import ApiClient, { type ApiResponse } from '../../../core/data/networking/ApiCl
 import type { User } from '../../domain/models/User';
 import {
     createAuthRequest,
+    createChangePasswordRequest,
     createRefreshTokenRequest,
     createVerificationCodeRequest,
     createVerifyCodeRequest,
@@ -78,6 +79,18 @@ async function verifyCode(email: string, code: string): Promise<string> {
         : 'Código verificado correctamente';
 }
 
+async function changePassword(email: string, password: string): Promise<string> {
+    const response = await ApiClient.post<ApiResponse<string>>(
+        '/api/auth/change-password',
+        createChangePasswordRequest(email, password),
+        { requiresAuth: false },
+    );
+
+    return typeof response.data === 'string' && response.data.trim()
+        ? response.data
+        : 'Contraseña restablecida correctamente';
+}
+
 async function register(username: string, email: string, password: string, profileImageUri?: string | null): Promise<User> {
     const formData = new FormData();
 
@@ -133,6 +146,7 @@ const AuthRemoteDataSource = {
     requestRegisterCode,
     requestPasswordRecoveryCode,
     verifyCode,
+    changePassword,
     register,
     refresh,
     logout,
