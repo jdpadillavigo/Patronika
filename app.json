@@ -36,7 +36,15 @@
       }
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Patrónika necesita acceso a tu galería para guardar los patrones que descargues.",
+          "savePhotosPermission": "Patrónika necesita acceso a tu galería para guardar los patrones que descargues.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ]
     ]
   }
 }

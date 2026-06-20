@@ -9,9 +9,12 @@ import {
   ActivityIndicator,
   Image,
   InteractionManager,
+  Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system'; //nuevo import
+import * as MediaLibrary from 'expo-media-library'; //nuevo import
 import { misPatronesStyles as styles, PURPLE } from '../styles/MisPatronesStyles';
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
 import { gridDataToImageUri } from '../utils/GridImage';
@@ -22,7 +25,41 @@ const PATTERN_ITEM_HEIGHT = 302;
 const PATTERNS_PAGE_SIZE = 5;
 const LOAD_MORE_DELAY_MS = 450;
 
-const PatternCardImage = memo(function PatternCardImage({ gridData, shouldRenderImage }) {
+async function downloadPatternImage(imageUri, patternName, showError) {
+  if (!imageUri) {
+    showError('La imagen del patrón aún no está lista. Intenta de nuevo en un momento.');
+    return;
+  }
+ 
+  try {
+    // Pide permiso para guardar en la galería del dispositivo
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería para guardar el patrón.');
+      return;
+    }
+ 
+    // El imageUri viene como "data:image/png;base64,XXXX" — separamos el base64 puro
+    const base64Data = imageUri.split(',')[1];
+    const fileName = `patron_${patternName.replace(/\s+/g, '_')}_${Date.now()}.png`;
+    const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+ 
+    // Escribe el archivo PNG en el almacenamiento temporal de la app
+    await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+ 
+    // Guarda el archivo en la galería del dispositivo (carpeta de fotos)
+    const asset = await MediaLibrary.createAssetAsync(fileUri);
+    await MediaLibrary.createAlbumAsync('Patrónika', asset, false);
+ 
+    Alert.alert('¡Descargado!', 'El patrón se guardó en tu galería.');
+  } catch (error) {
+    showError('No se pudo descargar el patrón. Intenta de nuevo.');
+  }
+}
+
+const PatternCardImage = memo(function PatternCardImage({ gridData, shouldRenderImage, onImageReady}) {
   const [imageUri, setImageUri] = useState(null);
 
   useEffect(() => {
@@ -41,7 +78,12 @@ const PatternCardImage = memo(function PatternCardImage({ gridData, shouldRender
     interactionTask = InteractionManager.runAfterInteractions(() => {
       timeoutId = setTimeout(() => {
         const generatedUri = gridDataToImageUri(gridData, { maxDimension: 360 });
-        if (mounted) setImageUri(generatedUri);
+        if (mounted) {
+          setImageUri(generatedUri);
+          // NUEVO (Sprint 2): avisa al componente padre (PatternCard) que la imagen
+          // ya está lista, para poder habilitar la descarga con el uri correcto
+          if (onImageReady) onImageReady(generatedUri);
+        }
       }, 0);
     });
 
@@ -69,10 +111,19 @@ const PatternCardImage = memo(function PatternCardImage({ gridData, shouldRender
   );
 });
 
-const PatternCard = memo(function PatternCard({ pattern, shouldRenderImage }) {
+const PatternCard = memo(function PatternCard({ pattern, shouldRenderImage,onDownload  }) {
   return (
     <TouchableOpacity style={styles.cardPatron} activeOpacity={0.85}>
-      <PatternCardImage gridData={pattern.gridData} shouldRenderImage={shouldRenderImage} />
+      <PatternCardImage gridData={pattern.gridData} shouldRenderImage={shouldRenderImage} onImageReady={setCardImageUri}/>
+      
+      <TouchableOpacity
+        style={styles.downloadButton}
+        onPress={() => onDownload(cardImageUri, pattern.name)}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="download-outline" size={20} color="white" />
+      </TouchableOpacity>
+
       <View style={styles.cardInfo}>
         <Text style={styles.cardNombre} numberOfLines={1}>{pattern.name}</Text>
         <Text style={styles.cardCreador} numberOfLines={1}>
@@ -138,9 +189,10 @@ export default function MisPatronesScreen({ navigation }) {
       <PatternCard
         pattern={item}
         shouldRenderImage={viewableBatchIndexes.has(batchIndex)}
+        onDownload={(imageUri, patternName) => downloadPatternImage(imageUri, patternName, showError)}
       />
     );
-  }, [viewableBatchIndexes]);
+  }, [viewableBatchIndexes,showError]);
 
   const renderSeparator = useCallback(() => (
     <View style={styles.patternSeparator} />
