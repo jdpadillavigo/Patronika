@@ -27,6 +27,8 @@ export default function PerfilScreen({ navigation }) {
   const [editando, setEditando] = useState(false);
   const [nuevoNombre, setNuevoNombre] = useState('');
   const [nuevaFoto, setNuevaFoto] = useState(null);
+  const [confirmPass, setConfirmPass] = useState('');
+  const [mostrarConfirmPass, setMostrarConfirmPass] = useState(false);
   const [errorPerfil, setErrorPerfil] = useState('');
   const [loadingPerfil, setLoadingPerfil] = useState(false);
 
@@ -76,7 +78,7 @@ export default function PerfilScreen({ navigation }) {
     }
     setLoadingPerfil(true);
     try {
-      const result = await ProfileUseCase.updateProfile(nuevoNombre.trim(), nuevaFoto);
+      const result = await ProfileUseCase.updateProfile(nuevoNombre.trim(), confirmPass, nuevaFoto);
       if (!result.success) {
         if (result.sessionExpired) return;
         setErrorPerfil(result.error || 'No se pudo actualizar el perfil');
@@ -94,6 +96,8 @@ export default function PerfilScreen({ navigation }) {
   const handleCancelarEdicion = () => {
     setNuevoNombre(usuario?.username ?? '');
     setNuevaFoto(usuario?.avatar ?? null);
+    setConfirmPass('');
+    setMostrarConfirmPass(false);
     setErrorPerfil('');
     setEditando(false);
   };
@@ -231,6 +235,30 @@ export default function PerfilScreen({ navigation }) {
             </Text>
           </View>
 
+          {/* Contraseña actual (requerida para guardar) */}
+          {editando && (
+            <View style={styles.fieldGroup}>
+              <View style={styles.fieldHeader}>
+                <Ionicons name="lock-closed-outline" size={16} color={PURPLE} />
+                <Text style={styles.fieldLabel}>CONTRASEÑA ACTUAL</Text>
+              </View>
+              <View style={styles.passwordInputContainer}>
+                <TextInput
+                  value={confirmPass}
+                  onChangeText={setConfirmPass}
+                  secureTextEntry={!mostrarConfirmPass}
+                  autoCapitalize="none"
+                  style={styles.passwordInput}
+                  placeholder="Ingresa tu contraseña para confirmar"
+                  placeholderTextColor="#BBB"
+                />
+                <TouchableOpacity onPress={() => setMostrarConfirmPass(v => !v)}>
+                  <Ionicons name={mostrarConfirmPass ? 'eye-outline' : 'eye-off-outline'} size={20} color="#999" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
           {errorPerfil ? (
             <Text style={styles.errorText}>{errorPerfil}</Text>
           ) : null}
@@ -363,6 +391,7 @@ export default function PerfilScreen({ navigation }) {
       <BottomNavbar
         activeItem="profile"
         onPressPatterns={() => navigation.navigate('MisPatrones')}
+        onPressCommunity={() => navigation.navigate('Comunidad')}
         onPressProfile={() => undefined}
         onPressCamera={handleFab}
       />

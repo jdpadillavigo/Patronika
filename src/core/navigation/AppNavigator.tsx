@@ -12,6 +12,9 @@ import VerificarCorreoScreen from '../../pattern/presentation/screens/VerificarC
 import RestablecerContrasenaScreen from '../../pattern/presentation/screens/RestablecerContrasenaScreen.js';
 import OnboardingScreen from '../../pattern/presentation/screens/OnboardingScreen';
 import TermsAndConditionsScreen from '../../pattern/presentation/screens/TermsAndConditionsScreen.js';
+import HomeScreen from '../../pattern/presentation/screens/HomeScreen.js';
+import PublicacionDetalleScreen from '../../pattern/presentation/screens/PublicacionDetalleScreen.js';
+import CrearPublicacionScreen from '../../pattern/presentation/screens/CrearPublicacionScreen.js';
 import GeneratePatternNavigator from './GeneratePatternNavigator';
 import type { RootStackParamList } from './types';
 
@@ -67,6 +70,9 @@ export default function AppNavigator() {
             <Stack.Screen name="VerificarCorreo" component={VerificarCorreoScreen} />
             <Stack.Screen name="RestablecerContrasena" component={RestablecerContrasenaScreen} />
             <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
+            <Stack.Screen name="Comunidad" component={HomeScreen} options={tabLikeScreenOptions} />
+            <Stack.Screen name="PublicacionDetalle" component={PublicacionDetalleScreen} />
+            <Stack.Screen name="CrearPublicacion" component={CrearPublicacionScreen} />
         </Stack.Navigator>
     );
 }

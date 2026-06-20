@@ -29,4 +29,10 @@ export type RootStackParamList = {
     TermsAndConditions: {
         kind?: 'app' | 'camera';
     };
+    Comunidad: undefined;
+    PublicacionDetalle: {
+        publicationId: string;
+        publication?: unknown;
+    };
+    CrearPublicacion: undefined;
 };

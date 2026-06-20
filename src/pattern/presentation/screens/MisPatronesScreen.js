@@ -291,6 +291,7 @@ export default function MisPatronesScreen({ navigation }) {
       <BottomNavbar
         activeItem="patterns"
         onPressPatterns={() => setActiveNav('patrones')}
+        onPressCommunity={() => navigation.navigate('Comunidad')}
         onPressProfile={() => navigation.navigate('Perfil')}
         onPressCamera={handleFab}
       />
