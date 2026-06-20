@@ -51,6 +51,21 @@ export const perfilStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#111',
   },
+    adminAccessButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#F1E6F2',
+  },
+  adminAccessText: {
+    color: '#7B3F7E',
+    fontWeight: '700',
+    fontSize: 13,
+  },
   section: {
     gap: 16,
   },

@@ -15,6 +15,7 @@ export type RootStackParamList = {
         pattern?: unknown;
     };
     Perfil: undefined;
+    GestionUsuarios: undefined;
     OlvidasteContrasena: undefined;
     VerificarCorreo: {
         mode?: 'register' | 'recovery';

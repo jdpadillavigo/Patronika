@@ -189,6 +189,17 @@ export default function PerfilScreen({ navigation }) {
               {usuario?.username ?? 'Usuario'}
             </Text>
           )}
+          {/* Boton de visualizar usuarios solo para admin */}
+          {!editando && usuario?.isAdmin && (
+            <TouchableOpacity
+              style={styles.adminAccessButton}
+              onPress={() => navigation.navigate('GestionUsuarios')}
+            >
+              <Ionicons name="people-outline" size={16} color={PURPLE} />
+              <Text style={styles.adminAccessText}>Gestionar usuarios</Text>
+              <Ionicons name="chevron-forward" size={16} color={PURPLE} />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* DATOS DEL PERFIL */}

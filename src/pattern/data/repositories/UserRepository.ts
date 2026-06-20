@@ -82,10 +82,16 @@ async function changePassword(currentPassword: string, newPassword: string): Pro
     return { ...updated, avatar: currentUser.avatar || null };
 }
 
+async function getAllUsers(): Promise<User[]> {
+    const users = await UserRemoteDataSource.loadAll();
+    return users.map(user => createUser(user));
+}
+
 const UserRepository = {
     getCurrent,
     updateProfile,
     changePassword,
+    getAllUsers,
 };
 
 export default UserRepository;

@@ -7,6 +7,7 @@ import LoginScreen from '../../pattern/presentation/screens/LoginScreen.js';
 import RegistroScreen from '../../pattern/presentation/screens/RegistroScreen.js';
 import MisPatronesScreen from '../../pattern/presentation/screens/MisPatronesScreen.js';
 import PerfilScreen from '../../pattern/presentation/screens/PerfilScreen.js';
+import GestionUsuariosScreen from '../../pattern/presentation/screens/GestionUsuariosScreen.js';
 import OlvidasteContrasenaScreen from '../../pattern/presentation/screens/OlvidasteContrasenaScreen.js';
 import VerificarCorreoScreen from '../../pattern/presentation/screens/VerificarCorreoScreen.js';
 import RestablecerContrasenaScreen from '../../pattern/presentation/screens/RestablecerContrasenaScreen.js';
@@ -66,6 +67,7 @@ export default function AppNavigator() {
             <Stack.Screen name="MisPatrones" component={MisPatronesScreen} options={tabLikeScreenOptions} />
             <Stack.Screen name="GenerarPatron" component={GeneratePatternNavigator} options={bottomSheetScreenOptions} />
             <Stack.Screen name="Perfil" component={PerfilScreen} options={tabLikeScreenOptions} />
+            <Stack.Screen name="GestionUsuarios" component={GestionUsuariosScreen} />
             <Stack.Screen name="OlvidasteContrasena" component={OlvidasteContrasenaScreen} />
             <Stack.Screen name="VerificarCorreo" component={VerificarCorreoScreen} />
             <Stack.Screen name="RestablecerContrasena" component={RestablecerContrasenaScreen} />

@@ -112,6 +112,7 @@ const PatternCardImage = memo(function PatternCardImage({ gridData, shouldRender
 });
 
 const PatternCard = memo(function PatternCard({ pattern, shouldRenderImage,onDownload  }) {
+  const [cardImageUri, setCardImageUri] = useState(null);
   return (
     <TouchableOpacity style={styles.cardPatron} activeOpacity={0.85}>
       <PatternCardImage gridData={pattern.gridData} shouldRenderImage={shouldRenderImage} onImageReady={setCardImageUri}/>

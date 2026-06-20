@@ -42,7 +42,10 @@
         {
           "photosPermission": "Patrónika necesita acceso a tu galería para guardar los patrones que descargues.",
           "savePhotosPermission": "Patrónika necesita acceso a tu galería para guardar los patrones que descargues.",
-          "isAccessMediaLocationEnabled": false
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": [
+            "photo"
+          ]
         }
       ]
     ]
