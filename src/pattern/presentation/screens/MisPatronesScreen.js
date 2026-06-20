@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system'; //nuevo import
+import { File, Paths } from 'expo-file-system'; // FIX: API nueva de expo-file-system v19+ (la antigua FileSystem.writeAsStringAsync/EncodingType ya no existe)
 import * as MediaLibrary from 'expo-media-library'; //nuevo import
 import { misPatronesStyles as styles, PURPLE } from '../styles/MisPatronesStyles';
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
@@ -42,19 +42,24 @@ async function downloadPatternImage(imageUri, patternName, showError) {
     // El imageUri viene como "data:image/png;base64,XXXX" — separamos el base64 puro
     const base64Data = imageUri.split(',')[1];
     const fileName = `patron_${patternName.replace(/\s+/g, '_')}_${Date.now()}.png`;
-    const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
- 
-    // Escribe el archivo PNG en el almacenamiento temporal de la app
-    await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
- 
+
+    // FIX: API nueva de expo-file-system v19+ — antes se usaba
+    // FileSystem.writeAsStringAsync(uri, data, { encoding: FileSystem.EncodingType.Base64 })
+    // pero esa API ya no existe en v19. Ahora se usa la clase File con .write()
+    const file = new File(Paths.cache, fileName);
+    file.write(base64Data, { encoding: 'base64' });
+    const fileUri = file.uri;
+
     // Guarda el archivo en la galería del dispositivo (carpeta de fotos)
     const asset = await MediaLibrary.createAssetAsync(fileUri);
     await MediaLibrary.createAlbumAsync('Patrónika', asset, false);
  
     Alert.alert('¡Descargado!', 'El patrón se guardó en tu galería.');
   } catch (error) {
+    // DEBUG TEMPORAL — quitar después de confirmar que funciona
+    console.log('🔴 ERROR AL DESCARGAR:', error);
+    console.log('Mensaje:', error?.message);
+    // FIN DEBUG TEMPORAL
     showError('No se pudo descargar el patrón. Intenta de nuevo.');
   }
 }
