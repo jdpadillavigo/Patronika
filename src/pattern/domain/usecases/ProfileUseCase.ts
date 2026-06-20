@@ -6,14 +6,17 @@ async function getCurrent() {
     return UserRepository.getCurrent();
 }
 
-async function updateProfile(username: string, avatar?: string | null) {
+async function updateProfile(username: string, password: string, avatar?: string | null) {
     const validation = validateUsername(username);
     if (!validation.isValid) {
         return { success: false, error: validation.message };
     }
+    if (!password.trim()) {
+        return { success: false, error: 'Ingresa tu contraseña actual para guardar cambios' };
+    }
 
     try {
-        const user = await UserRepository.updateProfile(username.trim(), avatar);
+        const user = await UserRepository.updateProfile(username.trim(), password, avatar);
         return { success: true, data: user };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) {

@@ -20,8 +20,12 @@ async function loadByUser(userId: string): Promise<Pattern[]> {
 
 async function create(userId: string, name: string, size: number, imageUri?: string | null): Promise<Pattern> {
     const formData = new FormData();
-    formData.append('name', name);
-    formData.append('size', String(size));
+
+    formData.append('request', {
+        string: JSON.stringify({ name, width: size, height: size }),
+        type: 'application/json',
+        name: 'request',
+    } as unknown as Blob);
 
     if (imageUri) {
         formData.append('image', {
