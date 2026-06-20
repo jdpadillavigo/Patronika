@@ -13,27 +13,54 @@ export const gestionUsuariosStyles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'android' ? 50 : 30,
     paddingBottom: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
-  backButton: {
-    marginRight: 12,
-    padding: 4,
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   headerTitle: {
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
   },
-  headerSubtitle: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 13,
-    marginTop: 2,
+  filtrarText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
   },
  
-  // Contenido / lista
+// Barra de búsqueda dentro del header morado
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginTop: 14,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 6,
+    fontSize: 14,
+    color: '#333',
+  },
+ 
+  // Contador de resultados 
+  resultsCount: {
+    fontSize: 13,
+    color: '#555',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+ 
+  // Lista
   listContent: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 24,
     gap: 12,
   },
  
@@ -41,118 +68,142 @@ export const gestionUsuariosStyles = StyleSheet.create({
   userCard: {
     backgroundColor: 'white',
     borderRadius: 14,
-    padding: 16,
     borderWidth: 1,
-    borderColor: '#EEE',
+    borderColor: '#EFEFEF',
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 3,
   },
-  userCardTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
+
+  avatarImage: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: PURPLE,
   },
   avatarPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F1E6F2',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#E4E4E4',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  avatarImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    marginRight: 12,
-  },
-  avatarInitial: {
-    color: PURPLE,
-    fontWeight: '700',
-    fontSize: 18,
-  },
-  userNameBlock: {
+  userInfo: {
     flex: 1,
   },
-  userName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1A1A1A',
-  },
-  userEmail: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 1,
-  },
- 
-  // Badges (rol y estado)
-  badgeRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  badgeAdmin: {
-    backgroundColor: '#F1E6F2',
-  },
-  badgeAdminText: {
-    color: PURPLE,
-  },
-  badgeUser: {
-    backgroundColor: '#EEF1F4',
-  },
-  badgeUserText: {
-    color: '#555',
-  },
-  badgeActive: {
-    backgroundColor: '#E6F7EC',
-  },
-  badgeActiveText: {
-    color: '#1F9254',
-  },
-  badgeSuspended: {
-    backgroundColor: '#FCEAEA',
-  },
-  badgeSuspendedText: {
-    color: '#C0392B',
-  },
- 
-  // Pie de la card — fecha de registro + estadísticas de actividad
-  userCardFooter: {
+  userTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 12,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    alignItems: 'flex-start',
   },
-  footerStat: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  footerStatValue: {
-    fontSize: 14,
+  userName: {
+    fontSize: 15,
     fontWeight: '700',
     color: '#1A1A1A',
   },
-  footerStatLabel: {
-    fontSize: 11,
-    color: '#888',
+  moreButton: {
+    padding: 4,
+  },
+  userEmailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 2,
   },
+  userEmail: {
+    fontSize: 12.5,
+    color: '#777',
+  },
+  userId: {
+    fontSize: 12,
+    color: '#999',
+  },
+  userMetaRow: {
+    flexDirection: 'row',
+    marginTop: 6,
+  },
+  userMetaText: {
+    fontSize: 12.5,
+    color: '#555',
+  },
+  userMetaSeparator: {
+    fontSize: 12.5,
+    color: '#CCC',
+    marginHorizontal: 6,
+  },
+  userDateText: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 4,
+  },
+  rolAdminText: {
+    color: PURPLE,
+    fontWeight: '700',
+  },
+  estadoActivoText: {
+    color: '#1F9254',
+    fontWeight: '600',
+  },
+  estadoSuspendidoText: {
+    color: '#C0392B',
+    fontWeight: '600',
+  },
  
-  // Estados: cargando / vacío / error
+  // ── Overlay de acciones (editar / estado / eliminar) ──────────────────────
+  // Reemplaza visualmente la card seleccionada — mismo tamaño y posición,
+  // con 3 botones circulares centrados y una X para cerrar.
+  actionsOverlay: {
+    backgroundColor: PURPLE,
+    borderRadius: 14,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-start',
+    position: 'relative',
+  },
+  closeOverlayButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#E53935',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    zIndex: 5,
+  },
+  overlayAction: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  overlayIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  overlayActionLabel: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+ 
+  // ── Estados: cargando / vacío / error / acceso denegado ───────────────────
   centerState: {
     flex: 1,
     alignItems: 'center',
@@ -177,16 +228,12 @@ export const gestionUsuariosStyles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 14,
   },
- 
-  // Acceso denegado (usuario no admin)
-  deniedIcon: {
-    marginBottom: 12,
-  },
   deniedTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#1A1A1A',
     marginBottom: 6,
+    marginTop: 12,
   },
   deniedText: {
     fontSize: 14,

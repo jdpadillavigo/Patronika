@@ -59,6 +59,7 @@ async function login(username: string, password: string): Promise<AuthResult> {
     await ApiClient.saveTokens(tokens.accessToken, tokens.refreshToken);
 
     const user = await resolveCurrentUser(username, tokens.accessToken);
+    console.log('DEBUG login -> usuario resuelto:', JSON.stringify(user));
     if (user) {
         await ApiClient.saveCurrentUser(user);
     }

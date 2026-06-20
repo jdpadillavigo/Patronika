@@ -43,9 +43,7 @@ async function downloadPatternImage(imageUri, patternName, showError) {
     const base64Data = imageUri.split(',')[1];
     const fileName = `patron_${patternName.replace(/\s+/g, '_')}_${Date.now()}.png`;
 
-    // FIX: API nueva de expo-file-system v19+ — antes se usaba
-    // FileSystem.writeAsStringAsync(uri, data, { encoding: FileSystem.EncodingType.Base64 })
-    // pero esa API ya no existe en v19. Ahora se usa la clase File con .write()
+
     const file = new File(Paths.cache, fileName);
     file.write(base64Data, { encoding: 'base64' });
     const fileUri = file.uri;

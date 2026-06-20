@@ -33,7 +33,11 @@ export default function LoginScreen({ navigation }) {
         showError(result.error || 'No se pudo iniciar sesión');
         return;
       }
-      navigation.replace('MisPatrones');
+      if (result.data?.isAdmin) {
+        navigation.replace('GestionUsuarios');
+      } else {
+        navigation.replace('MisPatrones');
+      }
     } catch (error) {
       showError(error.message);
     } finally {
