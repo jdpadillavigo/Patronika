@@ -32,7 +32,7 @@ function formatFecha(fechaIso) {
 }
  
 // Card individual de cada usuario en el listado
-function UserCard({ user }) {
+function UserCard({ user, isMenuOpen, onToggleMenu, onCloseMenu }) {
   const isActive = user.status === 0; // status 0 = activo, otro valor = suspendido (igual que en PerfilScreen/User.ts)
   const inicial = user.username?.charAt(0)?.toUpperCase() || '?';
  
@@ -142,7 +142,7 @@ export default function GestionUsuariosScreen({ navigation }) {
     verificarAccesoYCargar();
   }, [verificarAccesoYCargar]);
 
-  const usuarioFilrados = useMemo (() => {
+  const usuariosFiltrados = useMemo (() => {
     const query = busqueda.trim().toLowerCase();
     if(!query) return usuarios;
     return usuarios.filter( u =>
