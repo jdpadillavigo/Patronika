@@ -36,6 +36,16 @@ async function create(name: string, size: number, imageUri?: string | null) {
     }
 }
 
+async function getById(id: string) {
+    try {
+        const pattern = await PatternRepository.getById(id);
+        return { success: true as const, data: pattern };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Error al cargar el patrón';
+        return { success: false as const, error: message, data: null };
+    }
+}
+
 async function discard(id?: string | null) {
     if (!id) return { success: true };
 
@@ -55,6 +65,7 @@ async function discard(id?: string | null) {
 const PatternUseCase = {
     listMine,
     create,
+    getById,
     discard,
 };
 

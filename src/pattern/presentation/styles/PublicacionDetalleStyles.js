@@ -29,6 +29,9 @@ export const detalleStyles = StyleSheet.create({
   deleteBtn: {
     padding: 6,
   },
+  saveBtn: {
+    padding: 6,
+  },
   scroll: {
     flex: 1,
   },

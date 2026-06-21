@@ -187,4 +187,16 @@ export const crearStyles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
+  savedLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingBottom: 4,
+  },
+  savedLabelText: {
+    fontSize: 10,
+    color: PURPLE,
+    fontWeight: '600',
+  },
 });

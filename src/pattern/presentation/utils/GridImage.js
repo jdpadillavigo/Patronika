@@ -147,13 +147,24 @@ function createPngDataUri(grid, cellSize) {
   return `data:image/png;base64,${bytesToBase64(bytes)}`;
 }
 
+const _cache = new Map();
+
 export function gridDataToImageUri(gridData, options = {}) {
+  if (!gridData) return null;
+
+  const maxDimension = options.maxDimension || 512;
+  const cellSize = options.cellSize || 0;
+  const cacheKey = `${typeof gridData === 'string' ? gridData : JSON.stringify(gridData)}|${maxDimension}|${cellSize}`;
+
+  if (_cache.has(cacheKey)) return _cache.get(cacheKey);
+
   const grid = parseGridData(gridData);
   if (!grid?.length || !Array.isArray(grid[0]) || grid[0].length === 0) return null;
 
-  const maxDimension = options.maxDimension || 512;
   const largestSide = Math.max(grid.length, grid[0].length);
-  const cellSize = options.cellSize || Math.max(1, Math.floor(maxDimension / largestSide));
+  const resolvedCellSize = cellSize || Math.max(1, Math.floor(maxDimension / largestSide));
 
-  return createPngDataUri(grid, cellSize);
+  const uri = createPngDataUri(grid, resolvedCellSize);
+  _cache.set(cacheKey, uri);
+  return uri;
 }

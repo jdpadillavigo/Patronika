@@ -21,6 +21,10 @@ async function create(name: string, size: number, imageUri?: string | null): Pro
     return PatternRemoteDataSource.create(user.id, name, size, imageUri);
 }
 
+async function getById(id: string) {
+    return PatternRemoteDataSource.getById(id);
+}
+
 async function remove(id: string): Promise<void> {
     await PatternRemoteDataSource.remove(id);
 }
@@ -28,6 +32,7 @@ async function remove(id: string): Promise<void> {
 const PatternRepository = {
     listMine,
     create,
+    getById,
     remove,
 };
 

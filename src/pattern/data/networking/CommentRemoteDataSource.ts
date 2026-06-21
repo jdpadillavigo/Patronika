@@ -4,16 +4,10 @@
 import ApiClient, { type ApiResponse } from '../../../core/data/networking/ApiClient';
 import { assertApiSuccess } from './dto/ApiResponseDto';
 
-export interface CommentUser {
-    id: string;
-    username: string;
-    profileImageUrl?: string | null;
-}
-
 export interface Comment {
     id: string;
-    user: CommentUser;
-    publication: { id: string }; // solo el id de la publicación a la que pertenece
+    userId: string;
+    publicationId: string;
     content: string;
     createdAt: string;
     updatedAt?: string | null;
