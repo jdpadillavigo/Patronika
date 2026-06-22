@@ -8,7 +8,7 @@ import CommentRemoteDataSource, { type Comment } from '../networking/CommentRemo
 // Carga los comentarios de una publicación específica (filtro local)
 async function loadForPublication(publicationId: string): Promise<Comment[]> {
     const all = await CommentRemoteDataSource.loadAll();
-    return all.filter(c => c.publication?.id === publicationId);
+    return all.filter(c => c.publicationId === publicationId);
 }
 
 // Agrega un comentario; el userId se toma del usuario en sesión

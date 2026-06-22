@@ -1,12 +1,17 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, Dimensions } from 'react-native';
 import { PURPLE } from './CommonStyles';
 
 export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from './CommonStyles';
 
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const GRID_PADDING = 12;
+const GRID_GAP = 8;
+export const CARD_WIDTH = (SCREEN_WIDTH - GRID_PADDING * 2 - GRID_GAP) / 2;
+
 export const misPatronesStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#F8F8F8',
   },
   header: {
     backgroundColor: PURPLE,
@@ -19,113 +24,222 @@ export const misPatronesStyles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
   },
-  tabsContainer: {
+
+  // --- Filtros ---
+  filtrosContainer: {
     flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 8,
+    alignItems: 'center',
     backgroundColor: 'white',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    borderBottomColor: '#F0F0F0',
   },
-  tab: {
-    flex: 1,
+  filtroGrid: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#F3EDF4',
     alignItems: 'center',
-    paddingVertical: 14,
-    position: 'relative',
+    justifyContent: 'center',
   },
-  tabText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#888',
-  },
-  tabTextActivo: {
-    color: PURPLE,
-    fontWeight: 'bold',
-  },
-  tabIndicador: {
-    position: 'absolute',
-    bottom: 0,
-    left: '15%',
-    right: '15%',
-    height: 2.5,
+  filtroGridActivo: {
     backgroundColor: PURPLE,
-    borderRadius: 2,
   },
+  filtroPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#F0F0F0',
+  },
+  filtroPillActivo: {
+    backgroundColor: PURPLE,
+  },
+  filtroPillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#555',
+  },
+  filtroPillTextActivo: {
+    color: 'white',
+  },
+
+  // --- Estado vacío / loading ---
   contenido: {
     flex: 1,
-    backgroundColor: 'white',
   },
   vacio: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
   },
   vacioText: {
     fontSize: 15,
     color: '#999',
   },
-  listaPatrones: {
-    padding: 16,
+
+  // --- Grid Pinterest ---
+  gridScroll: {
+    flex: 1,
   },
-  patternSeparator: {
-    height: 16,
+  gridContainer: {
+    padding: GRID_PADDING,
+    paddingBottom: 100,
   },
-  listFooter: {
-    minHeight: 96,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+  gridColumns: {
+    flexDirection: 'row',
+    gap: GRID_GAP,
   },
-  loadingMoreText: {
-    fontSize: 14,
-    color: '#999',
-    fontWeight: '600',
+  gridColumn: {
+    flex: 1,
+    gap: GRID_GAP,
   },
-  cardPatron: {
-    borderRadius: 12,
+  gridCard: {
+    borderRadius: 14,
     overflow: 'hidden',
     backgroundColor: 'white',
     elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowRadius: 4,
   },
-  cardImagen: {
-    width: '100%',
-    height: 200,
+  gridCardImage: {
+    width: CARD_WIDTH,
+    height: CARD_WIDTH,
     backgroundColor: '#F3EDF4',
   },
-  cardImagePlaceholder: {
+  gridCardImg: {
+    width: '100%',
+    height: '100%',
+  },
+  gridCardPlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F3EDF4',
+  },
+  gridCardBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: PURPLE,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardInfo: {
-    backgroundColor: PURPLE,
-    height: 86,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 4,
+  gridCardFooter: {
+    paddingHorizontal: 8,
+    paddingVertical: 7,
+    backgroundColor: 'white',
   },
-  cardNombre: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
+  gridCardName: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#333',
   },
-  cardCreador: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.8)',
+
+  // --- Modal detalle (bottom sheet) ---
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
   },
-  cardFooter: {
+  modalSheet: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#DDD',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  modalHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 4,
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  cardValoracion: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
+  modalTitle: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#222',
   },
-  cardDificultad: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
+  modalCloseBtn: {
+    padding: 4,
+  },
+  modalPreview: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.55,
+    borderRadius: 12,
+    backgroundColor: '#F3EDF4',
+    marginBottom: 20,
+  },
+  modalPreviewPlaceholder: {
+    width: '100%',
+    height: SCREEN_WIDTH * 0.55,
+    borderRadius: 12,
+    backgroundColor: '#F3EDF4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  modalActions: {
+    gap: 10,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    backgroundColor: '#F5F0F5',
+  },
+  actionBtnDanger: {
+    backgroundColor: '#FFF0F0',
+  },
+  actionBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: PURPLE,
+  },
+  actionBtnTextDanger: {
+    color: '#E53935',
+  },
+
+  // --- Fullscreen ---
+  fullscreenOverlay: {
+    flex: 1,
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullscreenImage: {
+    width: '100%',
+    height: '100%',
+  },
+  fullscreenClose: {
+    position: 'absolute',
+    top: 50,
+    right: 16,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 8,
+    zIndex: 10,
   },
 
   downloadButton: {
@@ -146,4 +260,3 @@ export const misPatronesStyles = StyleSheet.create({
     zIndex: 10, // asegura que quede encima de la imagen
   },
 });
-

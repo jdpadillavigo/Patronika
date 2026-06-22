@@ -8,7 +8,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { detalleStyles as styles, PURPLE } from '../styles/PublicacionDetalleStyles';
 import CommentUseCase from '../../domain/usecases/CommentUseCase';
 import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
+import PatternUseCase from '../../domain/usecases/PatternUseCase';
+import PatternLibraryUseCase from '../../domain/usecases/PatternLibraryUseCase';
 import ApiClient from '../../../core/data/networking/ApiClient';
+import UserRemoteDataSource from '../../data/networking/UserRemoteDataSource';
 import { gridDataToImageUri } from '../utils/GridImage';
 
 const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Otros'];
@@ -19,15 +22,13 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// Avatar del autor de un comentario.
-// Muestra la foto de perfil si está disponible, si no muestra la inicial.
-function CommentAvatar({ username, imageUrl }) {
+function CommentAvatar({ initial, imageUrl }) {
   if (imageUrl) {
     return <Image source={{ uri: imageUrl }} style={styles.commentAvatarImage} />;
   }
   return (
     <View style={styles.commentAvatar}>
-      <Text style={styles.commentAvatarText}>{(username || '?')[0].toUpperCase()}</Text>
+      <Text style={styles.commentAvatarText}>{(initial || '?').toUpperCase()}</Text>
     </View>
   );
 }
@@ -35,37 +36,104 @@ function CommentAvatar({ username, imageUrl }) {
 export default function PublicacionDetalleScreen({ navigation, route }) {
   const { publication: initialPub, publicationId } = route.params || {};
   const [pub] = useState(initialPub);
+  const [fetchedPattern, setFetchedPattern] = useState(null);
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(true);
   const [commentText, setCommentText] = useState('');
   const [sending, setSending] = useState(false);
   const [editingComment, setEditingComment] = useState(null);
-  const [currentUserId, setCurrentUserId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingPub, setDeletingPub] = useState(false);
   const [fullscreenUri, setFullscreenUri] = useState(null);
-  const [fullscreenLoading, setFullscreenLoading] = useState(false); // spinner mientras carga imagen en fullscreen
+  const [fullscreenLoading, setFullscreenLoading] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [savingPattern, setSavingPattern] = useState(false);
+  const [userMap, setUserMap] = useState({});
+  const inputRef = useRef(null);
 
-  // Abre el visor fullscreen activando el spinner en el mismo toque,
-  // antes de que el Modal se renderice, para dar feedback inmediato al usuario.
+  const currentUserId = currentUser?.id || null;
+  const isOwnPublication = pub?.user?.id && currentUserId && pub.user.id === currentUserId;
+
+  // patternId puede venir como campo plano (nuevo backend) o dentro del objeto pattern (compatibilidad)
+  const patternId = pub?.patternId || pub?.pattern?.id || null;
+
+  const patternImageUri = fetchedPattern?.gridData
+    ? gridDataToImageUri(fetchedPattern.gridData, { maxDimension: 600 })
+    : null;
+
+  const resultImageUri = pub?.imageUrl || null;
+
   const openFullscreen = (uri) => {
     setFullscreenLoading(true);
     setFullscreenUri(uri);
   };
-  const inputRef = useRef(null);
 
+  // Cargar usuario en sesión y agregarlo al mapa de usuarios
   useEffect(() => {
-    ApiClient.getCurrentUser().then(u => setCurrentUserId(u?.id || null));
+    ApiClient.getCurrentUser().then(u => {
+      if (!u) return;
+      setCurrentUser(u);
+      setUserMap(prev => ({
+        ...prev,
+        [u.id]: { username: u.username, profileImageUrl: u.profileImageUrl ?? null },
+      }));
+    });
   }, []);
+
+  // Fetch del patrón para obtener gridData y nombre
+  useEffect(() => {
+    if (!patternId) return;
+    PatternUseCase.getById(patternId).then(result => {
+      if (result.success && result.data) setFetchedPattern(result.data);
+    });
+  }, [patternId]);
+
+  // Verificar si el patrón ya está guardado (solo para publicaciones ajenas)
+  useEffect(() => {
+    if (!patternId || !currentUserId || isOwnPublication) return;
+    PatternLibraryUseCase.listSaved().then(result => {
+      if (result.success) {
+        setIsSaved(result.data.some(entry => entry.pattern.id === patternId));
+      }
+    });
+  }, [patternId, currentUserId, isOwnPublication]);
 
   const loadComments = useCallback(async () => {
     setLoadingComments(true);
     const result = await CommentUseCase.loadForPublication(publicationId);
-    if (result.success) setComments(result.data);
+    if (result.success) {
+      setComments(result.data);
+      const uniqueIds = [...new Set(result.data.map(c => c.userId))];
+      const entries = await Promise.all(
+        uniqueIds.map(async uid => {
+          try {
+            const u = await UserRemoteDataSource.loadById(uid);
+            return [uid, { username: u.username, profileImageUrl: u.profileImageUrl ?? null }];
+          } catch {
+            return [uid, { username: 'Usuario', profileImageUrl: null }];
+          }
+        })
+      );
+      setUserMap(prev => ({ ...prev, ...Object.fromEntries(entries) }));
+    }
     setLoadingComments(false);
   }, [publicationId]);
 
   useEffect(() => { loadComments(); }, [loadComments]);
+
+  const handleToggleSave = async () => {
+    if (savingPattern || !patternId) return;
+    setSavingPattern(true);
+    if (isSaved) {
+      const result = await PatternLibraryUseCase.remove(patternId);
+      if (result.success) setIsSaved(false);
+    } else {
+      const result = await PatternLibraryUseCase.save(patternId);
+      if (result.success) setIsSaved(true);
+    }
+    setSavingPattern(false);
+  };
 
   const handleSend = async () => {
     if (!commentText.trim() || sending) return;
@@ -122,14 +190,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
     setCommentText('');
   };
 
-  // Imagen 1: foto real del resultado (subida por el usuario al publicar)
-  const resultImageUri = pub?.imageUrl || null;
-  // Imagen 2: el patrón generado, convertido de gridData (JSON) a imagen en el cliente
-  const patternImageUri = pub?.pattern?.gridData
-    ? gridDataToImageUri(pub.pattern.gridData, { maxDimension: 600 })
-    : null;
-
-  const isOwnPublication = pub?.user?.id && currentUserId && pub.user.id === currentUserId;
+  const patternName = fetchedPattern?.name || pub?.pattern?.name || null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -140,6 +201,14 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
           <Ionicons name="arrow-back" size={22} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Publicación</Text>
+        {!isOwnPublication && patternId && (
+          <TouchableOpacity style={styles.saveBtn} onPress={handleToggleSave} disabled={savingPattern}>
+            {savingPattern
+              ? <ActivityIndicator size="small" color={PURPLE} />
+              : <Ionicons name={isSaved ? 'bookmark' : 'bookmark-outline'} size={22} color={PURPLE} />
+            }
+          </TouchableOpacity>
+        )}
         {isOwnPublication && (
           <TouchableOpacity style={styles.deleteBtn} onPress={() => setShowDeleteModal(true)}>
             <Ionicons name="trash-outline" size={20} color="#E53935" />
@@ -154,7 +223,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
       >
         <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled">
 
-          {/* Foto del resultado (si existe) */}
+          {/* Foto del resultado */}
           {resultImageUri && (
             <TouchableOpacity style={styles.imageBlock} onPress={() => openFullscreen(resultImageUri)} activeOpacity={0.92}>
               <Image source={{ uri: resultImageUri }} style={styles.image} resizeMode="cover" />
@@ -205,8 +274,8 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
             )}
 
             <Text style={styles.description}>{pub?.description}</Text>
-            {pub?.pattern?.name && (
-              <Text style={styles.patternName}>Patrón: {pub.pattern.name}</Text>
+            {patternName && (
+              <Text style={styles.patternName}>Patrón: {patternName}</Text>
             )}
 
             <View style={styles.divider} />
@@ -220,26 +289,32 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
             ) : comments.length === 0 ? (
               <Text style={styles.noComments}>Sé el primero en comentar</Text>
             ) : (
-              comments.map(comment => (
-                <View key={comment.id} style={styles.commentItem}>
-                  <View style={styles.commentHeader}>
-                    <CommentAvatar username={comment.user?.username} imageUrl={comment.user?.profileImageUrl} />
-                    <Text style={styles.commentAuthor}>@{comment.user?.username}</Text>
-                    {comment.user?.id === currentUserId && (
-                      <View style={styles.commentActions}>
-                        <TouchableOpacity style={styles.commentActionBtn} onPress={() => handleEditComment(comment)}>
-                          <Ionicons name="pencil-outline" size={14} color="#888" />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.commentActionBtn} onPress={() => handleDeleteComment(comment.id)}>
-                          <Ionicons name="trash-outline" size={14} color="#E53935" />
-                        </TouchableOpacity>
-                      </View>
-                    )}
+              comments.map(comment => {
+                const commentUser = userMap[comment.userId];
+                const isOwnComment = comment.userId === currentUserId;
+                const displayUsername = commentUser?.username || 'Usuario';
+                const displayAvatar = commentUser?.profileImageUrl || null;
+                return (
+                  <View key={comment.id} style={styles.commentItem}>
+                    <View style={styles.commentHeader}>
+                      <CommentAvatar initial={displayUsername[0]} imageUrl={displayAvatar} />
+                      <Text style={styles.commentAuthor}>@{displayUsername}</Text>
+                      {isOwnComment && (
+                        <View style={styles.commentActions}>
+                          <TouchableOpacity style={styles.commentActionBtn} onPress={() => handleEditComment(comment)}>
+                            <Ionicons name="pencil-outline" size={14} color="#888" />
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.commentActionBtn} onPress={() => handleDeleteComment(comment.id)}>
+                            <Ionicons name="trash-outline" size={14} color="#E53935" />
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.commentContent}>{comment.content}</Text>
+                    <Text style={styles.commentDate}>{formatDate(comment.createdAt)}</Text>
                   </View>
-                  <Text style={styles.commentContent}>{comment.content}</Text>
-                  <Text style={styles.commentDate}>{formatDate(comment.createdAt)}</Text>
-                </View>
-              ))
+                );
+              })
             )}
           </View>
         </ScrollView>

@@ -1,250 +1,217 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  FlatList,
-  ActivityIndicator,
-  Image,
-  InteractionManager,
-  Alert,
+  View, Text, TouchableOpacity, StatusBar,
+  ScrollView, ActivityIndicator, Image, Modal, Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { File, Paths } from 'expo-file-system'; // FIX: API nueva de expo-file-system v19+ (la antigua FileSystem.writeAsStringAsync/EncodingType ya no existe)
-import * as MediaLibrary from 'expo-media-library'; //nuevo import
-import { misPatronesStyles as styles, PURPLE } from '../styles/MisPatronesStyles';
+import { File, Paths } from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+
+import { misPatronesStyles as styles, PURPLE, CARD_WIDTH } from '../styles/MisPatronesStyles';
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
+import PatternLibraryUseCase from '../../domain/usecases/PatternLibraryUseCase';
 import { gridDataToImageUri } from '../utils/GridImage';
 import BottomNavbar from '../components/BottomNavbar';
 import { useErrorPopup } from '../components/ErrorPopup';
 
-const PATTERN_ITEM_HEIGHT = 302;
-const PATTERNS_PAGE_SIZE = 5;
-const LOAD_MORE_DELAY_MS = 450;
-
-async function downloadPatternImage(imageUri, patternName, showError) {
-  if (!imageUri) {
-    showError('La imagen del patrón aún no está lista. Intenta de nuevo en un momento.');
-    return;
-  }
- 
-  try {
-    // Pide permiso para guardar en la galería del dispositivo
-    const { status } = await MediaLibrary.requestPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería para guardar el patrón.');
-      return;
-    }
- 
-    // El imageUri viene como "data:image/png;base64,XXXX" — separamos el base64 puro
-    const base64Data = imageUri.split(',')[1];
-    const fileName = `patron_${patternName.replace(/\s+/g, '_')}_${Date.now()}.png`;
-
-
-    const file = new File(Paths.cache, fileName);
-    file.write(base64Data, { encoding: 'base64' });
-    const fileUri = file.uri;
-
-    // Guarda el archivo en la galería del dispositivo (carpeta de fotos)
-    const asset = await MediaLibrary.createAssetAsync(fileUri);
-    await MediaLibrary.createAlbumAsync('Patrónika', asset, false);
- 
-    Alert.alert('¡Descargado!', 'El patrón se guardó en tu galería.');
-  } catch (error) {
-    // DEBUG TEMPORAL — quitar después de confirmar que funciona
-    console.log('🔴 ERROR AL DESCARGAR:', error);
-    console.log('Mensaje:', error?.message);
-    // FIN DEBUG TEMPORAL
-    showError('No se pudo descargar el patrón. Intenta de nuevo.');
-  }
+// --- Normalización de datos ---
+function normalizeOwn(p) {
+  return { id: p.id, name: p.name, gridData: p.gridData, displaySize: p.size || p.width, isSaved: false };
+}
+function normalizeSaved(entry) {
+  return { id: entry.pattern.id, name: entry.pattern.name, gridData: entry.pattern.gridData, displaySize: entry.pattern.width, isSaved: true };
+}
+function normalizeAll(p, currentUserId) {
+  return { id: p.id, name: p.name, gridData: p.gridData, displaySize: p.width, isSaved: p.userId !== currentUserId };
 }
 
-const PatternCardImage = memo(function PatternCardImage({ gridData, shouldRenderImage, onImageReady}) {
-  const [imageUri, setImageUri] = useState(null);
+// --- Tarjeta de patrón (grid Pinterest) ---
+const GridCard = memo(function GridCard({ pattern, onPress }) {
+  const uri = pattern.gridData
+    ? gridDataToImageUri(pattern.gridData, { maxDimension: 300 })
+    : null;
 
-  useEffect(() => {
-    let mounted = true;
-    let timeoutId = null;
-    let interactionTask = null;
-
-    if (!gridData || !shouldRenderImage) {
-      setImageUri(null);
-      return () => {
-        mounted = false;
-      };
-    }
-
-    setImageUri(null);
-    interactionTask = InteractionManager.runAfterInteractions(() => {
-      timeoutId = setTimeout(() => {
-        const generatedUri = gridDataToImageUri(gridData, { maxDimension: 360 });
-        if (mounted) {
-          setImageUri(generatedUri);
-          // NUEVO (Sprint 2): avisa al componente padre (PatternCard) que la imagen
-          // ya está lista, para poder habilitar la descarga con el uri correcto
-          if (onImageReady) onImageReady(generatedUri);
-        }
-      }, 0);
-    });
-
-    return () => {
-      mounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
-      interactionTask?.cancel?.();
-    };
-  }, [gridData, shouldRenderImage]);
-
-  if (!imageUri) {
-    return (
-      <View style={[styles.cardImagen, styles.cardImagePlaceholder]}>
-        <Ionicons name="image-outline" size={44} color={PURPLE} />
+  return (
+    <TouchableOpacity
+      style={[styles.gridCard, { width: CARD_WIDTH }]}
+      onPress={() => onPress(pattern)}
+      activeOpacity={0.82}
+    >
+      <View style={[styles.gridCardImage, { width: CARD_WIDTH, height: CARD_WIDTH }]}>
+        {uri ? (
+          <Image source={{ uri }} style={styles.gridCardImg} resizeMode="cover" />
+        ) : (
+          <View style={styles.gridCardPlaceholder}>
+            <Ionicons name="grid-outline" size={32} color={PURPLE} />
+          </View>
+        )}
+        {pattern.isSaved && (
+          <View style={styles.gridCardBadge}>
+            <Ionicons name="bookmark" size={12} color="white" />
+          </View>
+        )}
       </View>
-    );
-  }
-
-  return (
-    <Image
-      source={{ uri: imageUri }}
-      style={styles.cardImagen}
-      resizeMode="contain"
-    />
-  );
-});
-
-const PatternCard = memo(function PatternCard({ pattern, shouldRenderImage,onDownload  }) {
-  const [cardImageUri, setCardImageUri] = useState(null);
-  return (
-    <TouchableOpacity style={styles.cardPatron} activeOpacity={0.85}>
-      <PatternCardImage gridData={pattern.gridData} shouldRenderImage={shouldRenderImage} onImageReady={setCardImageUri}/>
-      
-      <TouchableOpacity
-        style={styles.downloadButton}
-        onPress={() => onDownload(cardImageUri, pattern.name)}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="download-outline" size={20} color="white" />
-      </TouchableOpacity>
-
-      <View style={styles.cardInfo}>
-        <Text style={styles.cardNombre} numberOfLines={1}>{pattern.name}</Text>
-        <Text style={styles.cardCreador} numberOfLines={1}>
-          Creador: {pattern.user?.username || 'Tú'}
-        </Text>
-        <View style={styles.cardFooter}>
-          <Text style={styles.cardValoracion}>Sin valoraciones</Text>
-          <Text style={styles.cardDificultad}>Tamaño: {pattern.size}</Text>
-        </View>
+      <View style={styles.gridCardFooter}>
+        <Text style={styles.gridCardName} numberOfLines={1}>{pattern.name}</Text>
       </View>
     </TouchableOpacity>
   );
 });
 
+// --- Pantalla principal ---
 export default function MisPatronesScreen({ navigation }) {
-  const [activeNav, setActiveNav] = useState('patrones');
+  const [activeFilter, setActiveFilter] = useState('todos');
   const [patterns, setPatterns] = useState([]);
-  const [visiblePatternCount, setVisiblePatternCount] = useState(PATTERNS_PAGE_SIZE);
   const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [viewableBatchIndexes, setViewableBatchIndexes] = useState(() => new Set());
-  const hasUserScrolledRef = useRef(false);
+  const [selectedPattern, setSelectedPattern] = useState(null);
+  const [fullscreenVisible, setFullscreenVisible] = useState(false);
+  const [actionLoading, setActionLoading] = useState(null);
   const { showError, errorPopup } = useErrorPopup();
 
-  const visiblePatterns = useMemo(
-    () => patterns.slice(0, visiblePatternCount),
-    [patterns, visiblePatternCount],
-  );
-
-  const hasMorePatterns = visiblePatternCount < patterns.length;
-
   const loadPatterns = useCallback(async () => {
-    hasUserScrolledRef.current = false;
     setLoading(true);
     try {
-      const result = await PatternUseCase.listMine();
-      if (result.success) {
-        setPatterns([...(result.data || [])].reverse());
-        setVisiblePatternCount(PATTERNS_PAGE_SIZE);
-      } else if (result.sessionExpired) {
-        setPatterns([]);
-        setVisiblePatternCount(PATTERNS_PAGE_SIZE);
+      let normalized = [];
+      if (activeFilter === 'mios') {
+        const result = await PatternUseCase.listMine();
+        if (result.sessionExpired) { setPatterns([]); return; }
+        if (!result.success) { showError(result.error || 'No se pudieron cargar tus patrones'); return; }
+        normalized = (result.data || []).map(normalizeOwn);
+      } else if (activeFilter === 'guardados') {
+        const result = await PatternLibraryUseCase.listSaved();
+        if (result.sessionExpired) { setPatterns([]); return; }
+        if (!result.success) { showError(result.error || 'No se pudieron cargar los patrones guardados'); return; }
+        normalized = (result.data || []).map(normalizeSaved);
       } else {
-        showError(result.error || 'No se pudieron cargar tus patrones');
+        const result = await PatternLibraryUseCase.listAll();
+        if (result.sessionExpired) { setPatterns([]); return; }
+        if (!result.success) {
+          // Fallback a solo propios si listAll falla
+          const mine = await PatternUseCase.listMine();
+          normalized = mine.success ? (mine.data || []).map(normalizeOwn) : [];
+        } else {
+          normalized = (result.data || []).map(p => normalizeAll(p, result.currentUserId));
+        }
       }
+      setPatterns([...normalized].reverse());
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeFilter, showError]);
 
   useFocusEffect(useCallback(() => {
     loadPatterns();
   }, [loadPatterns]));
 
-  const handleFab = () => {
-    navigation.navigate('GenerarPatron');
-  };
-
-  const renderPattern = useCallback(({ item, index }) => {
-    const batchIndex = Math.floor(index / PATTERNS_PAGE_SIZE);
-
-    return (
-      <PatternCard
-        pattern={item}
-        shouldRenderImage={viewableBatchIndexes.has(batchIndex)}
-        onDownload={(imageUri, patternName) => downloadPatternImage(imageUri, patternName, showError)}
-      />
-    );
-  }, [viewableBatchIndexes,showError]);
-
-  const renderSeparator = useCallback(() => (
-    <View style={styles.patternSeparator} />
-  ), []);
-
-  const renderListFooter = useCallback(() => {
-    if (!loadingMore) return null;
-
-    return (
-      <View style={styles.listFooter}>
-        <ActivityIndicator size="small" color={PURPLE} />
-        <Text style={styles.loadingMoreText}>Cargando...</Text>
-      </View>
-    );
-  }, [loadingMore]);
-
-  const handleLoadMorePatterns = useCallback(async () => {
-    if (!hasUserScrolledRef.current || loading || loadingMore || !hasMorePatterns) return;
-
-    setLoadingMore(true);
-    await new Promise(resolve => setTimeout(resolve, LOAD_MORE_DELAY_MS));
-    setVisiblePatternCount(currentCount => Math.min(currentCount + PATTERNS_PAGE_SIZE, patterns.length));
-    hasUserScrolledRef.current = false;
-    setLoadingMore(false);
-  }, [hasMorePatterns, loading, loadingMore, patterns.length]);
-
-  const handleScrollBeginDrag = useCallback(() => {
-    hasUserScrolledRef.current = true;
+  const handleFilterChange = useCallback((filter) => {
+    setActiveFilter(filter);
   }, []);
 
-  const handleViewableItemsChanged = useRef(({ viewableItems }) => {
-    setViewableBatchIndexes(new Set(
-      viewableItems
-        .filter(item => typeof item.index === 'number')
-        .map(item => Math.floor(item.index / PATTERNS_PAGE_SIZE))
-    ));
-  }).current;
+  // --- Acciones del modal ---
+  const handleViewFullscreen = useCallback(() => {
+    setFullscreenVisible(true);
+  }, []);
 
-  const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 35,
-    minimumViewTime: 80,
-  }).current;
+  const handleDownload = useCallback(async () => {
+    if (!selectedPattern?.gridData) {
+      Alert.alert('Sin imagen', 'Este patrón no tiene imagen para descargar');
+      return;
+    }
+    setActionLoading('download');
+    let cachedFile = null;
+    try {
+      // maxDimension 300 ya está cacheado desde la tarjeta → no bloquea el hilo JS
+      const uri = gridDataToImageUri(selectedPattern.gridData, { maxDimension: 300 });
+      if (!uri) {
+        Alert.alert('Error', 'No se pudo generar la imagen del patrón');
+        return;
+      }
 
-  const getPatternLayout = useCallback((_, index) => ({
-    length: PATTERN_ITEM_HEIGHT,
-    offset: PATTERN_ITEM_HEIGHT * index,
-    index,
-  }), []);
+      const base64 = uri.split(',')[1];
+      const safeName = (selectedPattern.name || 'patron').replace(/[^a-zA-Z0-9]/g, '_');
+
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permiso denegado', 'Activa el permiso de fotos en Configuración para guardar el patrón');
+        return;
+      }
+
+      cachedFile = new File(Paths.cache, `patron_${safeName}_${Date.now()}.png`);
+      cachedFile.write(base64, { encoding: 'base64' });
+
+      const asset = await MediaLibrary.createAssetAsync(cachedFile.uri);
+      await MediaLibrary.createAlbumAsync('Patrónika', asset, false);
+
+      Alert.alert('¡Listo!', 'El patrón se guardó en tu galería.');
+    } catch (err) {
+      showError(err.message || 'No se pudo descargar el patrón');
+    } finally {
+      if (cachedFile?.exists) cachedFile.delete();
+      setActionLoading(null);
+    }
+  }, [selectedPattern, showError]);
+
+  const handleDelete = useCallback(() => {
+    Alert.alert('Eliminar patrón', '¿Seguro que quieres eliminar este patrón? Esta acción no se puede deshacer.', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Eliminar', style: 'destructive',
+        onPress: async () => {
+          setActionLoading('delete');
+          const result = await PatternUseCase.discard(selectedPattern?.id);
+          setActionLoading(null);
+          if (result.success) {
+            setSelectedPattern(null);
+            loadPatterns();
+          } else {
+            showError(result.error || 'No se pudo eliminar el patrón');
+          }
+        },
+      },
+    ]);
+  }, [selectedPattern, loadPatterns, showError]);
+
+  const handleRemoveSaved = useCallback(() => {
+    Alert.alert('Quitar patrón', '¿Quitar este patrón de tus guardados?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Quitar', style: 'destructive',
+        onPress: async () => {
+          setActionLoading('remove');
+          const result = await PatternLibraryUseCase.remove(selectedPattern?.id);
+          setActionLoading(null);
+          if (result.success) {
+            setSelectedPattern(null);
+            loadPatterns();
+          } else {
+            showError(result.error || 'No se pudo quitar el patrón');
+          }
+        },
+      },
+    ]);
+  }, [selectedPattern, loadPatterns, showError]);
+
+  const closeModal = useCallback(() => {
+    setFullscreenVisible(false);
+    setSelectedPattern(null);
+  }, []);
+
+  // --- Columnas para el grid ---
+  const leftCol = patterns.filter((_, i) => i % 2 === 0);
+  const rightCol = patterns.filter((_, i) => i % 2 !== 0);
+
+  const emptyText = activeFilter === 'guardados'
+    ? 'No guardaste patrones aún'
+    : activeFilter === 'mios'
+    ? 'No creaste patrones aún'
+    : 'No tienes patrones disponibles';
+
+  // maxDimension 300 ya está cacheado desde cuando se renderizó la tarjeta → instantáneo
+  const previewUri = selectedPattern?.gridData
+    ? gridDataToImageUri(selectedPattern.gridData, { maxDimension: 300 })
+    : null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -254,50 +221,144 @@ export default function MisPatronesScreen({ navigation }) {
         <Text style={styles.headerTitle}>Patrónika</Text>
       </View>
 
+      {/* Filtros */}
+      <View style={styles.filtrosContainer}>
+        <TouchableOpacity
+          style={[styles.filtroGrid, activeFilter === 'todos' && styles.filtroGridActivo]}
+          onPress={() => handleFilterChange('todos')}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="grid" size={18} color={activeFilter === 'todos' ? 'white' : PURPLE} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.filtroPill, activeFilter === 'guardados' && styles.filtroPillActivo]}
+          onPress={() => handleFilterChange('guardados')}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="bookmark" size={14} color={activeFilter === 'guardados' ? 'white' : '#555'} />
+          <Text style={[styles.filtroPillText, activeFilter === 'guardados' && styles.filtroPillTextActivo]}>
+            Guardados
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.filtroPill, activeFilter === 'mios' && styles.filtroPillActivo]}
+          onPress={() => handleFilterChange('mios')}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.filtroPillText, activeFilter === 'mios' && styles.filtroPillTextActivo]}>
+            Creado por ti
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Contenido */}
       <View style={styles.contenido}>
         {loading ? (
           <View style={styles.vacio}>
             <ActivityIndicator size="large" color={PURPLE} />
           </View>
-        ) : activeNav === 'patrones' ? (
-          patterns.length === 0 ? (
-            <View style={styles.vacio}>
-              <Text style={styles.vacioText}>No creaste patrones aún</Text>
-            </View>
-          ) : (
-            <FlatList
-              data={visiblePatterns}
-              keyExtractor={item => item.id.toString()}
-              contentContainerStyle={styles.listaPatrones}
-              renderItem={renderPattern}
-              ItemSeparatorComponent={renderSeparator}
-              ListFooterComponent={renderListFooter}
-              onEndReached={handleLoadMorePatterns}
-              onEndReachedThreshold={0.05}
-              onScrollBeginDrag={handleScrollBeginDrag}
-              onViewableItemsChanged={handleViewableItemsChanged}
-              viewabilityConfig={viewabilityConfig}
-              initialNumToRender={5}
-              maxToRenderPerBatch={5}
-              updateCellsBatchingPeriod={80}
-              windowSize={7}
-              removeClippedSubviews={false}
-              getItemLayout={getPatternLayout}
-            />
-          )
-        ) : (
+        ) : patterns.length === 0 ? (
           <View style={styles.vacio}>
-            <Text style={styles.vacioText}>Próximamente</Text>
+            <Ionicons name="grid-outline" size={52} color="#DDD" />
+            <Text style={styles.vacioText}>{emptyText}</Text>
           </View>
+        ) : (
+          <ScrollView style={styles.gridScroll} contentContainerStyle={styles.gridContainer} showsVerticalScrollIndicator={false}>
+            <View style={styles.gridColumns}>
+              <View style={styles.gridColumn}>
+                {leftCol.map(p => <GridCard key={p.id} pattern={p} onPress={setSelectedPattern} />)}
+              </View>
+              <View style={styles.gridColumn}>
+                {rightCol.map(p => <GridCard key={p.id} pattern={p} onPress={setSelectedPattern} />)}
+              </View>
+            </View>
+          </ScrollView>
         )}
       </View>
 
+      {/* Modal detalle */}
+      <Modal
+        visible={!!selectedPattern && !fullscreenVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={closeModal}
+      >
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={closeModal} />
+        <View style={styles.modalSheet}>
+          <View style={styles.modalHandle} />
+
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle} numberOfLines={2}>{selectedPattern?.name}</Text>
+            <TouchableOpacity style={styles.modalCloseBtn} onPress={closeModal}>
+              <Ionicons name="close" size={22} color="#555" />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity onPress={handleViewFullscreen} activeOpacity={0.9}>
+            {previewUri ? (
+              <Image source={{ uri: previewUri }} style={styles.modalPreview} resizeMode="contain" />
+            ) : (
+              <View style={styles.modalPreviewPlaceholder}>
+                <Ionicons name="grid-outline" size={64} color={PURPLE} />
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.modalActions}>
+            <TouchableOpacity style={styles.actionBtn} onPress={handleViewFullscreen}>
+              <Ionicons name="expand-outline" size={20} color={PURPLE} />
+              <Text style={styles.actionBtnText}>Ver más grande</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionBtn} onPress={handleDownload} disabled={!!actionLoading}>
+              {actionLoading === 'download'
+                ? <ActivityIndicator size="small" color={PURPLE} />
+                : <Ionicons name="download-outline" size={20} color={PURPLE} />
+              }
+              <Text style={styles.actionBtnText}>Descargar en mi galería</Text>
+            </TouchableOpacity>
+
+            {selectedPattern?.isSaved ? (
+              <TouchableOpacity style={[styles.actionBtn, styles.actionBtnDanger]} onPress={handleRemoveSaved} disabled={!!actionLoading}>
+                {actionLoading === 'remove'
+                  ? <ActivityIndicator size="small" color="#E53935" />
+                  : <Ionicons name="bookmark-outline" size={20} color="#E53935" />
+                }
+                <Text style={[styles.actionBtnText, styles.actionBtnTextDanger]}>Quitar de guardados</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={[styles.actionBtn, styles.actionBtnDanger]} onPress={handleDelete} disabled={!!actionLoading}>
+                {actionLoading === 'delete'
+                  ? <ActivityIndicator size="small" color="#E53935" />
+                  : <Ionicons name="trash-outline" size={20} color="#E53935" />
+                }
+                <Text style={[styles.actionBtnText, styles.actionBtnTextDanger]}>Eliminar patrón</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Fullscreen viewer */}
+      <Modal visible={fullscreenVisible} transparent animationType="fade" statusBarTranslucent onRequestClose={() => setFullscreenVisible(false)}>
+        <View style={styles.fullscreenOverlay}>
+          <TouchableOpacity style={styles.fullscreenClose} onPress={() => setFullscreenVisible(false)}>
+            <Ionicons name="close" size={22} color="white" />
+          </TouchableOpacity>
+          {previewUri && (
+            <Image source={{ uri: previewUri }} style={styles.fullscreenImage} resizeMode="contain" />
+          )}
+        </View>
+      </Modal>
+
       <BottomNavbar
         activeItem="patterns"
-        onPressPatterns={() => setActiveNav('patrones')}
+        onPressPatterns={() => {}}
         onPressCommunity={() => navigation.navigate('Comunidad')}
         onPressProfile={() => navigation.navigate('Perfil')}
-        onPressCamera={handleFab}
+        onPressCamera={() => navigation.navigate('GenerarPatron')}
       />
       {errorPopup}
     </SafeAreaView>

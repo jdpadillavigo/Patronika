@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Patronika necesita acceso a tu cámara para que puedas tomar fotos y convertirlas en patrones de tejido.",
-        "NSPhotoLibraryUsageDescription": "Patronika necesita acceso a tu galería para que puedas seleccionar imágenes y convertirlas en patrones de tejido."
+        "NSPhotoLibraryUsageDescription": "Patronika necesita acceso a tu galería para que puedas seleccionar imágenes y convertirlas en patrones de tejido.",
+        "NSPhotoLibraryAddUsageDescription": "Patronika necesita permiso para guardar los patrones generados en tu galería."
       }
     },
     "android": {
@@ -25,7 +26,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

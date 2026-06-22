@@ -49,6 +49,13 @@ async function create(userId: string, name: string, size: number, imageUri?: str
     return response.data as Pattern;
 }
 
+async function getById(id: string): Promise<{ id: string; name: string; gridData?: string | null; userId: string }> {
+    const response = await ApiClient.get<ApiResponse<{ id: string; name: string; gridData?: string | null; userId: string }>>(`/api/patterns/${id}`);
+    const data = assertApiSuccess(response, 'No se pudo cargar el patrón');
+    if (!data) throw new Error('No se pudo cargar el patrón');
+    return data;
+}
+
 async function remove(id: string): Promise<void> {
     await ApiClient.delete<ApiResponse<string>>(`/api/patterns/${id}`);
 }
@@ -56,6 +63,7 @@ async function remove(id: string): Promise<void> {
 const PatternRemoteDataSource = {
     loadByUser,
     create,
+    getById,
     remove,
 };
 

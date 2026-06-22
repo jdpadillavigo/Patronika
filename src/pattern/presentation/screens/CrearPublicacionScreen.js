@@ -6,9 +6,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+
 import { crearStyles as styles, PURPLE } from '../styles/CrearPublicacionStyles';
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
+import PatternLibraryUseCase from '../../domain/usecases/PatternLibraryUseCase';
 import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
+import ApiClient from '../../../core/data/networking/ApiClient';
 import { gridDataToImageUri } from '../utils/GridImage';
 import { useErrorPopup } from '../components/ErrorPopup';
 
@@ -26,6 +29,7 @@ function PatternThumb({ pattern }) {
 
 export default function CrearPublicacionScreen({ navigation }) {
   const [patterns, setPatterns] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [loadingPatterns, setLoadingPatterns] = useState(true);
   const [selectedPattern, setSelectedPattern] = useState(null);
   const [description, setDescription] = useState('');
@@ -36,10 +40,42 @@ export default function CrearPublicacionScreen({ navigation }) {
   const { showError, errorPopup } = useErrorPopup();
 
   useEffect(() => {
-    PatternUseCase.listMine().then(result => {
-      if (result.success) setPatterns(result.data);
+    async function load() {
+      const [user, mineResult, savedResult] = await Promise.all([
+        ApiClient.getCurrentUser(),
+        PatternUseCase.listMine(),
+        PatternLibraryUseCase.listSaved(),
+      ]);
+
+      const uid = user?.id || null;
+      setCurrentUserId(uid);
+
+      const ownPatterns = mineResult.success
+        ? (mineResult.data || []).map(p => ({
+            id: p.id,
+            name: p.name,
+            gridData: p.gridData,
+            userId: p.user?.id || uid,
+            isSavedPattern: false,
+          }))
+        : [];
+
+      const savedPatterns = savedResult.success
+        ? (savedResult.data || []).map(entry => ({
+            id: entry.pattern.id,
+            name: entry.pattern.name,
+            gridData: entry.pattern.gridData,
+            userId: entry.pattern.userId,
+            isSavedPattern: true,
+          }))
+        : [];
+
+      const ownIds = new Set(ownPatterns.map(p => p.id));
+      const combined = [...ownPatterns, ...savedPatterns.filter(p => !ownIds.has(p.id))];
+      setPatterns(combined);
       setLoadingPatterns(false);
-    });
+    }
+    load();
   }, []);
 
   const pickImage = useCallback(async () => {
@@ -49,7 +85,7 @@ export default function CrearPublicacionScreen({ navigation }) {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       quality: 0.8,
     });
@@ -101,22 +137,31 @@ export default function CrearPublicacionScreen({ navigation }) {
               <Text style={styles.noPatterns}>No tienes patrones generados aún</Text>
             ) : (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.patternList}>
-                {patterns.map(p => (
-                  <TouchableOpacity
-                    key={p.id}
-                    style={[styles.patternCard, selectedPattern?.id === p.id && styles.patternCardSelected]}
-                    onPress={() => setSelectedPattern(p)}
-                    activeOpacity={0.8}
-                  >
-                    <PatternThumb pattern={p} />
-                    <Text
-                      style={[styles.patternCardName, selectedPattern?.id === p.id && styles.patternCardNameSelected]}
-                      numberOfLines={1}
+                {patterns.map(p => {
+                  const isSaved = currentUserId && p.userId !== currentUserId;
+                  return (
+                    <TouchableOpacity
+                      key={p.id}
+                      style={[styles.patternCard, selectedPattern?.id === p.id && styles.patternCardSelected]}
+                      onPress={() => setSelectedPattern(p)}
+                      activeOpacity={0.8}
                     >
-                      {p.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <PatternThumb pattern={p} />
+                      <Text
+                        style={[styles.patternCardName, selectedPattern?.id === p.id && styles.patternCardNameSelected]}
+                        numberOfLines={1}
+                      >
+                        {p.name}
+                      </Text>
+                      {isSaved && (
+                        <View style={styles.savedLabel}>
+                          <Ionicons name="bookmark" size={10} color={PURPLE} />
+                          <Text style={styles.savedLabelText}>Guardado</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
               </ScrollView>
             )}
           </View>
