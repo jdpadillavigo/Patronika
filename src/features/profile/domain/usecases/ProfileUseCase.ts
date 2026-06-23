@@ -1,0 +1,61 @@
+import UserRepository from '../../../user/data/repositories/UserRepository';
+import { validatePassword, validateUsername } from '../../../../core/domain/models/User';
+import { isSessionExpiredError } from '../../../../core/data/network/HttpClientExt';
+
+async function getCurrent() {
+    return UserRepository.getCurrent();
+}
+
+async function updateProfile(username: string, password: string, avatar?: string | null) {
+    const validation = validateUsername(username);
+    if (!validation.isValid) {
+        return { success: false, error: validation.message };
+    }
+    if (!password.trim()) {
+        return { success: false, error: 'Ingresa tu contraseña actual para guardar cambios' };
+    }
+
+    try {
+        const user = await UserRepository.updateProfile(username.trim(), password, avatar);
+        return { success: true, data: user };
+    } catch (error: unknown) {
+        if (isSessionExpiredError(error)) {
+            return { success: false, sessionExpired: true };
+        }
+
+        const message = error instanceof Error ? error.message : 'Error al actualizar el perfil';
+        return { success: false, error: message };
+    }
+}
+
+async function changePassword(currentPassword: string, newPassword: string, confirmPassword: string) {
+    const currentValidation = validatePassword(currentPassword);
+    if (!currentValidation.isValid) return { success: false, error: currentValidation.message };
+
+    const newValidation = validatePassword(newPassword);
+    if (!newValidation.isValid) return { success: false, error: newValidation.message };
+
+    if (newPassword !== confirmPassword) {
+        return { success: false, error: 'Las contraseñas nuevas no coinciden' };
+    }
+
+    try {
+        const user = await UserRepository.changePassword(currentPassword, newPassword);
+        return { success: true, data: user };
+    } catch (error: unknown) {
+        if (isSessionExpiredError(error)) {
+            return { success: false, sessionExpired: true };
+        }
+
+        const message = error instanceof Error ? error.message : 'Error al cambiar la contraseña';
+        return { success: false, error: message };
+    }
+}
+
+const ProfileUseCase = {
+    getCurrent,
+    updateProfile,
+    changePassword,
+};
+
+export default ProfileUseCase;

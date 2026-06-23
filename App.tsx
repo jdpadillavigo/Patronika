@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
-import AppNavigator from './src/core/navigation/AppNavigator';
-import type { RootStackParamList } from './src/core/navigation/types';
-import SessionExpiredModal from './src/core/presentation/SessionExpiredModal';
+import NavigationRoot from './src/main/NavigationRoot';
+import type { RootStackParamList } from './src/main/navigationTypes';
+import SessionExpiredModal from './src/core/presentation/designsystem/components/SessionExpiredModal';
 import SessionExpiredService from './src/core/domain/session/SessionExpiredService';
+import SystemBarsLayout from './src/core/presentation/designsystem/components/SystemBarsLayout';
 
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
@@ -29,12 +30,14 @@ export default function App() {
     };
 
     return (
-        <NavigationContainer ref={navigationRef}>
-            <AppNavigator />
-            <SessionExpiredModal
-                visible={sessionExpiredVisible}
-                onAccept={handleSessionExpiredAccept}
-            />
-        </NavigationContainer>
+        <SystemBarsLayout>
+            <NavigationContainer ref={navigationRef}>
+                <NavigationRoot />
+                <SessionExpiredModal
+                    visible={sessionExpiredVisible}
+                    onAccept={handleSessionExpiredAccept}
+                />
+            </NavigationContainer>
+        </SystemBarsLayout>
     );
 }
