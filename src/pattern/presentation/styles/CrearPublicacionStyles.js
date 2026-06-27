@@ -187,6 +187,12 @@ export const crearStyles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
+  savedPatternNote: {
+    fontSize: 12,
+    color: '#E53935',
+    marginBottom: 8,
+    marginTop: 2,
+  },
   savedLabel: {
     flexDirection: 'row',
     alignItems: 'center',

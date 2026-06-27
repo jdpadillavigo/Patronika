@@ -12,19 +12,20 @@ import * as MediaLibrary from 'expo-media-library';
 import { misPatronesStyles as styles, PURPLE, CARD_WIDTH } from '../styles/MisPatronesStyles';
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
 import PatternLibraryUseCase from '../../domain/usecases/PatternLibraryUseCase';
+import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
 import { gridDataToImageUri } from '../utils/GridImage';
 import BottomNavbar from '../components/BottomNavbar';
 import { useErrorPopup } from '../components/ErrorPopup';
 
 // --- Normalización de datos ---
-function normalizeOwn(p) {
-  return { id: p.id, name: p.name, gridData: p.gridData, displaySize: p.size || p.width, isSaved: false };
+function normalizeOwn(p, publishedIds) {
+  return { id: p.id, name: p.name, gridData: p.gridData, displaySize: p.size || p.width, isSaved: false, isPublished: publishedIds.has(p.id) };
 }
-function normalizeSaved(entry) {
-  return { id: entry.pattern.id, name: entry.pattern.name, gridData: entry.pattern.gridData, displaySize: entry.pattern.width, isSaved: true };
+function normalizeSaved(entry, publishedIds) {
+  return { id: entry.pattern.id, name: entry.pattern.name, gridData: entry.pattern.gridData, displaySize: entry.pattern.width, isSaved: true, isPublished: publishedIds.has(entry.pattern.id) };
 }
-function normalizeAll(p, currentUserId) {
-  return { id: p.id, name: p.name, gridData: p.gridData, displaySize: p.width, isSaved: p.userId !== currentUserId };
+function normalizeAll(p, currentUserId, publishedIds) {
+  return { id: p.id, name: p.name, gridData: p.gridData, displaySize: p.width, isSaved: p.userId !== currentUserId, isPublished: publishedIds.has(p.id) };
 }
 
 // --- Tarjeta de patrón (grid Pinterest) ---
@@ -45,6 +46,11 @@ const GridCard = memo(function GridCard({ pattern, onPress }) {
         ) : (
           <View style={styles.gridCardPlaceholder}>
             <Ionicons name="grid-outline" size={32} color={PURPLE} />
+          </View>
+        )}
+        {pattern.isPublished && (
+          <View style={styles.gridCardPublishedBadge}>
+            <Ionicons name="earth" size={12} color="white" />
           </View>
         )}
         {pattern.isSaved && (
@@ -74,25 +80,33 @@ export default function MisPatronesScreen({ navigation }) {
     setLoading(true);
     try {
       let normalized = [];
+
+      const [publishedResult, patternsResult] = await Promise.all([
+        PublicationUseCase.getMyPublishedPatternIds(),
+        activeFilter === 'mios'
+          ? PatternUseCase.listMine()
+          : activeFilter === 'guardados'
+          ? PatternLibraryUseCase.listSaved()
+          : PatternLibraryUseCase.listAll(),
+      ]);
+
+      if (patternsResult.sessionExpired) { setPatterns([]); return; }
+
+      const publishedIds = publishedResult.data ?? new Set();
+
       if (activeFilter === 'mios') {
-        const result = await PatternUseCase.listMine();
-        if (result.sessionExpired) { setPatterns([]); return; }
-        if (!result.success) { showError(result.error || 'No se pudieron cargar tus patrones'); return; }
-        normalized = (result.data || []).map(normalizeOwn);
+        if (!patternsResult.success) { showError(patternsResult.error || 'No se pudieron cargar tus patrones'); return; }
+        normalized = (patternsResult.data || []).map(p => normalizeOwn(p, publishedIds));
       } else if (activeFilter === 'guardados') {
-        const result = await PatternLibraryUseCase.listSaved();
-        if (result.sessionExpired) { setPatterns([]); return; }
-        if (!result.success) { showError(result.error || 'No se pudieron cargar los patrones guardados'); return; }
-        normalized = (result.data || []).map(normalizeSaved);
+        if (!patternsResult.success) { showError(patternsResult.error || 'No se pudieron cargar los patrones guardados'); return; }
+        normalized = (patternsResult.data || []).map(e => normalizeSaved(e, publishedIds));
       } else {
-        const result = await PatternLibraryUseCase.listAll();
-        if (result.sessionExpired) { setPatterns([]); return; }
-        if (!result.success) {
+        if (!patternsResult.success) {
           // Fallback a solo propios si listAll falla
           const mine = await PatternUseCase.listMine();
-          normalized = mine.success ? (mine.data || []).map(normalizeOwn) : [];
+          normalized = mine.success ? (mine.data || []).map(p => normalizeOwn(p, publishedIds)) : [];
         } else {
-          normalized = (result.data || []).map(p => normalizeAll(p, result.currentUserId));
+          normalized = (patternsResult.data || []).map(p => normalizeAll(p, patternsResult.currentUserId, publishedIds));
         }
       }
       setPatterns([...normalized].reverse());
@@ -355,6 +369,7 @@ export default function MisPatronesScreen({ navigation }) {
         activeItem="patterns"
         onPressPatterns={() => {}}
         onPressCommunity={() => navigation.navigate('Comunidad')}
+        onPressTutorials={() => navigation.navigate('Tutoriales')}
         onPressProfile={() => navigation.navigate('Perfil')}
         onPressCamera={() => navigation.navigate('GenerarPatron')}
       />

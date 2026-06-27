@@ -392,6 +392,7 @@ export default function PerfilScreen({ navigation }) {
         activeItem="profile"
         onPressPatterns={() => navigation.navigate('MisPatrones')}
         onPressCommunity={() => navigation.navigate('Comunidad')}
+        onPressTutorials={() => navigation.navigate('Tutoriales')}
         onPressProfile={() => undefined}
         onPressCamera={handleFab}
       />

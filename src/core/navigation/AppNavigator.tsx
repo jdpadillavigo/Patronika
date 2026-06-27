@@ -15,6 +15,8 @@ import TermsAndConditionsScreen from '../../pattern/presentation/screens/TermsAn
 import HomeScreen from '../../pattern/presentation/screens/HomeScreen.js';
 import PublicacionDetalleScreen from '../../pattern/presentation/screens/PublicacionDetalleScreen.js';
 import CrearPublicacionScreen from '../../pattern/presentation/screens/CrearPublicacionScreen.js';
+import TutorialesScreen from '../../pattern/presentation/screens/TutorialesScreen.js';
+import TutorialPlayerScreen from '../../pattern/presentation/screens/TutorialPlayerScreen.js';
 import GeneratePatternNavigator from './GeneratePatternNavigator';
 import type { RootStackParamList } from './types';
 
@@ -73,6 +75,8 @@ export default function AppNavigator() {
             <Stack.Screen name="Comunidad" component={HomeScreen} options={tabLikeScreenOptions} />
             <Stack.Screen name="PublicacionDetalle" component={PublicacionDetalleScreen} />
             <Stack.Screen name="CrearPublicacion" component={CrearPublicacionScreen} />
+            <Stack.Screen name="Tutoriales" component={TutorialesScreen} options={tabLikeScreenOptions} />
+            <Stack.Screen name="TutorialPlayer" component={TutorialPlayerScreen} />
         </Stack.Navigator>
     );
 }

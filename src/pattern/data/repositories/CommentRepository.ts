@@ -26,11 +26,16 @@ async function deleteComment(id: string): Promise<void> {
     return CommentRemoteDataSource.remove(id);
 }
 
+async function reportComment(id: string): Promise<void> {
+    return CommentRemoteDataSource.report(id);
+}
+
 const CommentRepository = {
     loadForPublication,
     addComment,
     editComment,
     deleteComment,
+    reportComment,
 };
 
 export default CommentRepository;

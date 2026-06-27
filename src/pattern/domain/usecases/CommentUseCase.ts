@@ -52,11 +52,24 @@ async function deleteComment(id: string) {
     }
 }
 
+// Reporta un comentario inapropiado
+async function reportComment(id: string) {
+    try {
+        await CommentRepository.reportComment(id);
+        return { success: true as const };
+    } catch (error: unknown) {
+        if (isSessionExpiredError(error)) return { success: false as const, sessionExpired: true };
+        const message = error instanceof Error ? error.message : 'Error al reportar comentario';
+        return { success: false as const, error: message };
+    }
+}
+
 const CommentUseCase = {
     loadForPublication,
     addComment,
     editComment,
     deleteComment,
+    reportComment,
 };
 
 export default CommentUseCase;

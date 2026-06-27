@@ -95,6 +95,10 @@ export default function CrearPublicacionScreen({ navigation }) {
   const handlePublish = async () => {
     if (!selectedPattern) { showError('Selecciona un patrón para publicar'); return; }
     if (!description.trim()) { showError('Escribe una descripción'); return; }
+    if (selectedPattern.isSavedPattern && !imageUri) {
+      showError('Debes agregar una foto de tu resultado para publicar un patrón de otro usuario');
+      return;
+    }
     setPublishing(true);
     const result = await PublicationUseCase.create(selectedPattern.id, description, technique, imageUri);
     setPublishing(false);
@@ -106,7 +110,8 @@ export default function CrearPublicacionScreen({ navigation }) {
     navigation.navigate('Comunidad');
   };
 
-  const canPublish = selectedPattern && description.trim().length > 0 && !publishing;
+  const isSavedPattern = selectedPattern?.isSavedPattern === true;
+  const canPublish = selectedPattern && description.trim().length > 0 && !publishing && (!isSavedPattern || imageUri);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -208,9 +213,16 @@ export default function CrearPublicacionScreen({ navigation }) {
             )}
           </View>
 
-          {/* Foto opcional */}
+          {/* Foto del resultado */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Foto del resultado (opcional)</Text>
+            <Text style={styles.sectionLabel}>
+              {isSavedPattern ? 'Foto de tu resultado *' : 'Foto del resultado (opcional)'}
+            </Text>
+            {isSavedPattern && !imageUri && (
+              <Text style={styles.savedPatternNote}>
+                Como es un patrón de otro usuario, debes mostrar tu propio resultado
+              </Text>
+            )}
             {imageUri ? (
               <View style={styles.selectedImageContainer}>
                 <Image source={{ uri: imageUri }} style={styles.selectedImage} resizeMode="cover" />
