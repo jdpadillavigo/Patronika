@@ -25,6 +25,10 @@ async function update(id: string, request: UserRequest): Promise<void> {
     await HttpClient.put<ApiResponse<string>>(`/api/users/${id}`, request as unknown as Record<string, unknown>);
 }
 
+async function remove(id: string, username: string): Promise<void> {
+    await HttpClient.delete<ApiResponse<string>>(`/api/users/${id}/${encodeURIComponent(username)}`);
+}
+
 // PUT /api/users/{id}/profile-image — sube la foto de perfil del usuario.
 // Usa multipart/form-data con la parte "file" conteniendo la imagen.
 // Tras llamar a esta función, loadById() devolverá el profileImageUrl actualizado.
@@ -45,6 +49,7 @@ const UserRemoteDataSource = {
     loadAll,
     loadById,
     update,
+    remove,
     uploadAvatar,
 };
 

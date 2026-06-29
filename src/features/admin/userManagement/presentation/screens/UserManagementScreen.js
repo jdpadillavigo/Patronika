@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,17 @@ import {
   ActivityIndicator,
   Image,
   TextInput,
+  Modal,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { AdminBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
-import { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
+import { AdminBottomNavigationItem } from '../../../../../core/domain/BottomNavigationItem';
+import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
-import ProfileUseCase from '../../../profile/domain/usecases/ProfileUseCase';
-import AdminBottomBar from '../../../../core/presentation/designsystem/components/AdminBottomBar';
+import ProfileUseCase from '../../../../profile/domain/usecases/ProfileUseCase';
+import AdminBottomBar from '../../../../../core/presentation/designsystem/components/AdminBottomBar';
+import UserPreviewModal from '../../../../../core/presentation/designsystem/components/UserPreviewModal';
  
 // Formatea la fecha de registro a un formato legible (DD/MM/AAAA)
 function formatFecha(fechaIso) {
@@ -31,9 +34,10 @@ function formatFecha(fechaIso) {
 }
  
 // Card individual de cada usuario en el listado
-function UserCard({ user, isMenuOpen, onToggleMenu, onCloseMenu }) {
+function UserCard({ user, isMenuOpen, onToggleMenu, onCloseMenu, onEdit, onToggleStatus, onDelete, onOpenUser }) {
   const isActive = user.status === 0; // status 0 = activo, otro valor = suspendido (igual que en PerfilScreen/User.ts)
-  const inicial = user.username?.charAt(0)?.toUpperCase() || '?';
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const showAvatar = !!user.profileImageUrl && !avatarFailed;
  
   if(isMenuOpen) {
     return (
@@ -42,39 +46,45 @@ function UserCard({ user, isMenuOpen, onToggleMenu, onCloseMenu }) {
           <Ionicons name="close" size={14} color="white" />
         </TouchableOpacity>
  
-        {/* Los 3 botones no ejecutan ninguna acción todavía (a propósito) */}
-        <View style={styles.overlayAction}>
+        {/* Acciones del usuario seleccionado */}
+        <TouchableOpacity style={styles.overlayAction} onPress={onEdit} activeOpacity={0.8}>
           <View style={styles.overlayIconCircle}>
             <Ionicons name="pencil-outline" size={20} color="white" />
           </View>
           <Text style={styles.overlayActionLabel}>Editar</Text>
-        </View>
+        </TouchableOpacity>
  
-        <View style={styles.overlayAction}>
+        <TouchableOpacity style={styles.overlayAction} onPress={onToggleStatus} activeOpacity={0.8}>
           <View style={styles.overlayIconCircle}>
-            <Ionicons name="happy-outline" size={20} color="white" />
+            <Ionicons name={isActive ? 'happy-outline' : 'sad-outline'} size={20} color="white" />
           </View>
           <Text style={styles.overlayActionLabel}>Estado: {isActive ? 'Activo' : 'Suspendido'}</Text>
-        </View>
+        </TouchableOpacity>
  
-        <View style={styles.overlayAction}>
+        <TouchableOpacity style={styles.overlayAction} onPress={onDelete} activeOpacity={0.8}>
           <View style={styles.overlayIconCircle}>
             <Ionicons name="trash-outline" size={20} color="white" />
           </View>
           <Text style={styles.overlayActionLabel}>Eliminar</Text>
-        </View>
+        </TouchableOpacity>
       </View>
   );
 }
 return (
     <View style={styles.userCard}>
-      {user.profileImageUrl ? (
-        <Image source={{ uri: user.profileImageUrl }} style={styles.avatarImage} />
-      ) : (
-        <View style={styles.avatarPlaceholder}>
-          <Ionicons name="person" size={26} color="#999" />
-        </View>
-      )}
+      <TouchableOpacity onPress={() => onOpenUser(user)} activeOpacity={0.78}>
+        {showAvatar ? (
+          <Image
+            source={{ uri: user.profileImageUrl }}
+            style={styles.avatarImage}
+            onError={() => setAvatarFailed(true)}
+          />
+        ) : (
+          <View style={styles.avatarPlaceholder}>
+            <Ionicons name="person" size={26} color={PURPLE} />
+          </View>
+        )}
+      </TouchableOpacity>
  
       <View style={styles.userInfo}>
         <View style={styles.userTopRow}>
@@ -108,14 +118,19 @@ export default function GestionUsuariosScreen({ navigation }) {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
   const [esAdmin, setEsAdmin] = useState(null); // null = aún verificando, true/false = resultado
   const [busqueda, setBusqueda] = useState('');
+  const [deleteCandidate, setDeleteCandidate] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [menuAbiertoId, setMenuAbiertoId] = useState(null); // id del usuario cuyo menú overlay está abierto
  
   // Verifica el rol del usuario actual antes de mostrar el listado (criterio de aceptación #3)
   const verificarAccesoYCargar = useCallback(async () => {
     setLoading(true);
     setError('');
+    setActionError('');
  
     const currentUser = await ProfileUseCase.getCurrent().catch(() => null);
     if (!currentUser?.isAdmin) {
@@ -136,9 +151,9 @@ export default function GestionUsuariosScreen({ navigation }) {
     setLoading(false);
   }, []);
  
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     verificarAccesoYCargar();
-  }, [verificarAccesoYCargar]);
+  }, [verificarAccesoYCargar]));
 
   const usuariosFiltrados = useMemo (() => {
     const query = busqueda.trim().toLowerCase();
@@ -147,6 +162,53 @@ export default function GestionUsuariosScreen({ navigation }) {
       u.username?.toLowerCase().includes(query) || u.email?.toLowerCase().includes(query)
     );
   }, [usuarios,busqueda] );
+
+  const updateUserInList = useCallback((updatedUser) => {
+    setUsuarios(current => current.map(user => (
+      (user.id || user.email) === (updatedUser.id || updatedUser.email) ? updatedUser : user
+    )));
+  }, []);
+
+  const handleEditUser = useCallback((user) => {
+    setMenuAbiertoId(null);
+    navigation.navigate('EditarUsuarioAdmin', { userId: user.id });
+  }, [navigation]);
+
+  const handleToggleStatus = useCallback(async (user) => {
+    setActionError('');
+    const nextStatus = user.status === 0 ? 1 : 0;
+    const result = await UserManagementUseCase.updateUserStatus(user, nextStatus);
+    if (!result.success) {
+      if (result.sessionExpired) return;
+      setActionError(result.error || 'No se pudo cambiar el estado del usuario');
+      return;
+    }
+    updateUserInList(result.data || { ...user, status: nextStatus });
+    setMenuAbiertoId(null);
+  }, [updateUserInList]);
+
+  const handleAskDelete = useCallback((user) => {
+    setActionError('');
+    setDeleteCandidate(user);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteCandidate) return;
+    setDeleteLoading(true);
+    setActionError('');
+    const result = await UserManagementUseCase.deleteUser(deleteCandidate);
+    setDeleteLoading(false);
+    if (!result.success) {
+      if (result.sessionExpired) return;
+      setActionError(result.error || 'No se pudo eliminar el usuario');
+      setDeleteCandidate(null);
+      return;
+    }
+
+    setUsuarios(current => current.filter(user => (user.id || user.email) !== (deleteCandidate.id || deleteCandidate.email)));
+    setMenuAbiertoId(null);
+    setDeleteCandidate(null);
+  }, [deleteCandidate]);
  
   // ── Acceso denegado (criterio de aceptación #3) ──────────────────────────
   if (esAdmin === false) {
@@ -172,9 +234,6 @@ export default function GestionUsuariosScreen({ navigation }) {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Patrónika</Text>
-          <TouchableOpacity>
-            <Text style={styles.filtrarText}>Filtrar</Text>
-          </TouchableOpacity>
         </View>
  
         <View style={styles.searchBar}>
@@ -215,6 +274,7 @@ export default function GestionUsuariosScreen({ navigation }) {
           <Text style={styles.resultsCount}>
             Mostrando {usuariosFiltrados.length} {usuariosFiltrados.length === 1 ? 'resultado' : 'resultados'}
           </Text>
+          {actionError ? <Text style={styles.actionErrorText}>{actionError}</Text> : null}
  
           {usuariosFiltrados.length === 0 ? (
             <View style={styles.centerState}>
@@ -231,6 +291,10 @@ export default function GestionUsuariosScreen({ navigation }) {
                   isMenuOpen={menuAbiertoId === (item.id || item.email)}
                   onToggleMenu={() => setMenuAbiertoId(item.id || item.email)}
                   onCloseMenu={() => setMenuAbiertoId(null)}
+                  onEdit={() => handleEditUser(item)}
+                  onToggleStatus={() => handleToggleStatus(item)}
+                  onDelete={() => handleAskDelete(item)}
+                  onOpenUser={setSelectedUser}
                 />
               )}
               contentContainerStyle={styles.listContent}
@@ -244,7 +308,47 @@ export default function GestionUsuariosScreen({ navigation }) {
         activeItem={AdminBottomNavigationItem.USERS}
         onPressUsers={() => {}}
         onPressCommunity={() => navigation.navigate('GestionComunidadAdmin')}
-        onPressProfile={() => navigation.navigate('Perfil')}
+        onPressProfile={() => navigation.navigate('Perfil', { isAdmin: true })}
+      />
+
+      <Modal
+        visible={!!deleteCandidate}
+        transparent
+        animationType="fade"
+        onRequestClose={() => !deleteLoading && setDeleteCandidate(null)}
+      >
+        <View style={styles.deleteModalOverlay}>
+          <View style={styles.deleteModalCard}>
+            <View style={styles.deleteModalIcon}>
+              <Ionicons name="trash-outline" size={30} color={PURPLE} />
+            </View>
+            <Text style={styles.deleteModalTitle}>¿Quieres eliminar este usuario?</Text>
+            <View style={styles.deleteModalActions}>
+              <TouchableOpacity
+                style={styles.deleteCancelButton}
+                onPress={() => setDeleteCandidate(null)}
+                disabled={deleteLoading}
+              >
+                <Text style={styles.deleteCancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteConfirmButton}
+                onPress={handleConfirmDelete}
+                disabled={deleteLoading}
+              >
+                <Text style={styles.deleteConfirmButtonText}>
+                  {deleteLoading ? 'Eliminando...' : 'Eliminar'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <UserPreviewModal
+        visible={!!selectedUser}
+        user={selectedUser}
+        onClose={() => setSelectedUser(null)}
       />
     </View>
   );

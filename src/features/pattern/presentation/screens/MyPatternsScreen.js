@@ -358,7 +358,7 @@ export default function MisPatronesScreen({ navigation }) {
         activeItem={UserBottomNavigationItem.PATTERNS}
         onPressPatterns={() => {}}
         onPressCommunity={() => navigation.navigate('Comunidad')}
-        onPressProfile={() => navigation.navigate('Perfil')}
+        onPressProfile={() => navigation.navigate('Perfil', { isAdmin: false })}
         onPressCamera={() => navigation.navigate('GenerarPatron')}
       />
       {errorPopup}

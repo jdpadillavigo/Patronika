@@ -87,11 +87,35 @@ async function getAllUsers(): Promise<User[]> {
     return users.map(user => createUser(user));
 }
 
+async function getUserById(id: string): Promise<User> {
+    return createUser(await UserRemoteDataSource.loadById(id));
+}
+
+async function updateUser(user: User): Promise<User> {
+    if (!user.id) {
+        throw new Error('Usuario no encontrado');
+    }
+
+    await UserRemoteDataSource.update(user.id, toUserRequest(user));
+    return createUser(await UserRemoteDataSource.loadById(user.id));
+}
+
+async function deleteUser(user: User): Promise<void> {
+    if (!user.id) {
+        throw new Error('Usuario no encontrado');
+    }
+
+    await UserRemoteDataSource.remove(user.id, user.username);
+}
+
 const UserRepository = {
     getCurrent,
     updateProfile,
     changePassword,
     getAllUsers,
+    getUserById,
+    updateUser,
+    deleteUser,
 };
 
 export default UserRepository;

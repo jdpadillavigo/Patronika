@@ -22,6 +22,11 @@ export const perfilStyles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
+  profileLoadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   scrollContent: {
     paddingHorizontal: 28,
     paddingTop: 36,

@@ -16,14 +16,13 @@ const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Ot
 // Muestra la foto de perfil del autor si está disponible (profileImageUrl del backend).
 // Si no tiene foto, muestra un círculo con la inicial del nombre.
 function AvatarCircle({ username, imageUrl }) {
-  if (imageUrl) {
-    return <Image source={{ uri: imageUrl }} style={styles.cardAvatarImage} />;
+  const [imageFailed, setImageFailed] = useState(false);
+  if (imageUrl && !imageFailed) {
+    return <Image source={{ uri: imageUrl }} style={styles.cardAvatarImage} onError={() => setImageFailed(true)} />;
   }
   return (
     <View style={styles.cardAvatar}>
-      <Text style={styles.cardAvatarText}>
-        {(username || '?')[0].toUpperCase()}
-      </Text>
+      <Ionicons name="person" size={13} color="white" />
     </View>
   );
 }
@@ -147,7 +146,7 @@ export default function HomeScreen({ navigation }) {
         activeItem={UserBottomNavigationItem.COMMUNITY}
         onPressPatterns={() => navigation.navigate('MisPatrones')}
         onPressCommunity={() => undefined}
-        onPressProfile={() => navigation.navigate('Perfil')}
+        onPressProfile={() => navigation.navigate('Perfil', { isAdmin: false })}
         onPressCamera={() => navigation.navigate('GenerarPatron')}
       />
     </View>

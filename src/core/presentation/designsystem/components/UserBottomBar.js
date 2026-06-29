@@ -38,12 +38,12 @@ export default function UserBottomBar({
       <View style={styles.navBar}>
 
         <TouchableOpacity style={styles.navItem} onPress={onPressPatterns} activeOpacity={0.75}>
-          <Ionicons name="grid-outline" size={23} color={isPatternsActive ? PURPLE : '#AAA'} />
+          <Ionicons name={isPatternsActive ? 'grid' : 'grid-outline'} size={23} color={isPatternsActive ? PURPLE : '#AAA'} />
           <Text style={[styles.navLabel, isPatternsActive && styles.navLabelActive]}>Patrones</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={onPressCommunity} activeOpacity={0.75}>
-          <Ionicons name="people-outline" size={23} color={isCommunityActive ? PURPLE : '#AAA'} />
+          <Ionicons name={isCommunityActive ? 'people' : 'people-outline'} size={23} color={isCommunityActive ? PURPLE : '#AAA'} />
           <Text style={[styles.navLabel, isCommunityActive && styles.navLabelActive]}>Comunidad</Text>
         </TouchableOpacity>
 
@@ -51,7 +51,7 @@ export default function UserBottomBar({
         <View style={{ flex: 1 }} />
 
         <TouchableOpacity style={styles.navItem} onPress={onPressProfile} activeOpacity={0.75}>
-          <Ionicons name="person-outline" size={23} color={isProfileActive ? PURPLE : '#AAA'} />
+          <Ionicons name={isProfileActive ? 'person' : 'person-outline'} size={23} color={isProfileActive ? PURPLE : '#AAA'} />
           <Text style={[styles.navLabel, isProfileActive && styles.navLabelActive]}>Mi perfil</Text>
         </TouchableOpacity>
 

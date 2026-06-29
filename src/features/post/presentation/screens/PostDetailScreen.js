@@ -24,12 +24,13 @@ function formatDate(dateStr) {
 }
 
 function CommentAvatar({ initial, imageUrl }) {
-  if (imageUrl) {
-    return <Image source={{ uri: imageUrl }} style={styles.commentAvatarImage} />;
+  const [imageFailed, setImageFailed] = useState(false);
+  if (imageUrl && !imageFailed) {
+    return <Image source={{ uri: imageUrl }} style={styles.commentAvatarImage} onError={() => setImageFailed(true)} />;
   }
   return (
     <View style={styles.commentAvatar}>
-      <Text style={styles.commentAvatarText}>{(initial || '?').toUpperCase()}</Text>
+      <Ionicons name="person" size={16} color="white" />
     </View>
   );
 }
@@ -51,6 +52,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
   const [isSaved, setIsSaved] = useState(false);
   const [savingPattern, setSavingPattern] = useState(false);
   const [userMap, setUserMap] = useState({});
+  const [authorAvatarFailed, setAuthorAvatarFailed] = useState(false);
   const inputRef = useRef(null);
   const { showConfirm, errorPopup } = useErrorPopup();
 
@@ -254,11 +256,15 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
 
           <View style={styles.body}>
             <View style={styles.authorRow}>
-              {pub?.user?.profileImageUrl ? (
-                <Image source={{ uri: pub.user.profileImageUrl }} style={styles.avatarImage} />
+              {pub?.user?.profileImageUrl && !authorAvatarFailed ? (
+                <Image
+                  source={{ uri: pub.user.profileImageUrl }}
+                  style={styles.avatarImage}
+                  onError={() => setAuthorAvatarFailed(true)}
+                />
               ) : (
                 <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{(pub?.user?.username || '?')[0].toUpperCase()}</Text>
+                  <Ionicons name="person" size={20} color="white" />
                 </View>
               )}
               <View style={styles.authorInfo}>
@@ -287,7 +293,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
             {loadingComments ? (
               <ActivityIndicator color={PURPLE} style={{ marginVertical: 16 }} />
             ) : comments.length === 0 ? (
-              <Text style={styles.noComments}>Sé el primero en comentar</Text>
+              <Text style={styles.noComments}>¡Sé el primero en comentar!</Text>
             ) : (
               comments.map(comment => {
                 const commentUser = userMap[comment.userId];

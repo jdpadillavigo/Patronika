@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -18,9 +19,13 @@ import SessionUseCase from '../../../auth/login/domain/usecases/SessionUseCase';
 import { isSessionExpiredError } from '../../../../core/data/network/HttpClientExt';
 import AdminBottomBar from '../../../../core/presentation/designsystem/components/AdminBottomBar';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
+import UserPreviewModal from '../../../../core/presentation/designsystem/components/UserPreviewModal';
 
-export default function PerfilScreen({ navigation }) {
+export default function PerfilScreen({ navigation, route }) {
   const [usuario, setUsuario] = useState(null);
+  const [loadingUsuario, setLoadingUsuario] = useState(true);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const [previewVisible, setPreviewVisible] = useState(false);
 
   // Edición de datos
   const [editando, setEditando] = useState(false);
@@ -49,11 +54,15 @@ export default function PerfilScreen({ navigation }) {
         setUsuario(u);
         setNuevoNombre(u?.username ?? '');
         setNuevaFoto(u?.avatar ?? null);
+        setAvatarFailed(false);
       })
       .catch(error => {
         if (!isSessionExpiredError(error)) {
           setErrorPerfil(error.message);
         }
+      })
+      .finally(() => {
+        setLoadingUsuario(false);
       });
   }, []);
 
@@ -67,6 +76,7 @@ export default function PerfilScreen({ navigation }) {
       quality: 0.8,
     });
     if (!result.canceled) setNuevaFoto(result.assets[0].uri);
+    setAvatarFailed(false);
   };
 
   const handleGuardarPerfil = async () => {
@@ -84,6 +94,7 @@ export default function PerfilScreen({ navigation }) {
         return;
       }
       setUsuario(result.data);
+      setAvatarFailed(false);
       setEditando(false);
     } catch (e) {
       setErrorPerfil(e.message);
@@ -153,6 +164,8 @@ export default function PerfilScreen({ navigation }) {
   };
 
   const fotoActual = editando ? nuevaFoto : usuario?.avatar;
+  const bottomBarIsAdmin = usuario?.isAdmin ?? route?.params?.isAdmin;
+  const showProfilePhoto = !!fotoActual && !avatarFailed;
 
   return (
     <View style={styles.safeArea}>
@@ -161,17 +174,25 @@ export default function PerfilScreen({ navigation }) {
         <Text style={styles.headerTitle}>Patrónika</Text>
       </View>
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-      >
+      {loadingUsuario && !usuario ? (
+        <View style={styles.profileLoadingContainer}>
+          <ActivityIndicator size="large" color={PURPLE} />
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+        >
 
         {/* AVATAR */}
         <View style={styles.avatarSection}>
-          <TouchableOpacity onPress={editando ? handlePickFoto : undefined} activeOpacity={editando ? 0.7 : 1}>
+          <TouchableOpacity
+            onPress={editando ? handlePickFoto : () => usuario && setPreviewVisible(true)}
+            activeOpacity={0.7}
+          >
             <View style={styles.avatarFrame}>
-              {fotoActual
-                ? <Image source={{ uri: fotoActual }} style={styles.avatarImage} />
+              {showProfilePhoto
+                ? <Image source={{ uri: fotoActual }} style={styles.avatarImage} onError={() => setAvatarFailed(true)} />
                 : <Ionicons name="person" size={56} color={PURPLE} />
               }
             </View>
@@ -384,16 +405,17 @@ export default function PerfilScreen({ navigation }) {
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
 
-      </ScrollView>
+        </ScrollView>
+      )}
 
-      {usuario?.isAdmin ? (
+      {bottomBarIsAdmin === true ? (
         <AdminBottomBar
           activeItem={AdminBottomNavigationItem.PROFILE}
           onPressUsers={() => navigation.navigate('GestionUsuarios')}
           onPressCommunity={() => navigation.navigate('GestionComunidadAdmin')}
           onPressProfile={() => undefined}
         />
-      ) : usuario ? (
+      ) : bottomBarIsAdmin === false ? (
         <UserBottomBar
           activeItem={UserBottomNavigationItem.PROFILE}
           onPressPatterns={() => navigation.navigate('MisPatrones')}
@@ -444,6 +466,12 @@ export default function PerfilScreen({ navigation }) {
           </View>
         </View>
       </Modal>
+
+      <UserPreviewModal
+        visible={previewVisible}
+        user={usuario}
+        onClose={() => setPreviewVisible(false)}
+      />
 
     </View>
   );

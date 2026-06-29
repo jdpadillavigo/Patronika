@@ -1,5 +1,5 @@
 import { StyleSheet, Platform } from 'react-native';
-import { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
+import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
  
 export const gestionUsuariosStyles = StyleSheet.create({
   safeArea: {
@@ -23,11 +23,6 @@ export const gestionUsuariosStyles = StyleSheet.create({
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  filtrarText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
   },
  
 // Barra de búsqueda dentro del header morado
@@ -54,6 +49,13 @@ export const gestionUsuariosStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 4,
+  },
+  actionErrorText: {
+    color: '#C0392B',
+    fontSize: 13,
+    fontWeight: '600',
+    paddingHorizontal: 16,
+    paddingBottom: 6,
   },
  
   // Lista
@@ -239,5 +241,189 @@ export const gestionUsuariosStyles = StyleSheet.create({
     fontSize: 14,
     color: '#888',
     textAlign: 'center',
+  },
+  deleteModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 34,
+  },
+  deleteModalCard: {
+    width: '100%',
+    backgroundColor: 'white',
+    borderRadius: 18,
+    padding: 26,
+    alignItems: 'center',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+  },
+  deleteModalIcon: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    borderWidth: 2,
+    borderColor: PURPLE,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  deleteModalTitle: {
+    color: '#1A1A1A',
+    fontSize: 18,
+    fontWeight: '800',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  deleteModalActions: {
+    width: '100%',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  deleteCancelButton: {
+    flex: 1,
+    backgroundColor: PURPLE,
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  deleteCancelButtonText: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  deleteConfirmButton: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderWidth: 1.5,
+    borderColor: PURPLE,
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  deleteConfirmButtonText: {
+    color: PURPLE,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  editSafeArea: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  editContent: {
+    flex: 1,
+    paddingHorizontal: 52,
+    paddingTop: 18,
+  },
+  editBackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginLeft: -10,
+    marginBottom: 26,
+  },
+  editBackText: {
+    color: PURPLE,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  editTitle: {
+    color: '#262626',
+    fontSize: 30,
+    fontWeight: '800',
+    marginBottom: 28,
+  },
+  editFieldGroup: {
+    marginBottom: 26,
+  },
+  editLabel: {
+    alignSelf: 'flex-start',
+    color: '#111',
+    fontSize: 15,
+    fontWeight: '800',
+    paddingBottom: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: PURPLE,
+    marginBottom: 12,
+  },
+  editInput: {
+    borderWidth: 1,
+    borderColor: PURPLE,
+    borderRadius: 7,
+    minHeight: 46,
+    paddingHorizontal: 14,
+    color: '#333',
+    fontSize: 15,
+  },
+  editSelectButton: {
+    borderWidth: 1,
+    borderColor: PURPLE,
+    borderRadius: 7,
+    minHeight: 46,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  editSelectText: {
+    color: '#333',
+    fontSize: 15,
+  },
+  editSaveButton: {
+    backgroundColor: PURPLE,
+    borderRadius: 7,
+    minHeight: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 34,
+  },
+  editSaveButtonDisabled: {
+    opacity: 0.65,
+  },
+  editSaveButtonText: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  editErrorText: {
+    color: '#C0392B',
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 18,
+  },
+  editLoadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    justifyContent: 'center',
+    paddingHorizontal: 52,
+  },
+  statusModalCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#EFEFEF',
+  },
+  statusOption: {
+    paddingHorizontal: 18,
+    paddingVertical: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  statusOptionText: {
+    color: '#333',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

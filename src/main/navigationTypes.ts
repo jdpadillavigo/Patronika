@@ -14,9 +14,18 @@ export type RootStackParamList = {
         tamano?: number;
         pattern?: unknown;
     };
-    Perfil: undefined;
+    Perfil: {
+        isAdmin?: boolean;
+    } | undefined;
     GestionUsuarios: undefined;
+    EditarUsuarioAdmin: {
+        userId: string | null;
+    };
     GestionComunidadAdmin: undefined;
+    ReportarEliminarPatronAdmin: {
+        publicationId: string;
+        publicationName?: string;
+    };
     OlvidasteContrasena: undefined;
     VerificarCorreo: {
         mode?: 'register' | 'recovery';

@@ -6,8 +6,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginScreen from '../features/auth/login/presentation/screens/LoginScreen.js';
 import RegisterScreen from '../features/auth/register/presentation/screens/RegisterScreen.js';
 import VerifyEmailScreen from '../features/auth/verification/presentation/screens/VerifyEmailScreen.js';
-import AdminCommunityManagementScreen from '../features/admin/presentation/screens/AdminCommunityManagementScreen.js';
-import UserManagementScreen from '../features/admin/presentation/screens/UserManagementScreen.js';
+import AdminCommunityManagementScreen from '../features/admin/communityManagement/presentation/screens/AdminCommunityManagementScreen.js';
+import ReportDeletePatternScreen from '../features/admin/communityManagement/presentation/screens/ReportDeletePatternScreen.js';
+import EditUserScreen from '../features/admin/userManagement/presentation/screens/EditUserScreen.js';
+import UserManagementScreen from '../features/admin/userManagement/presentation/screens/UserManagementScreen.js';
 import HomeScreen from '../features/home/presentation/screens/HomeScreen.js';
 import OnboardingScreen from '../features/onboarding/presentation/screens/OnboardingScreen';
 import MyPatternsScreen from '../features/pattern/presentation/screens/MyPatternsScreen.js';
@@ -69,7 +71,9 @@ export default function NavigationRoot() {
             <Stack.Screen name="GenerarPatron" component={GeneratePatternNavigator} options={bottomSheetScreenOptions} />
             <Stack.Screen name="Perfil" component={ProfileScreen} options={tabLikeScreenOptions} />
             <Stack.Screen name="GestionUsuarios" component={UserManagementScreen} options={tabLikeScreenOptions}/>
+            <Stack.Screen name="EditarUsuarioAdmin" component={EditUserScreen} />
             <Stack.Screen name="GestionComunidadAdmin" component={AdminCommunityManagementScreen} options={tabLikeScreenOptions}/>
+            <Stack.Screen name="ReportarEliminarPatronAdmin" component={ReportDeletePatternScreen} />
             <Stack.Screen name="OlvidasteContrasena" component={ForgotPasswordScreen} />
             <Stack.Screen name="VerificarCorreo" component={VerifyEmailScreen} />
             <Stack.Screen name="RestablecerContrasena" component={ResetPasswordScreen} />
