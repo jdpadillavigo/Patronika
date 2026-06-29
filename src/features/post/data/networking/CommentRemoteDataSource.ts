@@ -9,6 +9,7 @@ export interface Comment {
     userId: string;
     publicationId: string;
     content: string;
+    reportCount: number;
     createdAt: string;
     updatedAt?: string | null;
 }
@@ -41,11 +42,17 @@ async function remove(id: string): Promise<void> {
     await HttpClient.delete<ApiResponse<string>>(`/api/comments/${id}`);
 }
 
+// POST /api/comments/{id}/report — incrementa el contador de reportes
+async function report(id: string): Promise<void> {
+    await HttpClient.post<ApiResponse<string>>(`/api/comments/${id}/report`, {});
+}
+
 const CommentRemoteDataSource = {
     loadAll,
     create,
     update,
     remove,
+    report,
 };
 
 export default CommentRemoteDataSource;

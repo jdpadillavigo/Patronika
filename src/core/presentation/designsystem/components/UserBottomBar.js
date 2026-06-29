@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -8,24 +7,26 @@ import { PURPLE, bottomNavigationStyles as styles } from './BottomNavigationStyl
 const FAB_SIZE = 58;
 
 export default function UserBottomBar({
-  activeItem,       
+  activeItem,
   onPressPatterns,   // navega a MisPatrones
   onPressCommunity,  // navega a Comunidad
+  onPressTutorials,  // navega a Tutoriales
   onPressProfile,    // navega a Perfil
   onPressCamera,     // navega a GenerarPatron (acción central del app)
 }) {
   const { width } = useWindowDimensions();
   const isPatternsActive = activeItem === UserBottomNavigationItem.PATTERNS;
   const isCommunityActive = activeItem === UserBottomNavigationItem.COMMUNITY;
+  const isTutorialsActive = activeItem === UserBottomNavigationItem.TUTORIALS;
   const isProfileActive = activeItem === UserBottomNavigationItem.PROFILE;
 
-  // Centro del 3er slot en un layout de 4 slots iguales = 5/8 del ancho total
-  const fabLeft = (width * 5) / 8 - FAB_SIZE / 2;
+  // 5 slots iguales: Patrones | Comunidad | [FAB centro] | Tutoriales | Perfil
+  // Centro del slot 3 (índice 2) = (2 + 0.5) / 5 * width = width / 2
+  const fabLeft = width / 2 - FAB_SIZE / 2;
 
   return (
     <View style={styles.wrapper}>
-
-      {/* FAB elevado — posicionado absolutamente sobre el 3er slot */}
+      {/* FAB elevado */}
       <TouchableOpacity
         onPress={onPressCamera}
         activeOpacity={0.85}
@@ -34,9 +35,8 @@ export default function UserBottomBar({
         <MaterialCommunityIcons name="camera-plus" size={28} color="white" />
       </TouchableOpacity>
 
-      {/* Barra de navegación: 4 slots de igual flex */}
+      {/* Barra de navegación: 5 slots */}
       <View style={styles.navBar}>
-
         <TouchableOpacity style={styles.navItem} onPress={onPressPatterns} activeOpacity={0.75}>
           <Ionicons name={isPatternsActive ? 'grid' : 'grid-outline'} size={23} color={isPatternsActive ? PURPLE : '#AAA'} />
           <Text style={[styles.navLabel, isPatternsActive && styles.navLabelActive]}>Patrones</Text>
@@ -47,14 +47,18 @@ export default function UserBottomBar({
           <Text style={[styles.navLabel, isCommunityActive && styles.navLabelActive]}>Comunidad</Text>
         </TouchableOpacity>
 
-        {/* Slot vacío del mismo tamaño que los otros — el FAB flota encima */}
+        {/* Slot vacío para el FAB */}
         <View style={{ flex: 1 }} />
+
+        <TouchableOpacity style={styles.navItem} onPress={onPressTutorials} activeOpacity={0.75}>
+          <Ionicons name={isTutorialsActive ? 'book' : 'book-outline'} size={23} color={isTutorialsActive ? PURPLE : '#AAA'} />
+          <Text style={[styles.navLabel, isTutorialsActive && styles.navLabelActive]}>Tutoriales</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={onPressProfile} activeOpacity={0.75}>
           <Ionicons name={isProfileActive ? 'person' : 'person-outline'} size={23} color={isProfileActive ? PURPLE : '#AAA'} />
           <Text style={[styles.navLabel, isProfileActive && styles.navLabelActive]}>Mi perfil</Text>
         </TouchableOpacity>
-
       </View>
     </View>
   );

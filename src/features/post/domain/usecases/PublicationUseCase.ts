@@ -41,10 +41,22 @@ async function remove(id: string) {
     }
 }
 
+// Obtiene los ids de patrones que el usuario publicó en comunidad
+async function getMyPublishedPatternIds() {
+    try {
+        const ids = await PublicationRepository.getMyPublishedPatternIds();
+        return { success: true as const, data: ids };
+    } catch (error: unknown) {
+        if (isSessionExpiredError(error)) return { success: false as const, sessionExpired: true, data: new Set<string>() };
+        return { success: false as const, data: new Set<string>() };
+    }
+}
+
 const PublicationUseCase = {
     loadFeed,
     create,
     remove,
+    getMyPublishedPatternIds,
 };
 
 export default PublicationUseCase;

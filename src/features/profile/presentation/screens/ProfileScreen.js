@@ -440,6 +440,7 @@ export default function PerfilScreen({ navigation, route }) {
           activeItem={UserBottomNavigationItem.PROFILE}
           onPressPatterns={() => navigation.navigate('MisPatrones')}
           onPressCommunity={() => navigation.navigate('Comunidad')}
+          onPressTutorials={() => navigation.navigate('Tutoriales')}
           onPressProfile={() => undefined}
           onPressCamera={handleFab}
         />
@@ -495,5 +496,6 @@ export default function PerfilScreen({ navigation, route }) {
 
     </View>
   );
+  
 }
 

@@ -26,10 +26,28 @@ async function remove(id: string): Promise<void> {
     return PublicationRemoteDataSource.remove(id);
 }
 
+// Retorna los ids de patrones que el usuario publicó en comunidad
+async function getMyPublishedPatternIds(): Promise<Set<string>> {
+    const currentUser = await HttpClient.getCurrentUser<User>();
+    if (!currentUser?.id) return new Set();
+
+    const publications = await PublicationRemoteDataSource.loadAll();
+    const myPatternIds = new Set<string>();
+
+    for (const pub of publications) {
+        if (pub.user?.id === currentUser.id && pub.patternId) {
+            myPatternIds.add(pub.patternId);
+        }
+    }
+
+    return myPatternIds;
+}
+
 const PublicationRepository = {
     loadFeed,
     create,
     remove,
+    getMyPublishedPatternIds,
 };
 
 export default PublicationRepository;

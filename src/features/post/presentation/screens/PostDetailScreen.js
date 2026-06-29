@@ -3,8 +3,10 @@ import {
   View, Text, ScrollView, TouchableOpacity, Image,
   TextInput, ActivityIndicator,
   KeyboardAvoidingView, Platform, Modal,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { detalleStyles as styles, PURPLE } from '../styles/PostDetailStyles';
 import CommentUseCase from '../../domain/usecases/CommentUseCase';
 import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
@@ -53,6 +55,20 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
   const [savingPattern, setSavingPattern] = useState(false);
   const [userMap, setUserMap] = useState({});
   const [authorAvatarFailed, setAuthorAvatarFailed] = useState(false);
+  const [reportedComments, setReportedComments] = useState(new Set());
+
+  // Clave de AsyncStorage por usuario para persistir los comentarios reportados
+  const getReportKey = useCallback((userId) => `@patronika_reported_comments_${userId}`, []);
+
+  useEffect(() => {
+    async function loadReported() {
+      const user = await HttpClient.getCurrentUser();
+      if (!user?.id) return;
+      const stored = await AsyncStorage.getItem(getReportKey(user.id));
+      if (stored) setReportedComments(new Set(JSON.parse(stored)));
+    }
+    loadReported();
+  }, [getReportKey]);
   const inputRef = useRef(null);
   const { showConfirm, errorPopup } = useErrorPopup();
 
@@ -193,6 +209,31 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
     setCommentText('');
   };
 
+  const handleReportComment = (commentId) => {
+    Alert.alert(
+      'Reportar comentario',
+      '¿Quieres reportar este comentario como inapropiado?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Reportar',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await CommentUseCase.reportComment(commentId);
+            if (result.success) {
+              const user = await HttpClient.getCurrentUser();
+              const updated = new Set([...reportedComments, commentId]);
+              setReportedComments(updated);
+              if (user?.id) {
+                await AsyncStorage.setItem(getReportKey(user.id), JSON.stringify([...updated]));
+              }
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const patternName = fetchedPattern?.name || pub?.pattern?.name || null;
 
   return (
@@ -308,7 +349,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
                     <View style={styles.commentHeader}>
                       <CommentAvatar initial={displayUsername[0]} imageUrl={displayAvatar} />
                       <Text style={styles.commentAuthor}>@{displayUsername}</Text>
-                      {isOwnComment && (
+                      {isOwnComment ? (
                         <View style={styles.commentActions}>
                           <TouchableOpacity style={styles.commentActionBtn} onPress={() => handleEditComment(comment)}>
                             <Ionicons name="pencil-outline" size={14} color="#888" />
@@ -317,6 +358,18 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
                             <Ionicons name="trash-outline" size={14} color="#E53935" />
                           </TouchableOpacity>
                         </View>
+                      ) : (
+                        <TouchableOpacity
+                          style={styles.commentActionBtn}
+                          onPress={() => handleReportComment(comment.id)}
+                          disabled={reportedComments.has(comment.id)}
+                        >
+                          <Ionicons
+                            name={reportedComments.has(comment.id) ? 'flag' : 'flag-outline'}
+                            size={14}
+                            color={reportedComments.has(comment.id) ? '#E53935' : '#BBB'}
+                          />
+                        </TouchableOpacity>
                       )}
                     </View>
                     <Text style={styles.commentContent}>{comment.content}</Text>

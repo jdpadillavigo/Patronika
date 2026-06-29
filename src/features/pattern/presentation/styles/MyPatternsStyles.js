@@ -135,6 +135,17 @@ export const misPatronesStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  gridCardPublishedBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: PURPLE,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   gridCardFooter: {
     paddingHorizontal: 8,
     paddingVertical: 7,

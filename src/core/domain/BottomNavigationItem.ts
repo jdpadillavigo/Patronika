@@ -1,6 +1,7 @@
 export const UserBottomNavigationItem = Object.freeze({
     PATTERNS: 'patterns',
     COMMUNITY: 'community',
+    TUTORIALS: 'tutorials',
     PROFILE: 'profile',
 } as const);
 

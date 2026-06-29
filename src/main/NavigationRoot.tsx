@@ -14,6 +14,8 @@ import UserManagementScreen from '../features/admin/userManagement/presentation/
 import HomeScreen from '../features/home/presentation/screens/HomeScreen.js';
 import OnboardingScreen from '../features/onboarding/presentation/screens/OnboardingScreen';
 import MyPatternsScreen from '../features/pattern/presentation/screens/MyPatternsScreen.js';
+import TutorialPlayerScreen from '../features/tutorial/presentation/screens/TutorialPlayerScreen.js';
+import TutorialesScreen from '../features/tutorial/presentation/screens/TutorialesScreen.js';
 import CreatePostScreen from '../features/post/presentation/screens/CreatePostScreen.js';
 import PostDetailScreen from '../features/post/presentation/screens/PostDetailScreen.js';
 import ProfileScreen from '../features/profile/presentation/screens/ProfileScreen.js';
@@ -83,6 +85,8 @@ export default function NavigationRoot() {
             <Stack.Screen name="Comunidad" component={HomeScreen} options={tabLikeScreenOptions} />
             <Stack.Screen name="PublicacionDetalle" component={PostDetailScreen} />
             <Stack.Screen name="CrearPublicacion" component={CreatePostScreen} />
+            <Stack.Screen name="Tutoriales" component={TutorialesScreen} options={tabLikeScreenOptions} />
+            <Stack.Screen name="TutorialPlayer" component={TutorialPlayerScreen} />
         </Stack.Navigator>
     );
 }

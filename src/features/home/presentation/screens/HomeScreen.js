@@ -8,6 +8,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { homeStyles as styles, PURPLE } from '../styles/HomeStyles';
 import { UserBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
 import PublicationUseCase from '../../../post/domain/usecases/PublicationUseCase';
+import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
 
@@ -29,7 +30,7 @@ function AvatarCircle({ username, imageUrl }) {
 
 function PublicationCard({ pub, onPress, tall }) {
   const imageUri = pub.imageUrl
-    || (pub.pattern?.gridData ? gridDataToImageUri(pub.pattern.gridData, { maxDimension: 300 }) : null);
+    || (pub.patternGridData ? gridDataToImageUri(pub.patternGridData, { maxDimension: 300 }) : null);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.88}>
@@ -68,7 +69,27 @@ export default function HomeScreen({ navigation }) {
   const loadFeed = useCallback(async (isRefresh = false) => {
     if (!isRefresh) setLoading(true);
     const result = await PublicationUseCase.loadFeed();
-    if (result.success) setPublications(result.data);
+    if (result.success) {
+      const pubs = result.data;
+
+      // Para publicaciones sin foto de resultado, cargar el gridData del patrón
+      const uniquePatternIds = [...new Set(
+        pubs.filter(p => !p.imageUrl && p.patternId).map(p => p.patternId)
+      )];
+
+      const patternGridMap = {};
+      await Promise.all(uniquePatternIds.map(async (id) => {
+        const res = await PatternUseCase.getById(id);
+        if (res.success && res.data?.gridData) {
+          patternGridMap[id] = res.data.gridData;
+        }
+      }));
+
+      setPublications(pubs.map(pub => ({
+        ...pub,
+        patternGridData: patternGridMap[pub.patternId] || null,
+      })));
+    }
     setLoading(false);
     setRefreshing(false);
   }, []);
@@ -147,6 +168,7 @@ export default function HomeScreen({ navigation }) {
         activeItem={UserBottomNavigationItem.COMMUNITY}
         onPressPatterns={() => navigation.navigate('MisPatrones')}
         onPressCommunity={() => undefined}
+        onPressTutorials={() => navigation.navigate('Tutoriales')}
         onPressProfile={() => navigation.navigate('Perfil', { isAdmin: false })}
         onPressCamera={() => navigation.navigate('GenerarPatron')}
       />

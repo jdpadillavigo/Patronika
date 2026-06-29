@@ -47,4 +47,13 @@ export type RootStackParamList = {
         publication?: unknown;
     };
     CrearPublicacion: undefined;
+    Tutoriales: undefined;
+    TutorialPlayer: {
+        tutorial: {
+            id: string;
+            title: string;
+            description: string;
+            url: string;
+        };
+    };
 };

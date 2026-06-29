@@ -21,7 +21,8 @@ export interface PublicationPattern {
 export interface Publication {
     id: string;
     user: PublicationUser;
-    pattern: PublicationPattern;
+    patternId: string;
+    pattern?: PublicationPattern | null;
     description: string;
     technique: number; // 0=Crochet, 1=Tejido a dos agujas, 2=Bordado, 3=Macramé, 4=Otros
     imageUrl?: string | null; // foto opcional subida por el usuario
