@@ -433,6 +433,7 @@ export default function PerfilScreen({ navigation, route }) {
           activeItem={AdminBottomNavigationItem.PROFILE}
           onPressUsers={() => navigation.navigate('GestionUsuarios')}
           onPressCommunity={() => navigation.navigate('GestionComunidadAdmin')}
+          onPressTutorials={() => navigation.navigate('GestionTutorialesAdmin')}
           onPressProfile={() => undefined}
         />
       ) : bottomBarIsAdmin === false ? (

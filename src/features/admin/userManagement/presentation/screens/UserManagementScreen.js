@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { AdminBottomNavigationItem } from '../../../../../core/domain/BottomNavigationItem';
 import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
+import FloatingIconButton from '../../../../../core/presentation/designsystem/components/FloatingIconButton';
 import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
 import ProfileUseCase from '../../../../profile/domain/usecases/ProfileUseCase';
@@ -375,17 +376,15 @@ export default function GestionUsuariosScreen({ navigation }) {
         activeItem={AdminBottomNavigationItem.USERS}
         onPressUsers={() => {}}
         onPressCommunity={() => navigation.navigate('GestionComunidadAdmin')}
+        onPressTutorials={() => navigation.navigate('GestionTutorialesAdmin')}
         onPressProfile={() => navigation.navigate('Perfil', { isAdmin: true })}
       />
 
       {!loading && !error && esAdmin === true ? (
-        <TouchableOpacity
-          style={styles.addUserFab}
+        <FloatingIconButton
+          label="Agregar usuario"
           onPress={() => navigation.navigate('AgregarUsuarioAdmin')}
-          activeOpacity={0.82}
-        >
-          <Ionicons name="add" size={30} color="white" />
-        </TouchableOpacity>
+        />
       ) : null}
 
       <Modal

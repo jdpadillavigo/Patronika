@@ -8,6 +8,7 @@ export const UserBottomNavigationItem = Object.freeze({
 export const AdminBottomNavigationItem = Object.freeze({
     USERS: 'users',
     COMMUNITY_MANAGEMENT: 'communityManagement',
+    TUTORIAL_MANAGEMENT: 'tutorialManagement',
     PROFILE: 'profile',
 } as const);
 

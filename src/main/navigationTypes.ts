@@ -27,6 +27,11 @@ export type RootStackParamList = {
         publicationId: string;
         publicationName?: string;
     };
+    GestionTutorialesAdmin: undefined;
+    AgregarTutorialAdmin: undefined;
+    EditarTutorialAdmin: {
+        tutorialId: string | null;
+    };
     OlvidasteContrasena: undefined;
     VerificarCorreo: {
         mode?: 'register' | 'recovery';
@@ -48,12 +53,4 @@ export type RootStackParamList = {
     };
     CrearPublicacion: undefined;
     Tutoriales: undefined;
-    TutorialPlayer: {
-        tutorial: {
-            id: string;
-            title: string;
-            description: string;
-            url: string;
-        };
-    };
 };

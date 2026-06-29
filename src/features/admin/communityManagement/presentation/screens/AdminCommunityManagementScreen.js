@@ -7,13 +7,14 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Modal,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { AdminBottomNavigationItem } from '../../../../../core/domain/BottomNavigationItem';
+import AdminCircleIconButton from '../../../../../core/presentation/designsystem/components/AdminCircleIconButton';
 import AdminBottomBar from '../../../../../core/presentation/designsystem/components/AdminBottomBar';
+import ConfirmationModal from '../../../../../core/presentation/designsystem/components/ConfirmationModal';
 import UserPreviewModal from '../../../../../core/presentation/designsystem/components/UserPreviewModal';
 import { gridDataToImageUri } from '../../../../../core/presentation/designsystem/utils/GridImage';
 import AdminCommunityUseCase from '../../domain/usecases/AdminCommunityUseCase';
@@ -93,9 +94,12 @@ function CommentCard({ item, onDelete, onOpenPublication, onOpenUser }) {
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.commentDeleteButton} onPress={() => onDelete(item)} activeOpacity={0.82}>
-        <Ionicons name="trash-outline" size={18} color="white" />
-      </TouchableOpacity>
+      <AdminCircleIconButton
+        iconName="trash-outline"
+        label="Eliminar comentario"
+        onPress={() => onDelete(item)}
+        style={styles.commentDeleteButton}
+      />
     </View>
   );
 }
@@ -107,10 +111,14 @@ function PublicationCard({ publication, tall, onOpen, onReport }) {
 
   return (
     <TouchableOpacity style={styles.publicationCard} onPress={onOpen} activeOpacity={0.88}>
-      <TouchableOpacity style={styles.reportFab} onPress={onReport} activeOpacity={0.84}>
-        {reportCount > 0 ? <Text style={styles.reportCountText}>{reportCount}</Text> : null}
-        <MaterialCommunityIcons name="gavel" size={17} color="white" />
-      </TouchableOpacity>
+      <AdminCircleIconButton
+        iconName="gavel"
+        iconLibrary="material"
+        label="Sancionar publicación"
+        count={reportCount}
+        onPress={onReport}
+        style={styles.reportFab}
+      />
 
       {imageUri ? (
         <Image
@@ -370,42 +378,18 @@ export default function AdminCommunityManagementScreen({ navigation }) {
         activeItem={AdminBottomNavigationItem.COMMUNITY_MANAGEMENT}
         onPressUsers={() => navigation.navigate('GestionUsuarios')}
         onPressCommunity={() => undefined}
+        onPressTutorials={() => navigation.navigate('GestionTutorialesAdmin')}
         onPressProfile={() => navigation.navigate('Perfil', { isAdmin: true })}
       />
 
-      <Modal
+      <ConfirmationModal
         visible={!!commentToDelete}
-        transparent
-        animationType="fade"
-        onRequestClose={() => !actionLoadingId && setCommentToDelete(null)}
-      >
-        <View style={styles.deleteModalOverlay}>
-          <View style={styles.deleteModalCard}>
-            <View style={styles.deleteModalIcon}>
-              <Ionicons name="trash-outline" size={30} color={PURPLE} />
-            </View>
-            <Text style={styles.deleteModalTitle}>¿Quieres eliminar este comentario?</Text>
-            <View style={styles.deleteModalActions}>
-              <TouchableOpacity
-                style={styles.deleteCancelButton}
-                onPress={() => setCommentToDelete(null)}
-                disabled={!!actionLoadingId}
-              >
-                <Text style={styles.deleteCancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteConfirmButton}
-                onPress={handleDeleteComment}
-                disabled={!!actionLoadingId}
-              >
-                <Text style={styles.deleteConfirmButtonText}>
-                  {actionLoadingId ? 'Eliminando...' : 'Eliminar'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        title="¿Quieres eliminar este comentario?"
+        loading={!!actionLoadingId}
+        loadingText="Eliminando..."
+        onCancel={() => setCommentToDelete(null)}
+        onConfirm={handleDeleteComment}
+      />
 
       <UserPreviewModal
         visible={!!selectedUser}

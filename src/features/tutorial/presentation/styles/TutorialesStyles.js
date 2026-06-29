@@ -45,6 +45,14 @@ export const tutorialesStyles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
   },
+  cardActions: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    flexDirection: 'row',
+    gap: 8,
+    zIndex: 8,
+  },
 
   // Miniatura del video
   thumbnail: {
@@ -52,9 +60,18 @@ export const tutorialesStyles = StyleSheet.create({
     height: THUMBNAIL_HEIGHT,
     backgroundColor: '#111',
   },
+  thumbnailTouchable: {
+    width: '100%',
+    height: '100%',
+  },
   thumbnailImage: {
     width: '100%',
     height: '100%',
+  },
+  videoPlayer: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#000',
   },
   thumbnailPlaceholder: {
     flex: 1,

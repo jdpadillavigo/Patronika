@@ -14,7 +14,8 @@ import UserManagementScreen from '../features/admin/userManagement/presentation/
 import HomeScreen from '../features/home/presentation/screens/HomeScreen.js';
 import OnboardingScreen from '../features/onboarding/presentation/screens/OnboardingScreen';
 import MyPatternsScreen from '../features/pattern/presentation/screens/MyPatternsScreen.js';
-import TutorialPlayerScreen from '../features/tutorial/presentation/screens/TutorialPlayerScreen.js';
+import AdminTutorialManagementScreen from '../features/tutorial/presentation/screens/AdminTutorialManagementScreen.js';
+import TutorialFormScreen from '../features/tutorial/presentation/screens/TutorialFormScreen.js';
 import TutorialesScreen from '../features/tutorial/presentation/screens/TutorialesScreen.js';
 import CreatePostScreen from '../features/post/presentation/screens/CreatePostScreen.js';
 import PostDetailScreen from '../features/post/presentation/screens/PostDetailScreen.js';
@@ -78,6 +79,9 @@ export default function NavigationRoot() {
             <Stack.Screen name="EditarUsuarioAdmin" component={EditUserScreen} />
             <Stack.Screen name="GestionComunidadAdmin" component={AdminCommunityManagementScreen} options={tabLikeScreenOptions}/>
             <Stack.Screen name="SancionarEliminarPublicacionAdmin" component={SanctionUserDeletePublicationScreen} />
+            <Stack.Screen name="GestionTutorialesAdmin" component={AdminTutorialManagementScreen} options={tabLikeScreenOptions} />
+            <Stack.Screen name="AgregarTutorialAdmin" component={TutorialFormScreen} />
+            <Stack.Screen name="EditarTutorialAdmin" component={TutorialFormScreen} />
             <Stack.Screen name="OlvidasteContrasena" component={ForgotPasswordScreen} />
             <Stack.Screen name="VerificarCorreo" component={VerifyEmailScreen} />
             <Stack.Screen name="RestablecerContrasena" component={ResetPasswordScreen} />
@@ -86,7 +90,6 @@ export default function NavigationRoot() {
             <Stack.Screen name="PublicacionDetalle" component={PostDetailScreen} />
             <Stack.Screen name="CrearPublicacion" component={CreatePostScreen} />
             <Stack.Screen name="Tutoriales" component={TutorialesScreen} options={tabLikeScreenOptions} />
-            <Stack.Screen name="TutorialPlayer" component={TutorialPlayerScreen} />
         </Stack.Navigator>
     );
 }

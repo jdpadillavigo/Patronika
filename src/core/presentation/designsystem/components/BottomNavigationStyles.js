@@ -52,6 +52,7 @@ export const bottomNavigationStyles = StyleSheet.create({
   navLabel: {
     fontSize: 10,
     color: '#AAA',
+    textAlign: 'center',
   },
   navLabelActive: {
     color: PURPLE,
