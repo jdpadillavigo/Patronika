@@ -102,6 +102,7 @@ export default function HomeScreen({ navigation }) {
       {loading ? (
         <View style={styles.emptyContainer}>
           <ActivityIndicator size="large" color={PURPLE} />
+          <Text style={styles.emptyText}>Cargando publicaciones...</Text>
         </View>
       ) : publications.length === 0 ? (
         <View style={styles.emptyContainer}>

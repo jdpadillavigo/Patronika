@@ -18,11 +18,12 @@ export type RootStackParamList = {
         isAdmin?: boolean;
     } | undefined;
     GestionUsuarios: undefined;
+    AgregarUsuarioAdmin: undefined;
     EditarUsuarioAdmin: {
         userId: string | null;
     };
     GestionComunidadAdmin: undefined;
-    ReportarEliminarPatronAdmin: {
+    SancionarEliminarPublicacionAdmin: {
         publicationId: string;
         publicationName?: string;
     };

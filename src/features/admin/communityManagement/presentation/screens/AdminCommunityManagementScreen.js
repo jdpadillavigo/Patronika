@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+﻿import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -23,6 +23,10 @@ const TABS = {
   COMMENTS: 'comments',
   PUBLICATIONS: 'publications',
 };
+
+function getReportCount(item) {
+  return item?.reportCount ?? item?.reportsCount ?? item?.reportedCount ?? item?.reportQuantity ?? 0;
+}
 
 const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Otros'];
 
@@ -99,10 +103,12 @@ function CommentCard({ item, onDelete, onOpenPublication, onOpenUser }) {
 function PublicationCard({ publication, tall, onOpen, onReport }) {
   const imageUri = publication.imageUrl
     || (publication.pattern?.gridData ? gridDataToImageUri(publication.pattern.gridData, { maxDimension: 300 }) : null);
+  const reportCount = getReportCount(publication);
 
   return (
     <TouchableOpacity style={styles.publicationCard} onPress={onOpen} activeOpacity={0.88}>
       <TouchableOpacity style={styles.reportFab} onPress={onReport} activeOpacity={0.84}>
+        {reportCount > 0 ? <Text style={styles.reportCountText}>{reportCount}</Text> : null}
         <MaterialCommunityIcons name="gavel" size={17} color="white" />
       </TouchableOpacity>
 
@@ -139,6 +145,7 @@ function PublicationCard({ publication, tall, onOpen, onReport }) {
 
 export default function AdminCommunityManagementScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState(TABS.COMMENTS);
+  const [activeFilter, setActiveFilter] = useState('todos');
   const [comments, setComments] = useState([]);
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -154,7 +161,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
 
     const result = await AdminCommunityUseCase.loadDashboard();
     if (!result.success) {
-      if (!result.sessionExpired) setError(result.error || 'No se pudo cargar la comunidad');
+      if (!result.sessionExpired) setError('No se pudo cargar la información. Revisa tu conexión e inténtalo nuevamente.');
       setLoading(false);
       setRefreshing(false);
       return;
@@ -202,15 +209,30 @@ export default function AdminCommunityManagementScreen({ navigation }) {
   }, [navigation]);
 
   const columns = useMemo(() => ({
-    left: publications.filter((_, index) => index % 2 === 0),
-    right: publications.filter((_, index) => index % 2 !== 0),
-  }), [publications]);
+    left: publications
+      .filter(publication => activeFilter === 'todos' || getReportCount(publication) > 0)
+      .filter((_, index) => index % 2 === 0),
+    right: publications
+      .filter(publication => activeFilter === 'todos' || getReportCount(publication) > 0)
+      .filter((_, index) => index % 2 !== 0),
+  }), [publications, activeFilter]);
+
+  const filteredComments = useMemo(() => (
+    comments.filter(comment => activeFilter === 'todos' || getReportCount(comment) > 0)
+  ), [comments, activeFilter]);
+
+  const filteredPublications = useMemo(() => (
+    publications.filter(publication => activeFilter === 'todos' || getReportCount(publication) > 0)
+  ), [publications, activeFilter]);
 
   const renderContent = () => {
     if (loading) {
       return (
         <View style={styles.emptyContainer}>
           <ActivityIndicator size="large" color={PURPLE} />
+          <Text style={styles.emptyText}>
+            Cargando {activeTab === TABS.COMMENTS ? 'comentarios' : 'publicaciones'}...
+          </Text>
         </View>
       );
     }
@@ -228,7 +250,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
     }
 
     if (activeTab === TABS.COMMENTS) {
-      return comments.length === 0 ? (
+      return filteredComments.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="chatbubble-ellipses-outline" size={52} color="#CCC" />
           <Text style={styles.emptyText}>No hay comentarios para revisar</Text>
@@ -239,7 +261,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
           contentContainerStyle={styles.commentsContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PURPLE]} tintColor={PURPLE} />}
         >
-          {comments.map(comment => (
+          {filteredComments.map(comment => (
             <View key={comment.id} style={actionLoadingId === comment.id && styles.disabledItem}>
               <CommentCard
                 item={comment}
@@ -253,7 +275,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
       );
     }
 
-    return publications.length === 0 ? (
+    return filteredPublications.length === 0 ? (
       <View style={styles.emptyContainer}>
         <Ionicons name="images-outline" size={52} color="#CCC" />
         <Text style={styles.emptyText}>No hay publicaciones para revisar</Text>
@@ -272,7 +294,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
                 publication={publication}
                 tall={index % 3 === 0}
                 onOpen={() => navigation.navigate('PublicacionDetalle', { publicationId: publication.id, publication })}
-                onReport={() => navigation.navigate('ReportarEliminarPatronAdmin', {
+                onReport={() => navigation.navigate('SancionarEliminarPublicacionAdmin', {
                   publicationId: publication.id,
                   publicationName: publication.pattern?.name || 'Publicación',
                 })}
@@ -286,7 +308,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
                 publication={publication}
                 tall={index % 3 === 1}
                 onOpen={() => navigation.navigate('PublicacionDetalle', { publicationId: publication.id, publication })}
-                onReport={() => navigation.navigate('ReportarEliminarPatronAdmin', {
+                onReport={() => navigation.navigate('SancionarEliminarPublicacionAdmin', {
                   publicationId: publication.id,
                   publicationName: publication.pattern?.name || 'Publicación',
                 })}
@@ -318,6 +340,27 @@ export default function AdminCommunityManagementScreen({ navigation }) {
           activeOpacity={0.8}
         >
           <Text style={[styles.tabText, activeTab === TABS.PUBLICATIONS && styles.tabTextActive]}>Publicaciones</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.filtrosContainer}>
+        <TouchableOpacity
+          style={[styles.filtroGrid, activeFilter === 'todos' && styles.filtroGridActivo]}
+          onPress={() => setActiveFilter('todos')}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="grid" size={18} color={activeFilter === 'todos' ? 'white' : PURPLE} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.filtroPill, activeFilter === 'reportados' && styles.filtroPillActivo]}
+          onPress={() => setActiveFilter('reportados')}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="flag" size={14} color={activeFilter === 'reportados' ? 'white' : '#555'} />
+          <Text style={[styles.filtroPillText, activeFilter === 'reportados' && styles.filtroPillTextActivo]}>
+            Reportados
+          </Text>
         </TouchableOpacity>
       </View>
 

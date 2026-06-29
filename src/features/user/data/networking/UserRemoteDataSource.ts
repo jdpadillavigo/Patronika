@@ -1,4 +1,4 @@
-import HttpClient, { type ApiResponse } from '../../../../core/data/network/HttpClientExt';
+import HttpClient, { HttpResponseError, type ApiResponse } from '../../../../core/data/network/HttpClientExt';
 import type { User } from '../../../../core/domain/models/User';
 import { assertApiSuccess } from '../../../../core/data/network/dto/ApiResponseDto';
 import type { UserRequestDto } from '../../../../core/data/user/dto/UserDto';
@@ -26,7 +26,15 @@ async function update(id: string, request: UserRequest): Promise<void> {
 }
 
 async function remove(id: string, username: string): Promise<void> {
-    await HttpClient.delete<ApiResponse<string>>(`/api/users/${id}/${encodeURIComponent(username)}`);
+    try {
+        await HttpClient.delete<ApiResponse<string>>(`/api/users/${id}`);
+    } catch (error: unknown) {
+        if (error instanceof HttpResponseError && (error.status === 404 || error.status === 405)) {
+            await HttpClient.delete<ApiResponse<string>>(`/api/users/${id}/${encodeURIComponent(username)}`);
+            return;
+        }
+        throw error;
+    }
 }
 
 // PUT /api/users/{id}/profile-image — sube la foto de perfil del usuario.

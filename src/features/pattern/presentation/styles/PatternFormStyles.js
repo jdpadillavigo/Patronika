@@ -46,7 +46,7 @@ export const formularioStyles = StyleSheet.create({
     borderColor: PURPLE,
     borderRadius: 10,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    height: 48,
     fontSize: 15,
     color: '#111',
   },
@@ -76,7 +76,7 @@ export const formularioStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#111',
-    paddingVertical: 14,
+    height: 52,
   },
   button: {
     backgroundColor: PURPLE,

@@ -94,6 +94,7 @@ export default function FormularioPatronScreen({ navigation, route }) {
             placeholderTextColor="#aaa"
             value={nombre}
             onChangeText={setNombre}
+            maxLength={60}
           />
         </View>
 

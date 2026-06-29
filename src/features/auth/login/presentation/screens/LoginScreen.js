@@ -68,6 +68,7 @@ export default function LoginScreen({ navigation }) {
                 onChangeText={setUsername}
                 autoCapitalize="none"
                 autoCorrect={false}
+                maxLength={40}
               />
             </View>
 
@@ -80,6 +81,7 @@ export default function LoginScreen({ navigation }) {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
+                maxLength={80}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(value => !value)}

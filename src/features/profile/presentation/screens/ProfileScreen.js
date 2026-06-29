@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -48,7 +48,9 @@ export default function PerfilScreen({ navigation, route }) {
   const [loadingPass, setLoadingPass] = useState(false);
   const [exitoPass, setExitoPass] = useState('');
 
-  useEffect(() => {
+  const loadProfile = useCallback(() => {
+    setLoadingUsuario(true);
+    setErrorPerfil('');
     ProfileUseCase.getCurrent()
       .then(u => {
         setUsuario(u);
@@ -58,13 +60,17 @@ export default function PerfilScreen({ navigation, route }) {
       })
       .catch(error => {
         if (!isSessionExpiredError(error)) {
-          setErrorPerfil(error.message);
+          setErrorPerfil('No se pudo cargar el perfil. Revisa tu conexión e inténtalo nuevamente.');
         }
       })
       .finally(() => {
         setLoadingUsuario(false);
       });
   }, []);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const handlePickFoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -177,6 +183,15 @@ export default function PerfilScreen({ navigation, route }) {
       {loadingUsuario && !usuario ? (
         <View style={styles.profileLoadingContainer}>
           <ActivityIndicator size="large" color={PURPLE} />
+          <Text style={styles.profileLoadingText}>Cargando perfil...</Text>
+        </View>
+      ) : errorPerfil && !usuario ? (
+        <View style={styles.profileLoadingContainer}>
+          <Ionicons name="cloud-offline-outline" size={52} color="#CCC" />
+          <Text style={styles.profileLoadingText}>{errorPerfil}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadProfile}>
+            <Text style={styles.retryButtonText}>Reintentar</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <ScrollView
@@ -234,6 +249,7 @@ export default function PerfilScreen({ navigation, route }) {
                 onChangeText={setNuevoNombre}
                 autoCapitalize="none"
                 autoCorrect={false}
+                maxLength={40}
                 style={styles.editableInput}
               />
             ) : (
@@ -270,6 +286,7 @@ export default function PerfilScreen({ navigation, route }) {
                   style={styles.passwordInput}
                   placeholder="Ingresa tu contraseña para confirmar"
                   placeholderTextColor="#BBB"
+                  maxLength={80}
                 />
                 <TouchableOpacity onPress={() => setMostrarConfirmPass(v => !v)}>
                   <Ionicons name={mostrarConfirmPass ? 'eye-outline' : 'eye-off-outline'} size={20} color="#999" />
@@ -331,6 +348,7 @@ export default function PerfilScreen({ navigation, route }) {
                     style={styles.passwordInput}
                     placeholder="Contraseña actual"
                     placeholderTextColor="#BBB"
+                    maxLength={80}
                   />
                   <TouchableOpacity onPress={() => setMostrarActual(v => !v)}>
                     <Ionicons name={mostrarActual ? 'eye-outline' : 'eye-off-outline'} size={20} color="#999" />
@@ -350,6 +368,7 @@ export default function PerfilScreen({ navigation, route }) {
                     style={styles.passwordInput}
                     placeholder="Nueva contraseña"
                     placeholderTextColor="#BBB"
+                    maxLength={80}
                   />
                   <TouchableOpacity onPress={() => setMostrarNueva(v => !v)}>
                     <Ionicons name={mostrarNueva ? 'eye-outline' : 'eye-off-outline'} size={20} color="#999" />
@@ -369,6 +388,7 @@ export default function PerfilScreen({ navigation, route }) {
                     style={styles.passwordInput}
                     placeholder="Repite la nueva contraseña"
                     placeholderTextColor="#BBB"
+                    maxLength={80}
                   />
                   <TouchableOpacity onPress={() => setMostrarConfirmar(v => !v)}>
                     <Ionicons name={mostrarConfirmar ? 'eye-outline' : 'eye-off-outline'} size={20} color="#999" />

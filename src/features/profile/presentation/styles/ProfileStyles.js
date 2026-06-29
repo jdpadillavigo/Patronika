@@ -26,6 +26,25 @@ export const perfilStyles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  profileLoadingText: {
+    color: '#888',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: PURPLE,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '700',
   },
   scrollContent: {
     paddingHorizontal: 28,
@@ -123,7 +142,7 @@ export const perfilStyles = StyleSheet.create({
     borderColor: PURPLE,
     borderRadius: 10,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    height: 46,
     fontSize: 15,
     color: '#111',
   },
@@ -209,7 +228,7 @@ export const perfilStyles = StyleSheet.create({
     borderColor: PURPLE,
     borderRadius: 10,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    height: 46,
   },
   passwordInput: {
     flex: 1,

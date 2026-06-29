@@ -176,6 +176,7 @@ export default function CrearPublicacionScreen({ navigation }) {
               onChangeText={setDescription}
               multiline
               maxLength={500}
+              scrollEnabled={false}
             />
           </View>
 

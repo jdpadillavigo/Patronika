@@ -66,6 +66,7 @@ export default function RestablecerContrasenaScreen({ navigation, route }) {
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
             autoCapitalize="none"
+            maxLength={80}
           />
           <TouchableOpacity onPress={() => setShowPassword(value => !value)}>
             <Ionicons
@@ -85,6 +86,7 @@ export default function RestablecerContrasenaScreen({ navigation, route }) {
             onChangeText={setConfirmPassword}
             secureTextEntry={!showConfirmPassword}
             autoCapitalize="none"
+            maxLength={80}
           />
           <TouchableOpacity onPress={() => setShowConfirmPassword(value => !value)}>
             <Ionicons

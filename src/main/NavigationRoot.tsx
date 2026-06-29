@@ -7,7 +7,8 @@ import LoginScreen from '../features/auth/login/presentation/screens/LoginScreen
 import RegisterScreen from '../features/auth/register/presentation/screens/RegisterScreen.js';
 import VerifyEmailScreen from '../features/auth/verification/presentation/screens/VerifyEmailScreen.js';
 import AdminCommunityManagementScreen from '../features/admin/communityManagement/presentation/screens/AdminCommunityManagementScreen.js';
-import ReportDeletePatternScreen from '../features/admin/communityManagement/presentation/screens/ReportDeletePatternScreen.js';
+import SanctionUserDeletePublicationScreen from '../features/admin/communityManagement/presentation/screens/SanctionUserDeletePublicationScreen.js';
+import AddUserScreen from '../features/admin/userManagement/presentation/screens/AddUserScreen.js';
 import EditUserScreen from '../features/admin/userManagement/presentation/screens/EditUserScreen.js';
 import UserManagementScreen from '../features/admin/userManagement/presentation/screens/UserManagementScreen.js';
 import HomeScreen from '../features/home/presentation/screens/HomeScreen.js';
@@ -71,9 +72,10 @@ export default function NavigationRoot() {
             <Stack.Screen name="GenerarPatron" component={GeneratePatternNavigator} options={bottomSheetScreenOptions} />
             <Stack.Screen name="Perfil" component={ProfileScreen} options={tabLikeScreenOptions} />
             <Stack.Screen name="GestionUsuarios" component={UserManagementScreen} options={tabLikeScreenOptions}/>
+            <Stack.Screen name="AgregarUsuarioAdmin" component={AddUserScreen} />
             <Stack.Screen name="EditarUsuarioAdmin" component={EditUserScreen} />
             <Stack.Screen name="GestionComunidadAdmin" component={AdminCommunityManagementScreen} options={tabLikeScreenOptions}/>
-            <Stack.Screen name="ReportarEliminarPatronAdmin" component={ReportDeletePatternScreen} />
+            <Stack.Screen name="SancionarEliminarPublicacionAdmin" component={SanctionUserDeletePublicationScreen} />
             <Stack.Screen name="OlvidasteContrasena" component={ForgotPasswordScreen} />
             <Stack.Screen name="VerificarCorreo" component={VerifyEmailScreen} />
             <Stack.Screen name="RestablecerContrasena" component={ResetPasswordScreen} />

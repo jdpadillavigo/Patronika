@@ -259,6 +259,7 @@ export default function MisPatronesScreen({ navigation }) {
         {loading ? (
           <View style={styles.vacio}>
             <ActivityIndicator size="large" color={PURPLE} />
+            <Text style={styles.vacioText}>Cargando patrones...</Text>
           </View>
         ) : patterns.length === 0 ? (
           <View style={styles.vacio}>

@@ -10,7 +10,7 @@ import {
   Modal,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { AdminBottomNavigationItem } from '../../../../../core/domain/BottomNavigationItem';
 import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
@@ -51,21 +51,21 @@ function UserCard({ user, isMenuOpen, onToggleMenu, onCloseMenu, onEdit, onToggl
           <View style={styles.overlayIconCircle}>
             <Ionicons name="pencil-outline" size={20} color="white" />
           </View>
-          <Text style={styles.overlayActionLabel}>Editar</Text>
+          <Text style={styles.overlayActionLabel} numberOfLines={1}>Editar</Text>
         </TouchableOpacity>
  
         <TouchableOpacity style={styles.overlayAction} onPress={onToggleStatus} activeOpacity={0.8}>
           <View style={styles.overlayIconCircle}>
             <Ionicons name={isActive ? 'happy-outline' : 'sad-outline'} size={20} color="white" />
           </View>
-          <Text style={styles.overlayActionLabel}>Estado: {isActive ? 'Activo' : 'Suspendido'}</Text>
+          <Text style={styles.overlayActionLabel} numberOfLines={1}>Estado: {isActive ? 'Activo' : 'Suspendido'}</Text>
         </TouchableOpacity>
  
         <TouchableOpacity style={styles.overlayAction} onPress={onDelete} activeOpacity={0.8}>
           <View style={styles.overlayIconCircle}>
             <Ionicons name="trash-outline" size={20} color="white" />
           </View>
-          <Text style={styles.overlayActionLabel}>Eliminar</Text>
+          <Text style={styles.overlayActionLabel} numberOfLines={1}>Eliminar</Text>
         </TouchableOpacity>
       </View>
   );
@@ -124,6 +124,12 @@ export default function GestionUsuariosScreen({ navigation }) {
   const [deleteCandidate, setDeleteCandidate] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('todos');
+  const [statusCandidate, setStatusCandidate] = useState(null);
+  const [reactivateCandidate, setReactivateCandidate] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [suspensionDays, setSuspensionDays] = useState('');
+  const [suspensionReason, setSuspensionReason] = useState('');
   const [menuAbiertoId, setMenuAbiertoId] = useState(null); // id del usuario cuyo menú overlay está abierto
  
   // Verifica el rol del usuario actual antes de mostrar el listado (criterio de aceptación #3)
@@ -143,7 +149,7 @@ export default function GestionUsuariosScreen({ navigation }) {
 
     const result = await UserManagementUseCase.getAllUsers();
     if (!result.success) {
-      setError(result.error || 'No se pudo cargar el listado de usuarios');
+      setError('No se pudieron cargar los usuarios. Revisa tu conexión e inténtalo nuevamente.');
       setUsuarios([]);
     } else {
       setUsuarios(result.data || []);
@@ -157,11 +163,14 @@ export default function GestionUsuariosScreen({ navigation }) {
 
   const usuariosFiltrados = useMemo (() => {
     const query = busqueda.trim().toLowerCase();
-    if(!query) return usuarios;
-    return usuarios.filter( u =>
-      u.username?.toLowerCase().includes(query) || u.email?.toLowerCase().includes(query)
-    );
-  }, [usuarios,busqueda] );
+    return usuarios.filter(u => {
+      const matchesSearch = !query
+        || u.username?.toLowerCase().includes(query)
+        || u.email?.toLowerCase().includes(query);
+      const matchesFilter = activeFilter === 'todos' || u.status !== 0;
+      return matchesSearch && matchesFilter;
+    });
+  }, [usuarios, busqueda, activeFilter] );
 
   const updateUserInList = useCallback((updatedUser) => {
     setUsuarios(current => current.map(user => (
@@ -174,21 +183,57 @@ export default function GestionUsuariosScreen({ navigation }) {
     navigation.navigate('EditarUsuarioAdmin', { userId: user.id });
   }, [navigation]);
 
-  const handleToggleStatus = useCallback(async (user) => {
+  const handleAskToggleStatus = useCallback((user) => {
+    setActionError('');
+    if (user.status === 0) {
+      setStatusCandidate(user);
+    } else {
+      setReactivateCandidate(user);
+    }
+    setSuspensionDays('');
+    setSuspensionReason('');
+  }, []);
+
+  const handleToggleStatus = useCallback(async () => {
+    const user = statusCandidate || reactivateCandidate;
+    if (!user) return;
+
+    const shouldSuspend = user.status === 0;
+    if (shouldSuspend) {
+      const days = Number.parseInt(suspensionDays, 10);
+      if (!Number.isInteger(days) || days <= 0) {
+        setActionError('Ingresa una cantidad de días válida para suspender.');
+        return;
+      }
+      if (!suspensionReason.trim()) {
+        setActionError('Ingresa el motivo de suspensión.');
+        return;
+      }
+    }
+
+    setStatusLoading(true);
     setActionError('');
     const nextStatus = user.status === 0 ? 1 : 0;
-    const result = await UserManagementUseCase.updateUserStatus(user, nextStatus);
+    const suspensionDraft = shouldSuspend ? {
+      days: Number.parseInt(suspensionDays, 10),
+      reason: suspensionReason.trim(),
+    } : null;
+    const result = await UserManagementUseCase.updateUserStatus(user, nextStatus, suspensionDraft);
+    setStatusLoading(false);
     if (!result.success) {
       if (result.sessionExpired) return;
-      setActionError(result.error || 'No se pudo cambiar el estado del usuario');
+      setActionError('No se pudo completar la acción. Revisa tu conexión e inténtalo nuevamente.');
       return;
     }
     updateUserInList(result.data || { ...user, status: nextStatus });
     setMenuAbiertoId(null);
-  }, [updateUserInList]);
+    setStatusCandidate(null);
+    setReactivateCandidate(null);
+  }, [statusCandidate, reactivateCandidate, suspensionDays, suspensionReason, updateUserInList]);
 
   const handleAskDelete = useCallback((user) => {
     setActionError('');
+    setMenuAbiertoId(null);
     setDeleteCandidate(user);
   }, []);
 
@@ -200,7 +245,7 @@ export default function GestionUsuariosScreen({ navigation }) {
     setDeleteLoading(false);
     if (!result.success) {
       if (result.sessionExpired) return;
-      setActionError(result.error || 'No se pudo eliminar el usuario');
+      setActionError('No se pudo eliminar el usuario. Revisa tu conexión e inténtalo nuevamente.');
       setDeleteCandidate(null);
       return;
     }
@@ -245,8 +290,30 @@ export default function GestionUsuariosScreen({ navigation }) {
             value={busqueda}
             onChangeText={setBusqueda}
             autoCapitalize="none"
+            maxLength={80}
           />
         </View>
+      </View>
+
+      <View style={styles.filtrosContainer}>
+        <TouchableOpacity
+          style={[styles.filtroGrid, activeFilter === 'todos' && styles.filtroGridActivo]}
+          onPress={() => setActiveFilter('todos')}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="grid" size={18} color={activeFilter === 'todos' ? 'white' : PURPLE} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.filtroPill, activeFilter === 'suspendidos' && styles.filtroPillActivo]}
+          onPress={() => setActiveFilter('suspendidos')}
+          activeOpacity={0.8}
+        >
+          <MaterialCommunityIcons name="gavel" size={14} color={activeFilter === 'suspendidos' ? 'white' : '#555'} />
+          <Text style={[styles.filtroPillText, activeFilter === 'suspendidos' && styles.filtroPillTextActivo]}>
+            Suspendidos
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Estado: cargando */}
@@ -292,7 +359,7 @@ export default function GestionUsuariosScreen({ navigation }) {
                   onToggleMenu={() => setMenuAbiertoId(item.id || item.email)}
                   onCloseMenu={() => setMenuAbiertoId(null)}
                   onEdit={() => handleEditUser(item)}
-                  onToggleStatus={() => handleToggleStatus(item)}
+                  onToggleStatus={() => handleAskToggleStatus(item)}
                   onDelete={() => handleAskDelete(item)}
                   onOpenUser={setSelectedUser}
                 />
@@ -310,6 +377,16 @@ export default function GestionUsuariosScreen({ navigation }) {
         onPressCommunity={() => navigation.navigate('GestionComunidadAdmin')}
         onPressProfile={() => navigation.navigate('Perfil', { isAdmin: true })}
       />
+
+      {!loading && !error && esAdmin === true ? (
+        <TouchableOpacity
+          style={styles.addUserFab}
+          onPress={() => navigation.navigate('AgregarUsuarioAdmin')}
+          activeOpacity={0.82}
+        >
+          <Ionicons name="add" size={30} color="white" />
+        </TouchableOpacity>
+      ) : null}
 
       <Modal
         visible={!!deleteCandidate}
@@ -338,6 +415,108 @@ export default function GestionUsuariosScreen({ navigation }) {
               >
                 <Text style={styles.deleteConfirmButtonText}>
                   {deleteLoading ? 'Eliminando...' : 'Eliminar'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={!!statusCandidate}
+        transparent
+        animationType="fade"
+        onRequestClose={() => !statusLoading && setStatusCandidate(null)}
+      >
+        <View style={styles.deleteModalOverlay}>
+          <View style={styles.deleteModalCard}>
+            <View style={styles.deleteModalIcon}>
+              <MaterialCommunityIcons name="gavel" size={32} color={PURPLE} />
+            </View>
+            <Text style={styles.deleteModalTitle}>Suspender usuario</Text>
+
+            <View style={styles.suspensionFields}>
+              <View>
+                <Text style={styles.suspensionLabel}>Cantidad de días</Text>
+                <TextInput
+                  value={suspensionDays}
+                  onChangeText={text => setSuspensionDays(text.replace(/[^0-9]/g, ''))}
+                  placeholder="Días"
+                  placeholderTextColor="#999"
+                  keyboardType="number-pad"
+                  maxLength={3}
+                  style={styles.suspensionInput}
+                />
+              </View>
+              <View>
+                <Text style={styles.suspensionLabel}>Motivo de suspensión</Text>
+                <TextInput
+                  value={suspensionReason}
+                  onChangeText={setSuspensionReason}
+                  placeholder="Motivo"
+                  placeholderTextColor="#999"
+                  multiline
+                  maxLength={250}
+                  scrollEnabled={false}
+                  style={[styles.suspensionInput, styles.suspensionTextArea]}
+                />
+              </View>
+            </View>
+
+            {actionError ? <Text style={styles.suspensionErrorText}>{actionError}</Text> : null}
+
+            <View style={styles.deleteModalActions}>
+              <TouchableOpacity
+                style={styles.deleteCancelButton}
+                onPress={() => {
+                  setActionError('');
+                  setStatusCandidate(null);
+                }}
+                disabled={statusLoading}
+              >
+                <Text style={styles.deleteCancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteConfirmButton}
+                onPress={handleToggleStatus}
+                disabled={statusLoading || !suspensionDays.trim() || !suspensionReason.trim()}
+              >
+                <Text style={styles.deleteConfirmButtonText}>
+                  {statusLoading ? 'Guardando...' : 'Suspender'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={!!reactivateCandidate}
+        transparent
+        animationType="fade"
+        onRequestClose={() => !statusLoading && setReactivateCandidate(null)}
+      >
+        <View style={styles.deleteModalOverlay}>
+          <View style={styles.deleteModalCard}>
+            <View style={styles.deleteModalIcon}>
+              <Ionicons name="play-circle-outline" size={32} color={PURPLE} />
+            </View>
+            <Text style={styles.deleteModalTitle}>¿Quieres reactivar al usuario?</Text>
+            <View style={styles.deleteModalActions}>
+              <TouchableOpacity
+                style={styles.deleteCancelButton}
+                onPress={() => setReactivateCandidate(null)}
+                disabled={statusLoading}
+              >
+                <Text style={styles.deleteCancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteConfirmButton}
+                onPress={handleToggleStatus}
+                disabled={statusLoading}
+              >
+                <Text style={styles.deleteConfirmButtonText}>
+                  {statusLoading ? 'Guardando...' : 'Reactivar'}
                 </Text>
               </TouchableOpacity>
             </View>

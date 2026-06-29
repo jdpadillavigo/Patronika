@@ -291,7 +291,10 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
             </Text>
 
             {loadingComments ? (
-              <ActivityIndicator color={PURPLE} style={{ marginVertical: 16 }} />
+              <View style={{ alignItems: 'center', marginVertical: 16 }}>
+                <ActivityIndicator color={PURPLE} />
+                <Text style={{ color: '#888', fontSize: 14, marginTop: 8 }}>Cargando comentarios...</Text>
+              </View>
             ) : comments.length === 0 ? (
               <Text style={styles.noComments}>¡Sé el primero en comentar!</Text>
             ) : (
@@ -343,6 +346,8 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
             value={commentText}
             onChangeText={setCommentText}
             multiline
+            maxLength={250}
+            scrollEnabled={false}
             returnKeyType="send"
             onSubmitEditing={handleSend}
           />

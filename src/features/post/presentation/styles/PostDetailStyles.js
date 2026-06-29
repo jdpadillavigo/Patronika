@@ -230,7 +230,7 @@ export const detalleStyles = StyleSheet.create({
     paddingVertical: 8,
     fontSize: 14,
     color: '#333',
-    maxHeight: 100,
+    height: 38,
     backgroundColor: '#FAFAFA',
   },
   sendBtn: {

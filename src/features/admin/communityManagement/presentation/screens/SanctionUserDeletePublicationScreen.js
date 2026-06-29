@@ -2,40 +2,51 @@ import React, { useCallback, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
+  View,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { PURPLE, adminCommunityManagementStyles as styles } from '../styles/AdminCommunityManagementStyles';
+import { PURPLE, sanctionUserDeletePublicationStyles as styles } from '../styles/SanctionUserDeletePublicationStyles';
 import AdminCommunityUseCase from '../../domain/usecases/AdminCommunityUseCase';
 
-export default function ReportDeletePatternScreen({ route, navigation }) {
+export default function SanctionUserDeletePublicationScreen({ route, navigation }) {
   const publicationId = route?.params?.publicationId;
-  const [warningMessage, setWarningMessage] = useState('');
+  const [suspensionDays, setSuspensionDays] = useState('');
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleDelete = useCallback(async () => {
+  const handleSanctionAndDelete = useCallback(async () => {
     if (!publicationId || loading) return;
+
+    const days = Number.parseInt(suspensionDays, 10);
+    if (!Number.isInteger(days) || days <= 0) {
+      setError('Ingresa una cantidad de días válida.');
+      return;
+    }
+    if (!reason.trim()) {
+      setError('Ingresa el motivo de suspensión.');
+      return;
+    }
 
     setLoading(true);
     setError('');
-    const result = await AdminCommunityUseCase.reportAndDeletePublication(publicationId, warningMessage, reason);
+    const sanctionDraft = { days, reason: reason.trim() };
+    const result = await AdminCommunityUseCase.sanctionUserAndDeletePublication(publicationId, sanctionDraft);
     setLoading(false);
 
     if (!result.success) {
       if (result.sessionExpired) return;
-      setError(result.error || 'No se pudo eliminar la publicación');
+      setError(result.error || 'No se pudo completar la acción. Revisa tu conexión e inténtalo nuevamente.');
       return;
     }
 
     navigation.goBack();
-  }, [loading, navigation, publicationId, reason, warningMessage]);
+  }, [loading, navigation, publicationId, reason, suspensionDays]);
 
   return (
     <KeyboardAvoidingView
@@ -52,28 +63,32 @@ export default function ReportDeletePatternScreen({ route, navigation }) {
           <Text style={styles.reportBackText}>Volver</Text>
         </TouchableOpacity>
 
-        <Text style={styles.reportTitle}>Reportar y{'\n'}eliminar patrón</Text>
+        <Text style={styles.reportTitle}>Sancionar usuario y eliminar publicación</Text>
 
         <View style={styles.reportFieldGroup}>
-          <Text style={styles.reportLabel}>Mensaje de advertencia</Text>
+          <Text style={styles.reportLabel}>Cantidad de días</Text>
           <TextInput
-            value={warningMessage}
-            onChangeText={setWarningMessage}
-            placeholder="Mensaje"
+            value={suspensionDays}
+            onChangeText={text => setSuspensionDays(text.replace(/[^0-9]/g, ''))}
+            placeholder="Días"
             placeholderTextColor="#555"
-            multiline
-            style={[styles.reportInput, styles.reportTextArea]}
+            keyboardType="number-pad"
+            maxLength={3}
+            style={styles.reportInput}
           />
         </View>
 
         <View style={styles.reportFieldGroup}>
-          <Text style={styles.reportLabel}>Motivo de eliminación</Text>
+          <Text style={styles.reportLabel}>Motivo de suspensión</Text>
           <TextInput
             value={reason}
             onChangeText={setReason}
             placeholder="Motivo"
             placeholderTextColor="#555"
-            style={styles.reportInput}
+            multiline
+            maxLength={250}
+            scrollEnabled={false}
+            style={[styles.reportInput, styles.reportTextArea]}
           />
         </View>
 
@@ -90,11 +105,11 @@ export default function ReportDeletePatternScreen({ route, navigation }) {
 
         <TouchableOpacity
           style={[styles.reportDangerButton, loading && styles.reportButtonDisabled]}
-          onPress={handleDelete}
+          onPress={handleSanctionAndDelete}
           disabled={loading}
           activeOpacity={0.84}
         >
-          <Text style={styles.reportDangerButtonText}>{loading ? 'Eliminando...' : 'Eliminar'}</Text>
+          <Text style={styles.reportDangerButtonText}>{loading ? 'Procesando...' : 'Sancionar y eliminar'}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

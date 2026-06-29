@@ -49,6 +49,7 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
+          maxLength={80}
         />
 
         <TouchableOpacity style={styles.boton} onPress={handleEnviar}>

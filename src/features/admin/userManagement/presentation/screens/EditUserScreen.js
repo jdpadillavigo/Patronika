@@ -1,35 +1,30 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Modal,
+  Image,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
-
-const STATUS_ACTIVE = 0;
-const STATUS_SUSPENDED = 1;
-
-function statusLabel(status) {
-  return status === STATUS_ACTIVE ? 'Activo' : 'Suspendido';
-}
 
 export default function EditUserScreen({ route, navigation }) {
   const userId = route?.params?.userId;
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState(STATUS_ACTIVE);
+  const [avatarUri, setAvatarUri] = useState(null);
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [statusVisible, setStatusVisible] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -48,7 +43,7 @@ export default function EditUserScreen({ route, navigation }) {
 
       if (!result.success) {
         if (result.sessionExpired) return;
-        setError(result.error || 'No se pudo cargar el usuario');
+        setError('No se pudo cargar el usuario. Revisa tu conexión e inténtalo nuevamente.');
         setLoading(false);
         return;
       }
@@ -57,7 +52,8 @@ export default function EditUserScreen({ route, navigation }) {
       setUser(loadedUser);
       setUsername(loadedUser?.username || '');
       setEmail(loadedUser?.email || '');
-      setStatus(loadedUser?.status === STATUS_ACTIVE ? STATUS_ACTIVE : STATUS_SUSPENDED);
+      setAvatarUri(loadedUser?.profileImageUrl || loadedUser?.avatar || null);
+      setAvatarFailed(false);
       setLoading(false);
     }
 
@@ -67,6 +63,23 @@ export default function EditUserScreen({ route, navigation }) {
     };
   }, [userId]);
 
+  const pickAvatar = useCallback(async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setAvatarUri(result.assets[0].uri);
+      setAvatarFailed(false);
+    }
+  }, []);
+
   const handleSave = useCallback(async () => {
     if (!user || saving) return;
 
@@ -74,24 +87,29 @@ export default function EditUserScreen({ route, navigation }) {
     setError('');
     const result = await UserManagementUseCase.updateUser({
       ...user,
-      username,
-      email,
-      status,
-    });
+      username: username.trim(),
+      email: email.trim(),
+    }, avatarUri);
     setSaving(false);
 
     if (!result.success) {
       if (result.sessionExpired) return;
-      setError(result.error || 'No se pudo guardar el usuario');
+      setError('No se pudo guardar el usuario. Revisa tu conexión e inténtalo nuevamente.');
       return;
     }
 
     navigation.goBack();
-  }, [email, navigation, saving, status, user, username]);
+  }, [avatarUri, email, navigation, saving, user, username]);
+
+  const showAvatar = !!avatarUri && !avatarFailed;
 
   return (
     <View style={styles.editSafeArea}>
-      <View style={styles.editContent}>
+      <ScrollView
+        style={styles.editSafeArea}
+        contentContainerStyle={styles.editContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <TouchableOpacity style={styles.editBackButton} onPress={() => navigation.goBack()} activeOpacity={0.75}>
           <Ionicons name="chevron-back" size={28} color={PURPLE} />
           <Text style={styles.editBackText}>Volver</Text>
@@ -100,10 +118,28 @@ export default function EditUserScreen({ route, navigation }) {
         {loading ? (
           <View style={styles.editLoadingContainer}>
             <ActivityIndicator size="large" color={PURPLE} />
+            <Text style={styles.centerStateText}>Cargando usuario...</Text>
           </View>
         ) : (
           <>
-            <Text style={styles.editTitle}>Editar Usuario</Text>
+            <Text style={styles.editTitle}>Editar usuario</Text>
+
+            <TouchableOpacity style={styles.editAvatarWrapper} onPress={pickAvatar} activeOpacity={0.8}>
+              {showAvatar ? (
+                <Image
+                  source={{ uri: avatarUri }}
+                  style={styles.editAvatarImage}
+                  onError={() => setAvatarFailed(true)}
+                />
+              ) : (
+                <View style={styles.editAvatarPlaceholder}>
+                  <Ionicons name="person" size={96} color="#888" />
+                </View>
+              )}
+              <View style={styles.editAvatarBadge}>
+                <Ionicons name="add" size={32} color="white" />
+              </View>
+            </TouchableOpacity>
 
             <View style={styles.editFieldGroup}>
               <Text style={styles.editLabel}>Nombre de usuario</Text>
@@ -114,6 +150,7 @@ export default function EditUserScreen({ route, navigation }) {
                 placeholderTextColor="#555"
                 autoCapitalize="none"
                 autoCorrect={false}
+                maxLength={40}
                 style={styles.editInput}
               />
             </View>
@@ -128,20 +165,9 @@ export default function EditUserScreen({ route, navigation }) {
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="email-address"
+                maxLength={80}
                 style={styles.editInput}
               />
-            </View>
-
-            <View style={styles.editFieldGroup}>
-              <Text style={styles.editLabel}>Estado</Text>
-              <TouchableOpacity
-                style={styles.editSelectButton}
-                onPress={() => setStatusVisible(true)}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.editSelectText}>{statusLabel(status)}</Text>
-                <Ionicons name="chevron-down" size={22} color="#AAA" />
-              </TouchableOpacity>
             </View>
 
             {error ? <Text style={styles.editErrorText}>{error}</Text> : null}
@@ -158,38 +184,8 @@ export default function EditUserScreen({ route, navigation }) {
             </TouchableOpacity>
           </>
         )}
-      </View>
+      </ScrollView>
 
-      <Modal
-        visible={statusVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setStatusVisible(false)}
-      >
-        <TouchableOpacity
-          style={styles.statusModalOverlay}
-          activeOpacity={1}
-          onPress={() => setStatusVisible(false)}
-        >
-          <View style={styles.statusModalCard}>
-            {[STATUS_ACTIVE, STATUS_SUSPENDED].map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.statusOption}
-                onPress={() => {
-                  setStatus(option);
-                  setStatusVisible(false);
-                }}
-              >
-                <Text style={styles.statusOptionText}>{statusLabel(option)}</Text>
-                {status === option ? (
-                  <Ionicons name="checkmark" size={20} color={PURPLE} />
-                ) : null}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </TouchableOpacity>
-      </Modal>
     </View>
   );
 }

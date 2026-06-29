@@ -124,6 +124,7 @@ export default function RegistroScreen({ navigation }) {
                 onChangeText={setUsername}
                 autoCapitalize="none"
                 autoCorrect={false}
+                maxLength={40}
               />
             </View>
 
@@ -140,6 +141,7 @@ export default function RegistroScreen({ navigation }) {
                 autoCapitalize="none"
                 keyboardType="email-address"
                 autoCorrect={false}
+                maxLength={80}
               />
             </View>
             {emailError ? (
@@ -157,6 +159,7 @@ export default function RegistroScreen({ navigation }) {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
+                maxLength={80}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(value => !value)}
@@ -179,6 +182,7 @@ export default function RegistroScreen({ navigation }) {
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
+                maxLength={80}
               />
               <TouchableOpacity
                 onPress={() => setShowConfirmPassword(value => !value)}

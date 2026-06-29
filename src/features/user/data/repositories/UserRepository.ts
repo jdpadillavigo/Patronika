@@ -3,6 +3,7 @@ import type { User } from '../../../../core/domain/models/User';
 import { createUser } from '../../../../core/domain/models/User';
 import UserRemoteDataSource, { type UserRequest } from '../networking/UserRemoteDataSource';
 import LoginRemoteDataSource from '../../../auth/login/data/network/LoginRemoteDataSource';
+import RegisterRemoteDataSource from '../../../auth/register/data/network/RegisterRemoteDataSource';
 
 // Construye el body JSON que acepta PUT /api/users/{id}.
 // La contraseña es obligatoria en el backend; se incluye si se recibe.
@@ -91,13 +92,25 @@ async function getUserById(id: string): Promise<User> {
     return createUser(await UserRemoteDataSource.loadById(id));
 }
 
-async function updateUser(user: User): Promise<User> {
+async function updateUser(user: User, profileImageUri?: string | null): Promise<User> {
     if (!user.id) {
         throw new Error('Usuario no encontrado');
     }
 
     await UserRemoteDataSource.update(user.id, toUserRequest(user));
+    if (profileImageUri && profileImageUri.startsWith('file://')) {
+        await UserRemoteDataSource.uploadAvatar(user.id, profileImageUri);
+    }
     return createUser(await UserRemoteDataSource.loadById(user.id));
+}
+
+async function createUserFromAdmin(
+    username: string,
+    email: string,
+    password: string,
+    profileImageUri?: string | null,
+): Promise<User> {
+    return createUser(await RegisterRemoteDataSource.register(username, email, password, profileImageUri));
 }
 
 async function deleteUser(user: User): Promise<void> {
@@ -114,6 +127,7 @@ const UserRepository = {
     changePassword,
     getAllUsers,
     getUserById,
+    createUserFromAdmin,
     updateUser,
     deleteUser,
 };

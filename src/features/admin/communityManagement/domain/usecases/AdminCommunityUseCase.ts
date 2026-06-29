@@ -23,15 +23,16 @@ async function deleteComment(commentId: string) {
     }
 }
 
-async function reportAndDeletePublication(publicationId: string, warningMessage: string, reason: string) {
-    if (!warningMessage.trim()) {
-        return { success: false as const, error: 'Escribe el mensaje de advertencia' };
+async function sanctionUserAndDeletePublication(publicationId: string, sanctionDraft: { days: number; reason: string }) {
+    if (!Number.isInteger(sanctionDraft.days) || sanctionDraft.days <= 0) {
+        return { success: false as const, error: 'Ingresa una cantidad de días válida.' };
     }
-    if (!reason.trim()) {
-        return { success: false as const, error: 'Escribe el motivo de eliminación' };
+    if (!sanctionDraft.reason.trim()) {
+        return { success: false as const, error: 'Ingresa el motivo de suspensión.' };
     }
 
     try {
+        void sanctionDraft;
         await AdminCommunityRepository.deletePublication(publicationId);
         return { success: true as const };
     } catch (error: unknown) {
@@ -44,7 +45,7 @@ async function reportAndDeletePublication(publicationId: string, warningMessage:
 const AdminCommunityUseCase = {
     loadDashboard,
     deleteComment,
-    reportAndDeletePublication,
+    sanctionUserAndDeletePublication,
 };
 
 export default AdminCommunityUseCase;
