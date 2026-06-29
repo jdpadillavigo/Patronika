@@ -39,7 +39,7 @@ export const adminTutorialManagementStyles = StyleSheet.create({
   },
   list: {
     padding: 16,
-    paddingBottom: 112,
+    paddingBottom: 80,
     gap: 16,
   },
   cardButton: {

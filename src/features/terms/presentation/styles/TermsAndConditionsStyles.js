@@ -12,27 +12,14 @@ export const termsAndConditionsStyles = StyleSheet.create({
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#E3E3E3',
-    paddingTop: 12,
-    paddingHorizontal: 20,
     paddingBottom: 18,
-  },
-  backButton: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 18,
-    minHeight: 28,
-  },
-  backText: {
-    color: PURPLE,
-    fontSize: 15,
-    fontWeight: '700',
   },
   title: {
     color: '#222',
     fontSize: 30,
     fontWeight: '800',
     lineHeight: 38,
+    paddingHorizontal: 20,
   },
   scrollContent: {
     paddingHorizontal: 28,

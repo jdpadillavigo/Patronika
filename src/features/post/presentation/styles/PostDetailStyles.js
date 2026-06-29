@@ -8,23 +8,21 @@ export const detalleStyles = StyleSheet.create({
     backgroundColor: 'white',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
     backgroundColor: 'white',
-  },
-  backBtn: {
-    padding: 6,
-    marginRight: 8,
+    paddingBottom: 14,
   },
   headerTitle: {
     flex: 1,
-    fontSize: 17,
-    fontWeight: '600',
+    fontSize: 30,
+    fontWeight: '800',
     color: '#222',
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   deleteBtn: {
     padding: 6,

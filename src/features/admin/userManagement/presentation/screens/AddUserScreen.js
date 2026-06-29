@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
+import BackButton from '../../../../../core/presentation/designsystem/components/BackButton';
 import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
 import { useErrorPopup } from '../../../../../core/presentation/designsystem/components/ErrorPopup';
@@ -81,10 +81,7 @@ export default function AddUserScreen({ navigation }) {
         contentContainerStyle={styles.addUserContent}
         keyboardShouldPersistTaps="handled"
       >
-        <TouchableOpacity style={styles.editBackButton} onPress={() => navigation.goBack()} activeOpacity={0.75}>
-          <Ionicons name="chevron-back" size={28} color={PURPLE} />
-          <Text style={styles.editBackText}>Volver</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.editBackButton} />
 
         <Text style={styles.editTitle}>Agregar nuevo usuario</Text>
 

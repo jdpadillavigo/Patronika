@@ -7,7 +7,6 @@ import {
   ScrollView,
   Image,
   Modal,
-  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -17,7 +16,9 @@ import { perfilStyles as styles } from '../styles/ProfileStyles';
 import ProfileUseCase from '../../domain/usecases/ProfileUseCase';
 import SessionUseCase from '../../../auth/login/domain/usecases/SessionUseCase';
 import { isSessionExpiredError } from '../../../../core/data/network/HttpClientExt';
+import AppTopBar from '../../../../core/presentation/designsystem/components/AppTopBar';
 import AdminBottomBar from '../../../../core/presentation/designsystem/components/AdminBottomBar';
+import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
 import UserPreviewModal from '../../../../core/presentation/designsystem/components/UserPreviewModal';
 
@@ -176,23 +177,17 @@ export default function PerfilScreen({ navigation, route }) {
   return (
     <View style={styles.safeArea}>
 
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Patrónika</Text>
-      </View>
+      <AppTopBar />
 
       {loadingUsuario && !usuario ? (
-        <View style={styles.profileLoadingContainer}>
-          <ActivityIndicator size="large" color={PURPLE} />
-          <Text style={styles.profileLoadingText}>Cargando perfil...</Text>
-        </View>
+        <ScreenState loading text="Cargando perfil..." />
       ) : errorPerfil && !usuario ? (
-        <View style={styles.profileLoadingContainer}>
-          <Ionicons name="cloud-offline-outline" size={52} color="#CCC" />
-          <Text style={styles.profileLoadingText}>{errorPerfil}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadProfile}>
-            <Text style={styles.retryButtonText}>Reintentar</Text>
-          </TouchableOpacity>
-        </View>
+        <ScreenState
+          iconName="cloud-offline-outline"
+          text={errorPerfil}
+          actionText="Reintentar"
+          onAction={loadProfile}
+        />
       ) : (
         <ScrollView
           style={styles.scroll}

@@ -1,12 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
-  ActivityIndicator, RefreshControl,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { homeStyles as styles, PURPLE } from '../styles/HomeStyles';
 import { UserBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
+import AppTopBar from '../../../../core/presentation/designsystem/components/AppTopBar';
+import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import PublicationUseCase from '../../../post/domain/usecases/PublicationUseCase';
 import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
@@ -14,9 +16,7 @@ import { gridDataToImageUri } from '../../../../core/presentation/designsystem/u
 
 const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Otros'];
 
-// Muestra la foto de perfil del autor si está disponible (profileImageUrl del backend).
-// Si no tiene foto, muestra un círculo con la inicial del nombre.
-function AvatarCircle({ username, imageUrl }) {
+function AvatarCircle({ imageUrl }) {
   const [imageFailed, setImageFailed] = useState(false);
   if (imageUrl && !imageFailed) {
     return <Image source={{ uri: imageUrl }} style={styles.cardAvatarImage} onError={() => setImageFailed(true)} />;
@@ -31,20 +31,36 @@ function AvatarCircle({ username, imageUrl }) {
 function PublicationCard({ pub, onPress, tall }) {
   const imageUri = pub.imageUrl
     || (pub.patternGridData ? gridDataToImageUri(pub.patternGridData, { maxDimension: 300 }) : null);
+  const [imageLoading, setImageLoading] = useState(Boolean(imageUri));
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageLoading(Boolean(imageUri));
+    setImageFailed(false);
+  }, [imageUri]);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.88}>
-      {imageUri ? (
-        <Image
-          source={{ uri: imageUri }}
-          style={[styles.cardImage, tall && styles.cardImageTall]}
-          resizeMode="cover"
-        />
-      ) : (
-        <View style={[styles.cardPlaceholder, tall && styles.cardImageTall]}>
-          <Ionicons name="image-outline" size={36} color={PURPLE} />
-        </View>
-      )}
+      <View style={[styles.cardImage, tall && styles.cardImageTall]}>
+        {(!imageUri || imageLoading || imageFailed) ? (
+          <View style={styles.cardPlaceholder}>
+            <Ionicons name="image-outline" size={36} color={PURPLE} />
+          </View>
+        ) : null}
+        {imageUri && !imageFailed ? (
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.cardImageContent}
+            resizeMode="cover"
+            onLoadStart={() => setImageLoading(true)}
+            onLoadEnd={() => setImageLoading(false)}
+            onError={() => {
+              setImageFailed(true);
+              setImageLoading(false);
+            }}
+          />
+        ) : null}
+      </View>
       <View style={styles.cardInfo}>
         {TECHNIQUES[pub.technique] && (
           <View style={styles.techniqueBadge}>
@@ -53,7 +69,7 @@ function PublicationCard({ pub, onPress, tall }) {
         )}
         <Text style={styles.cardDesc} numberOfLines={2}>{pub.description}</Text>
         <View style={styles.cardAuthorRow}>
-          <AvatarCircle username={pub.user?.username} imageUrl={pub.user?.profileImageUrl} />
+          <AvatarCircle imageUrl={pub.user?.profileImageUrl} />
           <Text style={styles.cardAuthor}>@{pub.user?.username}</Text>
         </View>
       </View>
@@ -71,8 +87,6 @@ export default function HomeScreen({ navigation }) {
     const result = await PublicationUseCase.loadFeed();
     if (result.success) {
       const pubs = result.data;
-
-      // Para publicaciones sin foto de resultado, cargar el gridData del patrón
       const uniquePatternIds = [...new Set(
         pubs.filter(p => !p.imageUrl && p.patternId).map(p => p.patternId)
       )];
@@ -108,31 +122,28 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.safeArea}>
-
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Comunidad</Text>
-        <TouchableOpacity
-          style={styles.addBtn}
-          onPress={() => navigation.navigate('CrearPublicacion')}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons name="add" size={22} color="white" />
-        </TouchableOpacity>
-      </View>
+      <AppTopBar
+        subtitle="Comunidad"
+        description="Crea y explora patrones de la comunidad"
+        rightAction={(
+          <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => navigation.navigate('CrearPublicacion')}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="add" size={22} color="white" />
+          </TouchableOpacity>
+        )}
+      />
 
       {loading ? (
-        <View style={styles.emptyContainer}>
-          <ActivityIndicator size="large" color={PURPLE} />
-          <Text style={styles.emptyText}>Cargando publicaciones...</Text>
-        </View>
+        <ScreenState loading text="Cargando publicaciones..." />
       ) : publications.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="people-outline" size={56} color="#CCC" />
-          <Text style={styles.emptyText}>Aún no hay publicaciones</Text>
-          <Text style={styles.emptySubtext}>
-            Sé el primero en compartir un patrón con la comunidad
-          </Text>
-        </View>
+        <ScreenState
+          iconName="people-outline"
+          text="Aún no hay publicaciones"
+          subtext="Sé el primero en compartir un patrón con la comunidad"
+        />
       ) : (
         <ScrollView
           style={styles.scroll}

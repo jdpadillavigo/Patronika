@@ -8,9 +8,9 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
-import { PURPLE, sanctionUserDeletePublicationStyles as styles } from '../styles/SanctionUserDeletePublicationStyles';
+import BackButton from '../../../../../core/presentation/designsystem/components/BackButton';
+import { sanctionUserDeletePublicationStyles as styles } from '../styles/SanctionUserDeletePublicationStyles';
 import AdminCommunityUseCase from '../../domain/usecases/AdminCommunityUseCase';
 
 export default function SanctionUserDeletePublicationScreen({ route, navigation }) {
@@ -58,10 +58,7 @@ export default function SanctionUserDeletePublicationScreen({ route, navigation 
         contentContainerStyle={styles.reportContent}
         keyboardShouldPersistTaps="handled"
       >
-        <TouchableOpacity style={styles.reportBackButton} onPress={() => navigation.goBack()} activeOpacity={0.75}>
-          <Ionicons name="chevron-back" size={28} color={PURPLE} />
-          <Text style={styles.reportBackText}>Volver</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.reportBackButton} />
 
         <Text style={styles.reportTitle}>Sancionar usuario y eliminar publicación</Text>
 

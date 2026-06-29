@@ -30,7 +30,7 @@ export const tutorialesStyles = StyleSheet.create({
   // Lista
   list: {
     padding: 16,
-    paddingBottom: 100,
+    paddingBottom: 16,
     gap: 16,
   },
 

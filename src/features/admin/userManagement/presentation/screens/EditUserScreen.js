@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
+import BackButton from '../../../../../core/presentation/designsystem/components/BackButton';
 import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
 
@@ -110,10 +111,7 @@ export default function EditUserScreen({ route, navigation }) {
         contentContainerStyle={styles.editContent}
         keyboardShouldPersistTaps="handled"
       >
-        <TouchableOpacity style={styles.editBackButton} onPress={() => navigation.goBack()} activeOpacity={0.75}>
-          <Ionicons name="chevron-back" size={28} color={PURPLE} />
-          <Text style={styles.editBackText}>Volver</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.editBackButton} />
 
         {loading ? (
           <View style={styles.editLoadingContainer}>

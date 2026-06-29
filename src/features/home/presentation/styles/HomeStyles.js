@@ -32,7 +32,7 @@ export const homeStyles = StyleSheet.create({
   },
   scrollContent: {
     padding: 8,
-    paddingBottom: 90,
+    paddingBottom: 8,
   },
   columns: {
     flexDirection: 'row',
@@ -56,16 +56,21 @@ export const homeStyles = StyleSheet.create({
     width: '100%',
     height: 160,
     backgroundColor: '#EEE',
+    overflow: 'hidden',
   },
   cardImageTall: {
     height: 210,
   },
   cardPlaceholder: {
-    width: '100%',
-    height: 160,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: '#F0E8EF',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  cardImageContent: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
   },
   cardInfo: {
     padding: 10,

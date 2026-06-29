@@ -1,22 +1,23 @@
 import React, { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { AdminBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
 import AdminBottomBar from '../../../../core/presentation/designsystem/components/AdminBottomBar';
 import AdminCircleIconButton from '../../../../core/presentation/designsystem/components/AdminCircleIconButton';
+import AppTopBar from '../../../../core/presentation/designsystem/components/AppTopBar';
 import ConfirmationModal from '../../../../core/presentation/designsystem/components/ConfirmationModal';
 import FloatingIconButton from '../../../../core/presentation/designsystem/components/FloatingIconButton';
+import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import TutorialUseCase from '../../domain/usecases/TutorialUseCase';
 import TutorialCard from '../components/TutorialCard';
-import { adminTutorialManagementStyles as styles, PURPLE } from '../styles/AdminTutorialManagementStyles';
+import { adminTutorialManagementStyles as styles } from '../styles/AdminTutorialManagementStyles';
+
+const UNKNOWN_CONNECTION_ERROR = 'Ocurrió un error desconocido o de conexión. Inténtalo de nuevo.';
 
 export default function AdminTutorialManagementScreen({ navigation }) {
   const [tutorials, setTutorials] = useState([]);
@@ -31,16 +32,22 @@ export default function AdminTutorialManagementScreen({ navigation }) {
     setError('');
     setActionError('');
 
-    const result = await TutorialUseCase.getAll();
-    if (!result.success) {
-      if (!result.sessionExpired) setError(result.error || 'No se pudieron cargar los tutoriales.');
-      setTutorials([]);
-      setLoading(false);
-      return;
-    }
+    try {
+      const result = await TutorialUseCase.getAll();
+      if (!result.success) {
+        if (!result.sessionExpired) setError(UNKNOWN_CONNECTION_ERROR);
+        setTutorials([]);
+        setLoading(false);
+        return;
+      }
 
-    setTutorials(result.data || []);
-    setLoading(false);
+      setTutorials(result.data || []);
+      setLoading(false);
+    } catch {
+      setTutorials([]);
+      setError(UNKNOWN_CONNECTION_ERROR);
+      setLoading(false);
+    }
   }, []);
 
   useFocusEffect(useCallback(() => {
@@ -52,47 +59,42 @@ export default function AdminTutorialManagementScreen({ navigation }) {
 
     setDeleteLoading(true);
     setActionError('');
-    const result = await TutorialUseCase.remove(deleteCandidate.id);
-    setDeleteLoading(false);
-    setDeleteCandidate(null);
+    try {
+      const result = await TutorialUseCase.remove(deleteCandidate.id);
+      setDeleteLoading(false);
+      setDeleteCandidate(null);
 
-    if (!result.success) {
-      if (!result.sessionExpired) setActionError(result.error || 'No se pudo eliminar el tutorial.');
-      return;
+      if (!result.success) {
+        if (!result.sessionExpired) setActionError(UNKNOWN_CONNECTION_ERROR);
+        return;
+      }
+
+      setTutorials(current => current.filter(item => item.id !== deleteCandidate.id));
+    } catch {
+      setDeleteLoading(false);
+      setDeleteCandidate(null);
+      setActionError(UNKNOWN_CONNECTION_ERROR);
     }
-
-    setTutorials(current => current.filter(item => item.id !== deleteCandidate.id));
   }, [deleteCandidate]);
 
   const renderContent = () => {
     if (loading) {
-      return (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={PURPLE} />
-          <Text style={styles.emptyText}>Cargando tutoriales...</Text>
-        </View>
-      );
+      return <ScreenState loading text="Cargando tutoriales..." />;
     }
 
     if (error) {
       return (
-        <View style={styles.centered}>
-          <Ionicons name="cloud-offline-outline" size={52} color="#CCC" />
-          <Text style={styles.emptyText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadTutorials}>
-            <Text style={styles.retryButtonText}>Reintentar</Text>
-          </TouchableOpacity>
-        </View>
+        <ScreenState
+          iconName="cloud-offline-outline"
+          text={error}
+          actionText="Reintentar"
+          onAction={loadTutorials}
+        />
       );
     }
 
     if (tutorials.length === 0) {
-      return (
-        <View style={styles.centered}>
-          <Ionicons name="book-outline" size={52} color="#DDD" />
-          <Text style={styles.emptyText}>No hay tutoriales registrados</Text>
-        </View>
-      );
+      return <ScreenState iconName="book-outline" text="No hay tutoriales registrados" />;
     }
 
     return (
@@ -129,9 +131,7 @@ export default function AdminTutorialManagementScreen({ navigation }) {
 
   return (
     <View style={styles.safeArea}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Patrónika</Text>
-      </View>
+      <AppTopBar subtitle="Gestión de Tutoriales" />
 
       <View style={styles.content}>{renderContent()}</View>
 

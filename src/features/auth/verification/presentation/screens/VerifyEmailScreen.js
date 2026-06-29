@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { verificarCorreoStyles as styles, PURPLE } from '../styles/VerifyEmailStyles';
 import RegisterUseCase from '../../../register/domain/usecases/RegisterUseCase';
 import PasswordRecoveryUseCase from '../../../../resetPassword/domain/usecases/PasswordRecoveryUseCase';
+import BackButton from '../../../../../core/presentation/designsystem/components/BackButton';
 import { useErrorPopup } from '../../../../../core/presentation/designsystem/components/ErrorPopup';
 
 export default function VerificarCorreoScreen({ navigation, route }) {
@@ -88,12 +89,7 @@ export default function VerificarCorreoScreen({ navigation, route }) {
     <View style={styles.safeArea}>
 
       {/* Botón Volver regresa a la pantalla anterior del flujo */}
-      <TouchableOpacity
-        style={styles.volverBtn}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.volverText}>{'< Volver'}</Text>
-      </TouchableOpacity>
+      <BackButton onPress={() => navigation.goBack()} />
 
       <View style={styles.contenido}>
 

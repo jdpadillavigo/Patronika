@@ -26,13 +26,17 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
  
 // Barra de búsqueda dentro del header morado
+  searchHeader: {
+    backgroundColor: PURPLE,
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+  },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.92)',
     borderRadius: 10,
     paddingHorizontal: 12,
-    marginTop: 14,
     gap: 8,
   },
   searchInput: {
@@ -104,7 +108,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 112,
+    paddingBottom: 80,
     gap: 12,
   },
   addUserFab: {
@@ -425,16 +429,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     paddingTop: 18,
   },
   editBackButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    marginLeft: -10,
-    marginBottom: 26,
-  },
-  editBackText: {
-    color: PURPLE,
-    fontSize: 15,
-    fontWeight: '700',
+    marginLeft: -32,
   },
   editTitle: {
     color: '#262626',

@@ -89,7 +89,7 @@ export const misPatronesStyles = StyleSheet.create({
   },
   gridContainer: {
     padding: GRID_PADDING,
-    paddingBottom: 100,
+    paddingBottom: GRID_PADDING,
   },
   gridColumns: {
     flexDirection: 'row',
@@ -113,13 +113,15 @@ export const misPatronesStyles = StyleSheet.create({
     width: CARD_WIDTH,
     height: CARD_WIDTH,
     backgroundColor: '#F3EDF4',
+    overflow: 'hidden',
   },
   gridCardImg: {
+    ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
   },
   gridCardPlaceholder: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F3EDF4',

@@ -1,6 +1,5 @@
 ﻿import React, { useCallback, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Image,
   RefreshControl,
   ScrollView,
@@ -14,7 +13,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import { AdminBottomNavigationItem } from '../../../../../core/domain/BottomNavigationItem';
 import AdminCircleIconButton from '../../../../../core/presentation/designsystem/components/AdminCircleIconButton';
 import AdminBottomBar from '../../../../../core/presentation/designsystem/components/AdminBottomBar';
+import AppTopBar from '../../../../../core/presentation/designsystem/components/AppTopBar';
 import ConfirmationModal from '../../../../../core/presentation/designsystem/components/ConfirmationModal';
+import ScreenState from '../../../../../core/presentation/designsystem/components/ScreenState';
 import UserPreviewModal from '../../../../../core/presentation/designsystem/components/UserPreviewModal';
 import { gridDataToImageUri } from '../../../../../core/presentation/designsystem/utils/GridImage';
 import AdminCommunityUseCase from '../../domain/usecases/AdminCommunityUseCase';
@@ -235,34 +236,23 @@ export default function AdminCommunityManagementScreen({ navigation }) {
 
   const renderContent = () => {
     if (loading) {
-      return (
-        <View style={styles.emptyContainer}>
-          <ActivityIndicator size="large" color={PURPLE} />
-          <Text style={styles.emptyText}>
-            Cargando {activeTab === TABS.COMMENTS ? 'comentarios' : 'publicaciones'}...
-          </Text>
-        </View>
-      );
+      return <ScreenState loading text={`Cargando ${activeTab === TABS.COMMENTS ? 'comentarios' : 'publicaciones'}...`} />;
     }
 
     if (error) {
       return (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="cloud-offline-outline" size={52} color="#CCC" />
-          <Text style={styles.emptyText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={() => loadDashboard()}>
-            <Text style={styles.retryButtonText}>Reintentar</Text>
-          </TouchableOpacity>
-        </View>
+        <ScreenState
+          iconName="cloud-offline-outline"
+          text={error}
+          actionText="Reintentar"
+          onAction={() => loadDashboard()}
+        />
       );
     }
 
     if (activeTab === TABS.COMMENTS) {
       return filteredComments.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="chatbubble-ellipses-outline" size={52} color="#CCC" />
-          <Text style={styles.emptyText}>No hay comentarios para revisar</Text>
-        </View>
+        <ScreenState iconName="chatbubble-ellipses-outline" text="No hay comentarios para revisar" />
       ) : (
         <ScrollView
           style={styles.contentScroll}
@@ -284,10 +274,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
     }
 
     return filteredPublications.length === 0 ? (
-      <View style={styles.emptyContainer}>
-        <Ionicons name="images-outline" size={52} color="#CCC" />
-        <Text style={styles.emptyText}>No hay publicaciones para revisar</Text>
-      </View>
+      <ScreenState iconName="images-outline" text="No hay publicaciones para revisar" />
     ) : (
       <ScrollView
         style={styles.contentScroll}
@@ -330,9 +317,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
 
   return (
     <View style={styles.safeArea}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Patrónika</Text>
-      </View>
+      <AppTopBar subtitle="Gestión de Comunidad" />
 
       <View style={styles.tabs}>
         <TouchableOpacity

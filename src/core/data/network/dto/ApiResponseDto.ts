@@ -3,14 +3,14 @@ export interface ApiResponseDto<T> {
     data?: T | string | null;
 }
 
-export function getApiErrorMessage(response: ApiResponseDto<unknown>, fallback: string): string {
-    return typeof response.data === 'string' && response.data.trim()
+export function getApiErrorMessage(response: ApiResponseDto<unknown> | null | undefined, fallback: string): string {
+    return response && typeof response.data === 'string' && response.data.trim()
         ? response.data
         : fallback;
 }
 
-export function assertApiSuccess<T>(response: ApiResponseDto<T>, fallback: string): T | null {
-    if (!response.success) {
+export function assertApiSuccess<T>(response: ApiResponseDto<T> | null | undefined, fallback: string): T | null {
+    if (!response || !response.success) {
         throw new Error(getApiErrorMessage(response, fallback));
     }
 

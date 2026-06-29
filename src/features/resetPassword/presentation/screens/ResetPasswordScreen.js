@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { restablecerStyles as styles, PURPLE } from '../styles/ResetPasswordStyles';
 import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
+import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 
 export default function RestablecerContrasenaScreen({ navigation, route }) {
@@ -46,12 +47,7 @@ export default function RestablecerContrasenaScreen({ navigation, route }) {
 
   return (
     <View style={styles.safeArea}>
-      <TouchableOpacity
-        style={styles.volverBtn}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.volverText}>{'< Volver'}</Text>
-      </TouchableOpacity>
+      <BackButton onPress={() => navigation.goBack()} />
 
       <View style={styles.contenido}>
         <Text style={styles.titulo}>Restablecer{'\n'}contraseña</Text>

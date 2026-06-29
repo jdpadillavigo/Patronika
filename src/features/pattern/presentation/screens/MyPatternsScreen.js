@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
   View, Text, TouchableOpacity,
   ScrollView, ActivityIndicator, Image, Modal,
@@ -13,7 +13,9 @@ import { misPatronesStyles as styles, PURPLE, CARD_WIDTH } from '../styles/MyPat
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
 import PatternLibraryUseCase from '../../domain/usecases/PatternLibraryUseCase';
 import PublicationUseCase from '../../../post/domain/usecases/PublicationUseCase';
+import AppTopBar from '../../../../core/presentation/designsystem/components/AppTopBar';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
+import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 
@@ -33,6 +35,13 @@ const GridCard = memo(function GridCard({ pattern, onPress }) {
   const uri = pattern.gridData
     ? gridDataToImageUri(pattern.gridData, { maxDimension: 300 })
     : null;
+  const [imageLoading, setImageLoading] = useState(Boolean(uri));
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageLoading(Boolean(uri));
+    setImageFailed(false);
+  }, [uri]);
 
   return (
     <TouchableOpacity
@@ -41,13 +50,24 @@ const GridCard = memo(function GridCard({ pattern, onPress }) {
       activeOpacity={0.82}
     >
       <View style={[styles.gridCardImage, { width: CARD_WIDTH, height: CARD_WIDTH }]}>
-        {uri ? (
-          <Image source={{ uri }} style={styles.gridCardImg} resizeMode="cover" />
-        ) : (
+        {(!uri || imageLoading || imageFailed) ? (
           <View style={styles.gridCardPlaceholder}>
-            <Ionicons name="grid-outline" size={32} color={PURPLE} />
+            <Ionicons name="image-outline" size={32} color={PURPLE} />
           </View>
-        )}
+        ) : null}
+        {uri && !imageFailed ? (
+          <Image
+            source={{ uri }}
+            style={styles.gridCardImg}
+            resizeMode="cover"
+            onLoadStart={() => setImageLoading(true)}
+            onLoadEnd={() => setImageLoading(false)}
+            onError={() => {
+              setImageFailed(true);
+              setImageLoading(false);
+            }}
+          />
+        ) : null}
         {pattern.isPublished && (
           <View style={styles.gridCardPublishedBadge}>
             <Ionicons name="earth" size={12} color="white" />
@@ -232,9 +252,7 @@ export default function MisPatronesScreen({ navigation }) {
   return (
     <View style={styles.safeArea}>
 
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Patrónika</Text>
-      </View>
+      <AppTopBar />
 
       {/* Filtros */}
       <View style={styles.filtrosContainer}>
@@ -271,15 +289,9 @@ export default function MisPatronesScreen({ navigation }) {
       {/* Contenido */}
       <View style={styles.contenido}>
         {loading ? (
-          <View style={styles.vacio}>
-            <ActivityIndicator size="large" color={PURPLE} />
-            <Text style={styles.vacioText}>Cargando patrones...</Text>
-          </View>
+          <ScreenState loading text="Cargando patrones..." />
         ) : patterns.length === 0 ? (
-          <View style={styles.vacio}>
-            <Ionicons name="grid-outline" size={52} color="#DDD" />
-            <Text style={styles.vacioText}>{emptyText}</Text>
-          </View>
+          <ScreenState iconName="grid-outline" text={emptyText} />
         ) : (
           <ScrollView style={styles.gridScroll} contentContainerStyle={styles.gridContainer} showsVerticalScrollIndicator={false}>
             <View style={styles.gridColumns}>

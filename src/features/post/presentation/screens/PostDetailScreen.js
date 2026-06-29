@@ -15,6 +15,7 @@ import PatternLibraryUseCase from '../../../pattern/domain/usecases/PatternLibra
 import HttpClient from '../../../../core/data/network/HttpClientExt';
 import UserRemoteDataSource from '../../../user/data/networking/UserRemoteDataSource';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
+import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 
 const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Otros'];
@@ -240,23 +241,23 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
     <View style={styles.safeArea}>
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={22} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Publicación</Text>
-        {!isOwnPublication && patternId && (
-          <TouchableOpacity style={styles.saveBtn} onPress={handleToggleSave} disabled={savingPattern}>
-            {savingPattern
-              ? <ActivityIndicator size="small" color={PURPLE} />
-              : <Ionicons name={isSaved ? 'bookmark' : 'bookmark-outline'} size={22} color={PURPLE} />
-            }
-          </TouchableOpacity>
-        )}
-        {isOwnPublication && (
-          <TouchableOpacity style={styles.deleteBtn} onPress={() => setShowDeleteModal(true)}>
-            <Ionicons name="trash-outline" size={20} color="#E53935" />
-          </TouchableOpacity>
-        )}
+        <BackButton onPress={() => navigation.goBack()} />
+        <View style={styles.headerTitleRow}>
+          <Text style={styles.headerTitle}>Publicación</Text>
+          {!isOwnPublication && patternId && (
+            <TouchableOpacity style={styles.saveBtn} onPress={handleToggleSave} disabled={savingPattern}>
+              {savingPattern
+                ? <ActivityIndicator size="small" color={PURPLE} />
+                : <Ionicons name={isSaved ? 'bookmark' : 'bookmark-outline'} size={22} color={PURPLE} />
+              }
+            </TouchableOpacity>
+          )}
+          {isOwnPublication && (
+            <TouchableOpacity style={styles.deleteBtn} onPress={() => setShowDeleteModal(true)}>
+              <Ionicons name="trash-outline" size={20} color="#E53935" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <KeyboardAvoidingView

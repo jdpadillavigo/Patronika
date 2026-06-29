@@ -1,14 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import {
-  View, Text, ScrollView,
-  ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, ScrollView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { UserBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
+import AppTopBar from '../../../../core/presentation/designsystem/components/AppTopBar';
+import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
-import { tutorialesStyles as styles, PURPLE } from '../styles/TutorialesStyles';
+import { tutorialesStyles as styles } from '../styles/TutorialesStyles';
 import TutorialCard from '../components/TutorialCard';
 import TutorialUseCase from '../../domain/usecases/TutorialUseCase';
 
@@ -29,29 +27,20 @@ export default function TutorialesScreen({ navigation }) {
 
   return (
     <View style={styles.safeArea}>
-
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Tutoriales</Text>
-        <Text style={styles.headerSubtitle}>Aprende técnicas de tejido paso a paso</Text>
-      </View>
+      <AppTopBar subtitle="Tutoriales" description="Aprende técnicas de tejido paso a paso" />
 
       {loading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={PURPLE} />
-        </View>
+        <ScreenState loading text="Cargando tutoriales..." />
       ) : tutorials.length === 0 ? (
-        <View style={styles.centered}>
-          <Ionicons name="book-outline" size={52} color="#DDD" />
-          <Text style={styles.emptyText}>Sin tutoriales aún</Text>
-          <Text style={styles.emptySubtext}>Vuelve pronto para ver contenido nuevo</Text>
-        </View>
+        <ScreenState
+          iconName="book-outline"
+          text="Sin tutoriales aún"
+          subtext="Vuelve pronto para ver contenido nuevo"
+        />
       ) : (
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
           {tutorials.map(t => (
-            <TutorialCard
-              key={t.id}
-              tutorial={t}
-            />
+            <TutorialCard key={t.id} tutorial={t} />
           ))}
         </ScrollView>
       )}

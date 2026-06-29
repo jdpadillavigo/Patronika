@@ -13,6 +13,7 @@ import PatternLibraryUseCase from '../../../pattern/domain/usecases/PatternLibra
 import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
 import HttpClient from '../../../../core/data/network/HttpClientExt';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
+import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 
 const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Otros'];
@@ -117,9 +118,7 @@ export default function CrearPublicacionScreen({ navigation }) {
     <View style={styles.safeArea}>
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={22} color="#333" />
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} />
         <Text style={styles.headerTitle}>Nueva publicación</Text>
       </View>
 

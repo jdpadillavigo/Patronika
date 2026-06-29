@@ -95,7 +95,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
   commentsContent: {
     paddingHorizontal: 12,
     paddingTop: 14,
-    paddingBottom: 96,
+    paddingBottom: 12,
     gap: 12,
   },
   commentCard: {
@@ -168,21 +168,10 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     position: 'absolute',
     top: 9,
     right: 9,
-    width: 27,
-    height: 27,
-    borderRadius: 14,
-    backgroundColor: PURPLE,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
   publicationsContent: {
     padding: 8,
-    paddingBottom: 96,
+    paddingBottom: 8,
   },
   publicationColumns: {
     flexDirection: 'row',
@@ -380,16 +369,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     paddingTop: 18,
   },
   reportBackButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    marginLeft: -10,
-    marginBottom: 28,
-  },
-  reportBackText: {
-    color: PURPLE,
-    fontSize: 15,
-    fontWeight: '800',
+    marginLeft: -32,
   },
   reportTitle: {
     color: '#262626',

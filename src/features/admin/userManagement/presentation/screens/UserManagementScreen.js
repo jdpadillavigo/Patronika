@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  ActivityIndicator,
   Image,
   TextInput,
   Modal,
@@ -12,8 +11,10 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { AdminBottomNavigationItem } from '../../../../../core/domain/BottomNavigationItem';
+import AppTopBar from '../../../../../core/presentation/designsystem/components/AppTopBar';
 import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 import FloatingIconButton from '../../../../../core/presentation/designsystem/components/FloatingIconButton';
+import ScreenState from '../../../../../core/presentation/designsystem/components/ScreenState';
 import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
 import ProfileUseCase from '../../../../profile/domain/usecases/ProfileUseCase';
@@ -260,11 +261,7 @@ export default function GestionUsuariosScreen({ navigation }) {
   if (esAdmin === false) {
     return (
       <View style={styles.safeArea}>
-        <View style={styles.header}>
-           <View style={styles.headerTop}>
-            <Text style={styles.headerTitle}>Patrónika</Text>
-          </View>
-        </View>
+        <AppTopBar subtitle="Gestión de Usuarios" />
         <View style={styles.centerState}>
           <Ionicons name="lock-closed-outline" size={48} color="#CCC" />
           <Text style={styles.deniedTitle}>Acceso restringido</Text>
@@ -276,12 +273,9 @@ export default function GestionUsuariosScreen({ navigation }) {
  
   return (
     <View style={styles.safeArea}>
- 
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Patrónika</Text>
-        </View>
- 
+      <AppTopBar subtitle="Gestión de Usuarios" />
+
+      <View style={styles.searchHeader}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color="#888" />
           <TextInput
@@ -319,21 +313,17 @@ export default function GestionUsuariosScreen({ navigation }) {
 
       {/* Estado: cargando */}
       {loading && (
-        <View style={styles.centerState}>
-          <ActivityIndicator size="large" color={PURPLE} />
-          <Text style={styles.centerStateText}>Cargando usuarios...</Text>
-        </View>
+        <ScreenState loading text="Cargando usuarios..." />
       )}
  
       {/* Estado: error (criterio de aceptación #4) */}
       {!loading && error ? (
-        <View style={styles.centerState}>
-          <Ionicons name="cloud-offline-outline" size={48} color="#CCC" />
-          <Text style={styles.centerStateText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={verificarAccesoYCargar}>
-            <Text style={styles.retryButtonText}>Reintentar</Text>
-          </TouchableOpacity>
-        </View>
+        <ScreenState
+          iconName="cloud-offline-outline"
+          text={error}
+          actionText="Reintentar"
+          onAction={verificarAccesoYCargar}
+        />
       ) : null}
  
       {/* Estado: listado vacío (criterio de aceptación #4) */}
@@ -345,10 +335,7 @@ export default function GestionUsuariosScreen({ navigation }) {
           {actionError ? <Text style={styles.actionErrorText}>{actionError}</Text> : null}
  
           {usuariosFiltrados.length === 0 ? (
-            <View style={styles.centerState}>
-              <Ionicons name="people-outline" size={48} color="#CCC" />
-              <Text style={styles.centerStateText}>No se encontraron usuarios.</Text>
-            </View>
+            <ScreenState iconName="people-outline" text="No se encontraron usuarios" />
           ) : (
             <FlatList
               data={usuariosFiltrados}

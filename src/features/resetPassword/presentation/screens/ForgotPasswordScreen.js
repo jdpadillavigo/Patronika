@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { olvidasteStyles as styles } from '../styles/ForgotPasswordStyles';
 import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
+import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 
 export default function OlvidasteContrasenaScreen({ navigation }) {
@@ -25,12 +26,7 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
   return (
     <View style={styles.safeArea}>
 
-      <TouchableOpacity
-        style={styles.volverBtn}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={styles.volverText}>{'< Volver'}</Text>
-      </TouchableOpacity>
+      <BackButton onPress={() => navigation.navigate('Login')} />
 
       <View style={styles.contenido}>
 

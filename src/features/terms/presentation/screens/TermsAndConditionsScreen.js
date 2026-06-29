@@ -2,11 +2,10 @@ import React from 'react';
 import {
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { termsAndConditionsStyles as styles, PURPLE } from '../styles/TermsAndConditionsStyles';
+import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
+import { termsAndConditionsStyles as styles } from '../styles/TermsAndConditionsStyles';
 
 const appTermsSections = [
   {
@@ -116,14 +115,7 @@ export default function TermsAndConditionsScreen({ navigation, route }) {
   return (
     <View style={styles.safeArea}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.75}
-        >
-          <Ionicons name="chevron-back" size={22} color={PURPLE} />
-          <Text style={styles.backText}>Volver</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} />
         <Text style={styles.title}>Términos y condiciones</Text>
       </View>
 
