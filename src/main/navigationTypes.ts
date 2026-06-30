@@ -21,6 +21,7 @@ export type RootStackParamList = {
     AgregarUsuarioAdmin: undefined;
     EditarUsuarioAdmin: {
         userId: string | null;
+        editingOwnProfile?: boolean;
     };
     GestionComunidadAdmin: undefined;
     SancionarEliminarPublicacionAdmin: {

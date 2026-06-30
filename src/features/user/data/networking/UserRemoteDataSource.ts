@@ -21,8 +21,9 @@ async function loadById(id: string): Promise<User> {
 
 // PUT /api/users/{id} — actualiza datos del perfil (username, password, etc.)
 // No acepta imagen; para subir foto usar uploadAvatar()
-async function update(id: string, request: UserRequest): Promise<void> {
-    await HttpClient.put<ApiResponse<string>>(`/api/users/${id}`, request as unknown as Record<string, unknown>);
+async function update(id: string, request: UserRequest): Promise<string> {
+    const response = await HttpClient.put<ApiResponse<string>>(`/api/users/${id}`, request as unknown as Record<string, unknown>);
+    return assertApiSuccess(response, 'Usuario actualizado correctamente') || 'Usuario actualizado correctamente';
 }
 
 async function remove(id: string, username: string): Promise<void> {
@@ -40,7 +41,7 @@ async function remove(id: string, username: string): Promise<void> {
 // PUT /api/users/{id}/profile-image — sube la foto de perfil del usuario.
 // Usa multipart/form-data con la parte "file" conteniendo la imagen.
 // Tras llamar a esta función, loadById() devolverá el profileImageUrl actualizado.
-async function uploadAvatar(id: string, imageUri: string): Promise<void> {
+async function uploadAvatar(id: string, imageUri: string): Promise<string> {
     const formData = new FormData();
     const filename = imageUri.split('/').pop() || `avatar-${Date.now()}.jpg`;
     const ext = filename.split('.').pop()?.toLowerCase();
@@ -50,7 +51,13 @@ async function uploadAvatar(id: string, imageUri: string): Promise<void> {
         name: filename,
         type: mimeType,
     } as unknown as Blob);
-    await HttpClient.put<ApiResponse<unknown>>(`/api/users/${id}/profile-image`, formData);
+    const response = await HttpClient.put<ApiResponse<string>>(`/api/users/${id}/profile-image`, formData);
+    return assertApiSuccess(response, 'Imagen de perfil actualizada correctamente') || 'Imagen de perfil actualizada correctamente';
+}
+
+async function changePassword(email: string, password: string): Promise<string> {
+    const response = await HttpClient.post<ApiResponse<string>>('/api/auth/change-password', { email, password });
+    return assertApiSuccess(response, 'Contraseña actualizada correctamente') || 'Contraseña actualizada correctamente';
 }
 
 const UserRemoteDataSource = {
@@ -59,6 +66,7 @@ const UserRemoteDataSource = {
     update,
     remove,
     uploadAvatar,
+    changePassword,
 };
 
 export default UserRemoteDataSource;

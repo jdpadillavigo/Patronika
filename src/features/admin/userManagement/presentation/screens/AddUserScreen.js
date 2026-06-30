@@ -90,11 +90,11 @@ export default function AddUserScreen({ navigation }) {
             <Image source={{ uri: avatarUri }} style={styles.addAvatarImage} />
           ) : (
             <View style={styles.addAvatarPlaceholder}>
-              <Ionicons name="person" size={48} color="#888" />
+              <Ionicons name="person" size={96} color="#888" />
             </View>
           )}
           <View style={styles.addAvatarBadge}>
-            <Ionicons name="add" size={16} color="white" />
+            <Ionicons name={avatarUri ? 'pencil' : 'add'} size={22} color="white" />
           </View>
         </TouchableOpacity>
 
@@ -172,7 +172,7 @@ export default function AddUserScreen({ navigation }) {
           activeOpacity={0.85}
         >
           <Text style={styles.editSaveButtonText}>
-            {saving ? 'Registrando...' : 'Registrar'}
+            {saving ? 'Agregando...' : 'Agregar'}
           </Text>
         </TouchableOpacity>
       </ScrollView>

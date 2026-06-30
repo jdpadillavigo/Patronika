@@ -68,7 +68,7 @@ async function updateProfile(username: string, password: string, avatar?: string
 
 // Cambia la contraseña: primero valida la contraseña actual haciendo login,
 // luego actualiza con la nueva contraseña.
-async function changePassword(currentPassword: string, newPassword: string): Promise<User> {
+async function changePassword(currentPassword: string, newPassword: string): Promise<{ user: User; message: string }> {
     const currentUser = await HttpClient.getCurrentUser<User>();
     if (!currentUser?.id) {
         throw new Error('Inicia sesión nuevamente para cambiar tu contraseña');
@@ -76,11 +76,11 @@ async function changePassword(currentPassword: string, newPassword: string): Pro
 
     const tokens = await LoginRemoteDataSource.login(currentUser.username, currentPassword);
     await HttpClient.saveTokens(tokens.accessToken, tokens.refreshToken);
-    await UserRemoteDataSource.update(currentUser.id, toUserRequest(currentUser, newPassword));
+    const message = await UserRemoteDataSource.changePassword(currentUser.email, newPassword);
 
     const updated = createUser(await UserRemoteDataSource.loadById(currentUser.id));
     await HttpClient.saveCurrentUser({ ...updated, avatar: currentUser.avatar || null });
-    return { ...updated, avatar: currentUser.avatar || null };
+    return { user: { ...updated, avatar: currentUser.avatar || null }, message };
 }
 
 async function getAllUsers(): Promise<User[]> {
@@ -92,16 +92,38 @@ async function getUserById(id: string): Promise<User> {
     return createUser(await UserRemoteDataSource.loadById(id));
 }
 
-async function updateUser(user: User, profileImageUri?: string | null): Promise<User> {
+async function updateUser(user: User, profileImageUri?: string | null): Promise<{ user: User; message: string }> {
     if (!user.id) {
         throw new Error('Usuario no encontrado');
     }
 
-    await UserRemoteDataSource.update(user.id, toUserRequest(user));
+    const currentUser = await HttpClient.getCurrentUser<User>();
+    let message = await UserRemoteDataSource.update(user.id, toUserRequest(user));
     if (profileImageUri && profileImageUri.startsWith('file://')) {
-        await UserRemoteDataSource.uploadAvatar(user.id, profileImageUri);
+        message = await UserRemoteDataSource.uploadAvatar(user.id, profileImageUri);
     }
-    return createUser(await UserRemoteDataSource.loadById(user.id));
+    const updated = createUser(await UserRemoteDataSource.loadById(user.id));
+    const finalAvatar = updated.profileImageUrl || profileImageUri || user.avatar || null;
+    const withAvatar = { ...updated, avatar: finalAvatar };
+    if (currentUser?.id === user.id) {
+        await HttpClient.saveCurrentUser(withAvatar);
+    }
+    return { user: withAvatar, message };
+}
+
+async function updateProfileImage(user: User, profileImageUri: string): Promise<{ user: User; message: string }> {
+    if (!user.id) {
+        throw new Error('Usuario no encontrado');
+    }
+
+    const currentUser = await HttpClient.getCurrentUser<User>();
+    const message = await UserRemoteDataSource.uploadAvatar(user.id, profileImageUri);
+    const updated = createUser(await UserRemoteDataSource.loadById(user.id));
+    const withAvatar = { ...updated, avatar: updated.profileImageUrl || profileImageUri || user.avatar || null };
+    if (currentUser?.id === user.id) {
+        await HttpClient.saveCurrentUser(withAvatar);
+    }
+    return { user: withAvatar, message };
 }
 
 async function createUserFromAdmin(
@@ -129,6 +151,7 @@ const UserRepository = {
     getUserById,
     createUserFromAdmin,
     updateUser,
+    updateProfileImage,
     deleteUser,
 };
 

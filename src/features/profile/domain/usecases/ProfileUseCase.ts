@@ -41,7 +41,7 @@ async function changePassword(currentPassword: string, newPassword: string, conf
 
     try {
         const user = await UserRepository.changePassword(currentPassword, newPassword);
-        return { success: true, data: user };
+        return { success: true, data: user.user, message: user.message };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) {
             return { success: false, sessionExpired: true };

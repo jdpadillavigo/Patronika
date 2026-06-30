@@ -11,6 +11,10 @@ export default function FormTextField({
   secureTextEntry = false,
   multiline = false,
   inputProps,
+  editable = true,
+  labelRightAction,
+  inputContainerStyle,
+  inputStyle,
   style,
 }) {
   const [visible, setVisible] = useState(false);
@@ -18,8 +22,11 @@ export default function FormTextField({
 
   return (
     <View style={[styles.group, style]}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={[styles.inputContainer, multiline && styles.textAreaContainer]}>
+      <View style={styles.labelRow}>
+        <Text style={styles.label}>{label}</Text>
+        {labelRightAction ? <View style={styles.labelAction}>{labelRightAction}</View> : null}
+      </View>
+      <View style={[styles.inputContainer, multiline && styles.textAreaContainer, inputContainerStyle]}>
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -28,10 +35,11 @@ export default function FormTextField({
           secureTextEntry={isPassword && !visible}
           autoCapitalize="none"
           autoCorrect={false}
+          editable={editable}
           multiline={multiline}
           scrollEnabled={multiline}
           textAlignVertical={multiline ? 'top' : 'center'}
-          style={[styles.input, multiline && styles.textAreaInput]}
+          style={[styles.input, multiline && styles.textAreaInput, inputStyle]}
           {...inputProps}
         />
         {isPassword ? (
@@ -59,7 +67,17 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
     borderBottomWidth: 1,
     borderBottomColor: PURPLE,
+    marginBottom: 0,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
+  },
+  labelAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   inputContainer: {
     borderWidth: 1,
