@@ -35,6 +35,7 @@ export const misPatronesStyles = StyleSheet.create({
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
+    zIndex: 1
   },
   filtroGrid: {
     width: 38,
@@ -88,6 +89,12 @@ export const misPatronesStyles = StyleSheet.create({
     flex: 1,
   },
   gridContainer: {
+    padding: GRID_PADDING,
+    paddingBottom: GRID_PADDING,
+  },
+  gridEmptyContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
     padding: GRID_PADDING,
     paddingBottom: GRID_PADDING,
   },

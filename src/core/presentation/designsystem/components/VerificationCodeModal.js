@@ -9,29 +9,38 @@ export default function VerificationCodeModal({
   title,
   message,
   loading = false,
+  submitText = 'Continuar',
+  loadingText = 'Verificando...',
   onCancel,
   onResend,
   onSubmit,
 }) {
-  const [code, setCode] = useState(['', '', '', '']);
-  const inputs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+  const codeLength = 6;
+  const [code, setCode] = useState(Array(codeLength).fill(''));
+  const [resendVisible, setResendVisible] = useState(false);
+  const inputs = useRef([]);
 
   useEffect(() => {
-    if (visible) setCode(['', '', '', '']);
-  }, [visible]);
+    if (visible) setCode(Array(codeLength).fill(''));
+  }, [visible, codeLength]);
 
   const handleChange = (text, index) => {
     const digit = text.replace(/[^0-9]/g, '').slice(-1);
     const nextCode = [...code];
     nextCode[index] = digit;
     setCode(nextCode);
-    if (digit && index < 3) inputs[index + 1].current?.focus();
+    if (digit && index < codeLength - 1) inputs.current[index + 1]?.focus();
   };
 
   const handleKeyPress = (event, index) => {
     if (event.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
-      inputs[index - 1].current?.focus();
+      inputs.current[index - 1]?.focus();
     }
+  };
+
+  const handleResend = async () => {
+    const result = await onResend?.();
+    if (result !== false) setResendVisible(true);
   };
 
   return (
@@ -44,7 +53,7 @@ export default function VerificationCodeModal({
       <View style={popupStyles.modalOverlay}>
         <View style={popupStyles.modalCard}>
           <View style={popupStyles.modalIconContainer}>
-            <Ionicons name="mail-outline" size={38} color={PURPLE} />
+            <Ionicons name="mail" size={38} color={PURPLE} />
           </View>
 
           <Text style={popupStyles.modalTitle}>{title}</Text>
@@ -54,7 +63,9 @@ export default function VerificationCodeModal({
             {code.map((digit, index) => (
               <TextInput
                 key={index}
-                ref={inputs[index]}
+                ref={input => {
+                  inputs.current[index] = input;
+                }}
                 value={digit}
                 onChangeText={text => handleChange(text, index)}
                 onKeyPress={event => handleKeyPress(event, index)}
@@ -67,8 +78,8 @@ export default function VerificationCodeModal({
             ))}
           </View>
 
-          <TouchableOpacity onPress={onResend} disabled={loading} style={styles.resendButton}>
-            <Text style={styles.resendText}>Reenviar correo</Text>
+          <TouchableOpacity onPress={handleResend} disabled={loading} style={styles.resendButton}>
+            <Text style={styles.resendText}>Reenviar código</Text>
           </TouchableOpacity>
 
           <View style={popupStyles.modalActions}>
@@ -80,11 +91,29 @@ export default function VerificationCodeModal({
               onPress={() => onSubmit?.(code.join(''))}
               disabled={loading}
             >
-              <Text style={popupStyles.modalButtonText}>{loading ? 'Actualizando...' : 'Actualizar'}</Text>
+              <Text style={popupStyles.modalButtonText}>{loading ? loadingText : submitText}</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
+      <Modal
+        visible={resendVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setResendVisible(false)}
+      >
+        <View style={popupStyles.modalOverlay}>
+          <View style={popupStyles.modalCard}>
+            <View style={popupStyles.modalIconContainer}>
+              <Ionicons name="mail" size={38} color={PURPLE} />
+            </View>
+            <Text style={popupStyles.modalTitle}>Código reenviado</Text>
+            <TouchableOpacity style={popupStyles.modalButton} onPress={() => setResendVisible(false)}>
+              <Text style={popupStyles.modalButtonText}>Aceptar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 }
@@ -92,18 +121,22 @@ export default function VerificationCodeModal({
 const styles = StyleSheet.create({
   codeRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 7,
     marginBottom: 14,
   },
   codeInput: {
-    width: 46,
-    height: 46,
+    width: 36,
+    height: 44,
     borderWidth: 1.5,
     borderColor: PURPLE,
     borderRadius: 8,
     color: '#111',
-    fontSize: 22,
+    fontSize: 20,
+    lineHeight: 22,
     fontWeight: '800',
+    paddingVertical: 0,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   resendButton: {
     marginBottom: 22,

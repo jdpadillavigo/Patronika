@@ -14,14 +14,16 @@ import { sanctionUserDeletePublicationStyles as styles } from '../styles/Sanctio
 import AdminCommunityUseCase from '../../domain/usecases/AdminCommunityUseCase';
 
 export default function SanctionUserDeletePublicationScreen({ route, navigation }) {
-  const publicationId = route?.params?.publicationId;
+  const targetType = route?.params?.targetType === 'comment' ? 'comment' : 'publication';
+  const targetId = targetType === 'comment' ? route?.params?.commentId : route?.params?.publicationId;
   const [suspensionDays, setSuspensionDays] = useState('');
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const canSubmit = suspensionDays.trim() && reason.trim() && !loading;
 
   const handleSanctionAndDelete = useCallback(async () => {
-    if (!publicationId || loading) return;
+    if (!targetId || loading) return;
 
     const days = Number.parseInt(suspensionDays, 10);
     if (!Number.isInteger(days) || days <= 0) {
@@ -36,7 +38,9 @@ export default function SanctionUserDeletePublicationScreen({ route, navigation 
     setLoading(true);
     setError('');
     const sanctionDraft = { days, reason: reason.trim() };
-    const result = await AdminCommunityUseCase.sanctionUserAndDeletePublication(publicationId, sanctionDraft);
+    const result = targetType === 'comment'
+      ? await AdminCommunityUseCase.sanctionUserAndDeleteComment(targetId, sanctionDraft)
+      : await AdminCommunityUseCase.sanctionUserAndDeletePublication(targetId, sanctionDraft);
     setLoading(false);
 
     if (!result.success) {
@@ -46,7 +50,7 @@ export default function SanctionUserDeletePublicationScreen({ route, navigation 
     }
 
     navigation.goBack();
-  }, [loading, navigation, publicationId, reason, suspensionDays]);
+  }, [loading, navigation, reason, suspensionDays, targetId, targetType]);
 
   return (
     <KeyboardAvoidingView
@@ -60,10 +64,12 @@ export default function SanctionUserDeletePublicationScreen({ route, navigation 
       >
         <BackButton onPress={() => navigation.goBack()} style={styles.reportBackButton} />
 
-        <Text style={styles.reportTitle}>Sancionar usuario y eliminar publicación</Text>
+        <Text style={styles.reportTitle}>
+          Sancionar usuario y eliminar {targetType === 'comment' ? 'comentario' : 'publicación'}
+        </Text>
 
         <View style={styles.reportFieldGroup}>
-          <Text style={styles.reportLabel}>Cantidad de días</Text>
+          <Text style={styles.reportLabel}>Cantidad de dias</Text>
           <TextInput
             value={suspensionDays}
             onChangeText={text => setSuspensionDays(text.replace(/[^0-9]/g, ''))}
@@ -92,21 +98,12 @@ export default function SanctionUserDeletePublicationScreen({ route, navigation 
         {error ? <Text style={styles.reportErrorText}>{error}</Text> : null}
 
         <TouchableOpacity
-          style={[styles.reportPrimaryButton, loading && styles.reportButtonDisabled]}
-          onPress={() => navigation.goBack()}
-          disabled={loading}
-          activeOpacity={0.84}
-        >
-          <Text style={styles.reportPrimaryButtonText}>Cancelar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.reportDangerButton, loading && styles.reportButtonDisabled]}
+          style={[styles.reportDangerButton, !canSubmit && styles.reportButtonDisabled]}
           onPress={handleSanctionAndDelete}
-          disabled={loading}
+          disabled={!canSubmit}
           activeOpacity={0.84}
         >
-          <Text style={styles.reportDangerButtonText}>{loading ? 'Procesando...' : 'Sancionar y eliminar'}</Text>
+          <Text style={styles.reportDangerButtonText}>{loading ? 'Procesando...' : 'Eliminar y sancionar'}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

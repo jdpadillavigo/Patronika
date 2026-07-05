@@ -13,6 +13,7 @@ import PublicationUseCase from '../../../post/domain/usecases/PublicationUseCase
 import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
+import { REFRESH_TOP_BAR_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Otros'];
 
@@ -148,7 +149,7 @@ export default function HomeScreen({ navigation }) {
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PURPLE]} tintColor={PURPLE} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
         >
           <View style={styles.columns}>
             <View style={styles.column}>

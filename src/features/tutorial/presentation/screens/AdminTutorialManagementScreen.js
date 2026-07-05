@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
+  RefreshControl,
   ScrollView,
   Text,
   View,
@@ -15,20 +16,26 @@ import FloatingIconButton from '../../../../core/presentation/designsystem/compo
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import TutorialUseCase from '../../domain/usecases/TutorialUseCase';
 import TutorialCard from '../components/TutorialCard';
-import { adminTutorialManagementStyles as styles } from '../styles/AdminTutorialManagementStyles';
+import { adminTutorialManagementStyles as styles, PURPLE } from '../styles/AdminTutorialManagementStyles';
+import { REFRESH_ADMIN_LIST_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 const UNKNOWN_CONNECTION_ERROR = 'Ocurrió un error desconocido o de conexión. Inténtalo de nuevo.';
 
 export default function AdminTutorialManagementScreen({ navigation }) {
   const [tutorials, setTutorials] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
   const [deleteCandidate, setDeleteCandidate] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const loadTutorials = useCallback(async () => {
-    setLoading(true);
+  const loadTutorials = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     setError('');
     setActionError('');
 
@@ -37,18 +44,25 @@ export default function AdminTutorialManagementScreen({ navigation }) {
       if (!result.success) {
         if (!result.sessionExpired) setError(UNKNOWN_CONNECTION_ERROR);
         setTutorials([]);
+        setRefreshing(false);
         setLoading(false);
         return;
       }
 
       setTutorials(result.data || []);
+      setRefreshing(false);
       setLoading(false);
     } catch {
       setTutorials([]);
       setError(UNKNOWN_CONNECTION_ERROR);
+      setRefreshing(false);
       setLoading(false);
     }
   }, []);
+
+  const handleRefresh = useCallback(() => {
+    loadTutorials(true);
+  }, [loadTutorials]);
 
   useFocusEffect(useCallback(() => {
     loadTutorials();
@@ -94,7 +108,15 @@ export default function AdminTutorialManagementScreen({ navigation }) {
     }
 
     if (tutorials.length === 0) {
-      return <ScreenState iconName="book-outline" text="No hay tutoriales registrados" />;
+      return (
+        <ScrollView
+          contentContainerStyle={styles.emptyList}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_ADMIN_LIST_OFFSET} />}
+        >
+          <ScreenState iconName="book-outline" text="No hay tutoriales registrados" />
+        </ScrollView>
+      );
     }
 
     return (
@@ -103,7 +125,11 @@ export default function AdminTutorialManagementScreen({ navigation }) {
           Mostrando {tutorials.length} {tutorials.length === 1 ? 'tutorial' : 'tutoriales'}
         </Text>
         {actionError ? <Text style={styles.actionErrorText}>{actionError}</Text> : null}
-        <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_ADMIN_LIST_OFFSET} />}
+        >
           {tutorials.map(tutorial => (
             <TutorialCard
               key={tutorial.id}

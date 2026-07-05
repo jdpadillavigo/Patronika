@@ -20,9 +20,17 @@ async function requestRegisterCode(email: string): Promise<string> {
 
 async function requestPasswordRecoveryCode(email: string): Promise<string> {
     const response = await HttpClient.post<ApiResponse<string>>(
-        '/api/auth/change-password/request-code',
+        '/api/auth/modify-password/request-code',
         createVerificationCodeRequest(email),
         { requiresAuth: false },
+    );
+    return readMessage(response, 'Código enviado al correo');
+}
+
+async function requestEmailChangeCode(email: string): Promise<string> {
+    const response = await HttpClient.post<ApiResponse<string>>(
+        '/api/users/change-email/request-code',
+        createVerificationCodeRequest(email),
     );
     return readMessage(response, 'Código enviado al correo');
 }
@@ -38,7 +46,7 @@ async function verifyCode(email: string, code: string): Promise<string> {
 
 async function changePassword(email: string, password: string): Promise<string> {
     const response = await HttpClient.post<ApiResponse<string>>(
-        '/api/auth/change-password',
+        '/api/auth/forgot-password',
         createChangePasswordRequest(email, password),
         { requiresAuth: false },
     );
@@ -48,6 +56,7 @@ async function changePassword(email: string, password: string): Promise<string> 
 const VerificationRemoteDataSource = {
     requestRegisterCode,
     requestPasswordRecoveryCode,
+    requestEmailChangeCode,
     verifyCode,
     changePassword,
 };

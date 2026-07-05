@@ -42,6 +42,12 @@ export const adminTutorialManagementStyles = StyleSheet.create({
     paddingBottom: 80,
     gap: 16,
   },
+  emptyList: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 16,
+    paddingBottom: 80,
+  },
   cardButton: {
     position: 'relative',
   },

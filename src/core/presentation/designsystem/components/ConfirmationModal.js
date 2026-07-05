@@ -6,7 +6,7 @@ import { PURPLE } from './CommonStyles';
 export default function ConfirmationModal({
   visible,
   title,
-  iconName = 'trash-outline',
+  iconName = 'trash',
   confirmText = 'Eliminar',
   cancelText = 'Cancelar',
   loading = false,
@@ -14,6 +14,8 @@ export default function ConfirmationModal({
   onCancel,
   onConfirm,
 }) {
+  const filledIconName = typeof iconName === 'string' ? iconName.replace('-outline', '') : iconName;
+
   return (
     <Modal
       visible={visible}
@@ -24,7 +26,7 @@ export default function ConfirmationModal({
       <View style={styles.overlay}>
         <View style={styles.card}>
           <View style={styles.icon}>
-            <Ionicons name={iconName} size={30} color={PURPLE} />
+            <Ionicons name={filledIconName} size={30} color={PURPLE} />
           </View>
           <Text style={styles.title}>{title}</Text>
           <View style={styles.actions}>
@@ -88,18 +90,6 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: PURPLE,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: 'white',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  confirmButton: {
-    flex: 1,
     backgroundColor: 'white',
     borderWidth: 1.5,
     borderColor: PURPLE,
@@ -107,8 +97,20 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
   },
-  confirmButtonText: {
+  cancelButtonText: {
     color: PURPLE,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: PURPLE,
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    color: 'white',
     fontSize: 15,
     fontWeight: '700',
   },

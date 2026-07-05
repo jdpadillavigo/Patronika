@@ -25,8 +25,11 @@ export type RootStackParamList = {
     };
     GestionComunidadAdmin: undefined;
     SancionarEliminarPublicacionAdmin: {
-        publicationId: string;
+        targetType?: 'publication' | 'comment';
+        publicationId?: string;
         publicationName?: string;
+        commentId?: string;
+        commentContent?: string;
     };
     GestionTutorialesAdmin: undefined;
     AgregarTutorialAdmin: undefined;

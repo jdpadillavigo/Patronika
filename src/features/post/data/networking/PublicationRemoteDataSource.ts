@@ -27,6 +27,7 @@ export interface Publication {
     technique: number; // 0=Crochet, 1=Tejido a dos agujas, 2=Bordado, 3=Macramé, 4=Otros
     imageUrl?: string | null; // foto opcional subida por el usuario
     publishedAt?: string | null;
+    reportCount: number;
 }
 
 // GET /api/publications — devuelve todas las publicaciones de la comunidad

@@ -14,6 +14,10 @@ async function requestPasswordRecoveryCode(email: string): Promise<VerificationR
     return { success: true, data: await VerificationRemoteDataSource.requestPasswordRecoveryCode(email) };
 }
 
+async function requestEmailChangeCode(email: string): Promise<VerificationResult> {
+    return { success: true, data: await VerificationRemoteDataSource.requestEmailChangeCode(email) };
+}
+
 async function verifyCode(email: string, code: string): Promise<VerificationResult> {
     return { success: true, data: await VerificationRemoteDataSource.verifyCode(email, code) };
 }
@@ -25,6 +29,7 @@ async function changePassword(email: string, password: string): Promise<Verifica
 const VerificationRepository = {
     requestRegisterCode,
     requestPasswordRecoveryCode,
+    requestEmailChangeCode,
     verifyCode,
     changePassword,
 };

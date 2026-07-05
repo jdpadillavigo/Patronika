@@ -111,9 +111,9 @@ export default function RestablecerContrasenaScreen({ navigation, route }) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalIconContainer}>
-              <Ionicons name="lock-closed-outline" size={36} color={PURPLE} />
+              <Ionicons name="lock-closed" size={36} color={PURPLE} />
               <View style={styles.modalIconBadge}>
-                <Ionicons name="refresh-outline" size={14} color={PURPLE} />
+                <Ionicons name="refresh" size={14} color={PURPLE} />
               </View>
             </View>
 

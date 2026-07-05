@@ -199,8 +199,18 @@ export const detalleStyles = StyleSheet.create({
   commentDate: {
     fontSize: 11,
     color: '#BBB',
+  },
+  commentDateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     paddingLeft: 36,
     marginTop: 2,
+  },
+  commentEditedText: {
+    fontSize: 11,
+    color: '#999',
+    fontWeight: '600',
   },
   noComments: {
     fontSize: 14,
@@ -241,6 +251,15 @@ export const detalleStyles = StyleSheet.create({
   },
   sendBtnDisabled: {
     backgroundColor: '#DDD',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'white',
+    zIndex: 20,
   },
   cancelEditBtn: {
     paddingHorizontal: 8,

@@ -21,6 +21,10 @@ import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles'
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
 import VerificationRepository from '../../../../auth/verification/data/repositories/VerificationRepository';
 
+const EMAIL_CODE_MESSAGE = 'Ingresa el código enviado a tu correo actual para cambiarlo.';
+const PASSWORD_CODE_MESSAGE = 'Ingresa el código enviado a tu correo para actualizar tu contraseña.';
+const CODE_LENGTH = 6;
+
 export default function EditUserScreen({ route, navigation }) {
   const userId = route?.params?.userId;
   const editingOwnProfile = route?.params?.editingOwnProfile === true;
@@ -29,6 +33,7 @@ export default function EditUserScreen({ route, navigation }) {
   const [email, setEmail] = useState('');
   const [usernameDraft, setUsernameDraft] = useState('');
   const [emailDraft, setEmailDraft] = useState('');
+  const [initialUserValues, setInitialUserValues] = useState({ username: '', email: '' });
   const [editingUsername, setEditingUsername] = useState(false);
   const [editingEmail, setEditingEmail] = useState(false);
   const [avatarUri, setAvatarUri] = useState(null);
@@ -43,7 +48,8 @@ export default function EditUserScreen({ route, navigation }) {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [emailCodeVisible, setEmailCodeVisible] = useState(false);
   const [emailCodeLoading, setEmailCodeLoading] = useState(false);
-  const [emailCodeMessage, setEmailCodeMessage] = useState('Se envió un código de 4 dígitos a tu correo. Ingrésalo para actualizarlo.');
+  const [passwordCodeVisible, setPasswordCodeVisible] = useState(false);
+  const [passwordCodeLoading, setPasswordCodeLoading] = useState(false);
   const passwordAnim = useRef(new Animated.Value(0)).current;
   const { showError, showPopup, errorPopup } = useErrorPopup();
 
@@ -83,6 +89,10 @@ export default function EditUserScreen({ route, navigation }) {
       setEmail(loadedUser?.email || '');
       setUsernameDraft(loadedUser?.username || '');
       setEmailDraft(loadedUser?.email || '');
+      setInitialUserValues({
+        username: loadedUser?.username || '',
+        email: loadedUser?.email || '',
+      });
       setAvatarUri(loadedUser?.profileImageUrl || loadedUser?.avatar || null);
       setAvatarChanged(false);
       setAvatarFailed(false);
@@ -142,26 +152,27 @@ export default function EditUserScreen({ route, navigation }) {
     setUser(result.data);
     setUsername(result.data?.username || usernameDraft.trim());
     setUsernameDraft(result.data?.username || usernameDraft.trim());
+    setInitialUserValues(current => ({
+      ...current,
+      username: result.data?.username || usernameDraft.trim(),
+    }));
     setEditingUsername(false);
     if (result.message) showPopup(result.message, 'Éxito', { type: 'success' });
   }, [email, saving, showError, showPopup, user, usernameDraft]);
 
   const requestEmailCode = useCallback(async () => {
     try {
-      const result = await VerificationRepository.requestRegisterCode(emailDraft.trim());
+      const result = await VerificationRepository.requestEmailChangeCode(email.trim());
       if (!result.success) {
         showError(result.error || 'No se pudo enviar el código de verificación.');
         return false;
-      }
-      if (typeof result.data === 'string' && result.data.trim()) {
-        setEmailCodeMessage(result.data);
       }
       return true;
     } catch (error) {
       showError(error instanceof Error ? error.message : 'No se pudo enviar el código de verificación.');
       return false;
     }
-  }, [emailDraft, showError]);
+  }, [email, showError]);
 
   const handleConfirmEmail = useCallback(async () => {
     if (!user || saving) return;
@@ -173,7 +184,7 @@ export default function EditUserScreen({ route, navigation }) {
 
   const handleSubmitEmailCode = useCallback(async (code) => {
     if (!user || emailCodeLoading) return;
-    if (code.length !== 4) {
+    if (code.length !== CODE_LENGTH) {
       showError('Ingresa el código completo.');
       return;
     }
@@ -181,7 +192,7 @@ export default function EditUserScreen({ route, navigation }) {
     setEmailCodeLoading(true);
     let verification = null;
     try {
-      verification = await VerificationRepository.verifyCode(emailDraft.trim(), code);
+      verification = await VerificationRepository.verifyCode(email.trim(), code);
     } catch (error) {
       setEmailCodeLoading(false);
       showError(error instanceof Error ? error.message : 'No se pudo verificar el código.');
@@ -208,6 +219,10 @@ export default function EditUserScreen({ route, navigation }) {
     setUser(result.data);
     setEmail(result.data?.email || emailDraft.trim());
     setEmailDraft(result.data?.email || emailDraft.trim());
+    setInitialUserValues(current => ({
+      ...current,
+      email: result.data?.email || emailDraft.trim(),
+    }));
     showPopup(result.message || verification.data, 'Éxito', {
       type: 'success',
       onAccept: () => {
@@ -215,34 +230,95 @@ export default function EditUserScreen({ route, navigation }) {
         setEditingEmail(false);
       },
     });
-  }, [emailCodeLoading, emailDraft, showError, showPopup, user, username]);
+  }, [email, emailCodeLoading, emailDraft, showError, showPopup, user, username]);
+
+  const requestPasswordCode = useCallback(async () => {
+    const validation = UserManagementUseCase.validateOwnPasswordFields(
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+    );
+    if (!validation.success) {
+      showError(validation.error || 'Revisa los datos de tu contraseña.');
+      return false;
+    }
+
+    try {
+      const result = await VerificationRepository.requestPasswordRecoveryCode(email.trim());
+      if (!result.success) {
+        showError(result.error || 'No se pudo enviar el código de verificación.');
+        return false;
+      }
+      return true;
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'No se pudo enviar el código de verificación.');
+      return false;
+    }
+  }, [confirmNewPassword, currentPassword, email, newPassword, showError]);
+
+  const handleSubmitPasswordCode = useCallback(async (code) => {
+    if (!user || passwordCodeLoading) return;
+    if (code.length !== CODE_LENGTH) {
+      showError('Ingresa el código completo.');
+      return;
+    }
+
+    setPasswordCodeLoading(true);
+    let verification = null;
+    try {
+      verification = await VerificationRepository.verifyCode(email.trim(), code);
+    } catch (error) {
+      setPasswordCodeLoading(false);
+      showError(error instanceof Error ? error.message : 'No se pudo verificar el código.');
+      return;
+    }
+    if (!verification.success) {
+      setPasswordCodeLoading(false);
+      showError(verification.error || 'No se pudo verificar el código.');
+      return;
+    }
+
+    const passwordResult = await UserManagementUseCase.changeOwnPassword(
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+    );
+    setPasswordCodeLoading(false);
+    if (!passwordResult.success) {
+      if (passwordResult.sessionExpired) return;
+      showError(passwordResult.error || 'No se pudo cambiar la contraseña.');
+      return;
+    }
+
+    showPopup(passwordResult.message || verification.data, 'Éxito', {
+      type: 'success',
+      onAccept: () => {
+        setPasswordCodeVisible(false);
+        setModifyPassword(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmNewPassword('');
+      },
+    });
+  }, [
+    confirmNewPassword,
+    currentPassword,
+    email,
+    newPassword,
+    passwordCodeLoading,
+    showError,
+    showPopup,
+    user,
+  ]);
 
   const handleSave = useCallback(async () => {
     if (!user || saving) return;
 
     if (editingOwnProfile && modifyPassword) {
       setSaving(true);
-      const passwordResult = await UserManagementUseCase.changeOwnPassword(
-        currentPassword,
-        newPassword,
-        confirmNewPassword,
-      );
-      if (!passwordResult.success) {
-        setSaving(false);
-        if (passwordResult.sessionExpired) return;
-        showError(passwordResult.error || 'No se pudo cambiar la contraseña.');
-        return;
-      }
+      const sent = await requestPasswordCode();
       setSaving(false);
-      showPopup(passwordResult.message, 'Éxito', {
-        type: 'success',
-        onAccept: () => {
-          setModifyPassword(false);
-          setCurrentPassword('');
-          setNewPassword('');
-          setConfirmNewPassword('');
-        },
-      });
+      if (sent) setPasswordCodeVisible(true);
       return;
     }
 
@@ -272,6 +348,7 @@ export default function EditUserScreen({ route, navigation }) {
     modifyPassword,
     navigation,
     newPassword,
+    requestPasswordCode,
     saving,
     showError,
     showPopup,
@@ -304,6 +381,9 @@ export default function EditUserScreen({ route, navigation }) {
       }
     };
     const confirm = isUsernameField ? handleConfirmUsername : handleConfirmEmail;
+    const hasFieldChanged = isUsernameField
+      ? usernameDraft.trim() !== username.trim()
+      : emailDraft.trim().toLowerCase() !== email.trim().toLowerCase();
 
     if (!isEditing) {
       return (
@@ -315,9 +395,11 @@ export default function EditUserScreen({ route, navigation }) {
 
     return (
       <View style={styles.fieldActionIcons}>
-        <TouchableOpacity onPress={confirm} disabled={saving} hitSlop={{ top: 10, bottom: 10, left: 10, right: 8 }}>
-          <Ionicons name="checkmark" size={24} color={PURPLE} />
-        </TouchableOpacity>
+        {hasFieldChanged ? (
+          <TouchableOpacity onPress={confirm} disabled={saving} hitSlop={{ top: 10, bottom: 10, left: 10, right: 8 }}>
+            <Ionicons name="checkmark" size={24} color={PURPLE} />
+          </TouchableOpacity>
+        ) : null}
         <TouchableOpacity onPress={cancel} disabled={saving} hitSlop={{ top: 10, bottom: 10, left: 8, right: 10 }}>
           <Ionicons name="close" size={24} color={PURPLE} />
         </TouchableOpacity>
@@ -334,6 +416,12 @@ export default function EditUserScreen({ route, navigation }) {
     outputRange: [0, 1],
   });
   const canUpdatePassword = currentPassword.trim() && newPassword.trim() && confirmNewPassword.trim() && !saving;
+  const hasAdminUserChanges = !editingOwnProfile && (
+    username.trim() !== initialUserValues.username.trim()
+    || email.trim().toLowerCase() !== initialUserValues.email.trim().toLowerCase()
+    || avatarChanged
+  );
+  const canSaveAdminUser = hasAdminUserChanges && username.trim() && email.trim() && !saving;
 
   return (
     <View style={styles.editSafeArea}>
@@ -448,9 +536,9 @@ export default function EditUserScreen({ route, navigation }) {
 
             {!editingOwnProfile ? (
               <TouchableOpacity
-                style={[styles.editSaveButton, saving && styles.editSaveButtonDisabled]}
+                style={[styles.editSaveButton, !canSaveAdminUser && styles.editSaveButtonDisabled]}
                 onPress={handleSave}
-                disabled={saving}
+                disabled={!canSaveAdminUser}
                 activeOpacity={0.85}
               >
                 <Text style={styles.editSaveButtonText}>
@@ -463,14 +551,29 @@ export default function EditUserScreen({ route, navigation }) {
       </ScrollView>
       <VerificationCodeModal
         visible={emailCodeVisible}
-        title="Verifica tu correo"
-        message={emailCodeMessage}
+        title="Confirmación"
+        message={EMAIL_CODE_MESSAGE}
         loading={emailCodeLoading}
+        submitText="Actualizar"
+        loadingText="Actualizando..."
         onCancel={() => {
           if (!emailCodeLoading) setEmailCodeVisible(false);
         }}
         onResend={requestEmailCode}
         onSubmit={handleSubmitEmailCode}
+      />
+      <VerificationCodeModal
+        visible={passwordCodeVisible}
+        title="Confirmación"
+        message={PASSWORD_CODE_MESSAGE}
+        loading={passwordCodeLoading}
+        submitText="Actualizar"
+        loadingText="Actualizando..."
+        onCancel={() => {
+          if (!passwordCodeLoading) setPasswordCodeVisible(false);
+        }}
+        onResend={requestPasswordCode}
+        onSubmit={handleSubmitPasswordCode}
       />
       {errorPopup}
     </View>

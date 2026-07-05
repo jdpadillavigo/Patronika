@@ -55,8 +55,12 @@ async function uploadAvatar(id: string, imageUri: string): Promise<string> {
     return assertApiSuccess(response, 'Imagen de perfil actualizada correctamente') || 'Imagen de perfil actualizada correctamente';
 }
 
-async function changePassword(email: string, password: string): Promise<string> {
-    const response = await HttpClient.post<ApiResponse<string>>('/api/auth/change-password', { email, password });
+async function changePassword(email: string, currentPassword: string, newPassword: string): Promise<string> {
+    const response = await HttpClient.post<ApiResponse<string>>('/api/users/change-password', {
+        email,
+        currentPassword,
+        newPassword,
+    });
     return assertApiSuccess(response, 'Contraseña actualizada correctamente') || 'Contraseña actualizada correctamente';
 }
 

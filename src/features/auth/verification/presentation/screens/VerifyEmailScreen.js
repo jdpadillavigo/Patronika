@@ -15,28 +15,30 @@ import { useErrorPopup } from '../../../../../core/presentation/designsystem/com
 
 export default function VerificarCorreoScreen({ navigation, route }) {
   const { mode = 'recovery', email, username, password, profileImageUri } = route.params || {};
+  const codeLength = 6;
 
-  // 4 inputs separados para el código de verificación
-  const [codigo, setCodigo] = useState(['', '', '', '']);
-  const inputs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+  // 6 inputs separados para el código de verificación
+  const [codigo, setCodigo] = useState(Array(codeLength).fill(''));
+  const inputs = useRef([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [resendModalVisible, setResendModalVisible] = useState(false);
   const { showError, errorPopup } = useErrorPopup();
 
   // Maneja el cambio en cada casilla del código
   const handleCambioDigito = (texto, index) => {
+    const digito = texto.replace(/[^0-9]/g, '').slice(-1);
     const nuevoCodigo = [...codigo];
-    nuevoCodigo[index] = texto;
+    nuevoCodigo[index] = digito;
     setCodigo(nuevoCodigo);
     // Auto-avanza al siguiente input si se escribió un dígito
-    if (texto.length === 1 && index < 3) {
-      inputs[index + 1].current.focus();
+    if (digito && index < codeLength - 1) {
+      inputs.current[index + 1]?.focus();
     }
   };
 
   const handleVerificar = async () => {
     const codigoCompleto = codigo.join('');
-    if (codigoCompleto.length < 4) {
+    if (codigoCompleto.length < codeLength) {
       showError('Por favor ingresa el código completo');
       return;
     }
@@ -96,15 +98,17 @@ export default function VerificarCorreoScreen({ navigation, route }) {
         {/* Título y descripción */}
         <Text style={styles.titulo}>Verificar correo{'\n'}electrónico</Text>
         <Text style={styles.descripcion}>
-          Introduce el código de verificación{'\n'}enviado a tu correo.
+          Introduce el código de verificación enviado a tu correo.
         </Text>
 
-        {/* 4 casillas separadas para el código */}
+        {/* 6 casillas separadas para el código */}
         <View style={styles.codigoContainer}>
           {codigo.map((digito, index) => (
             <TextInput
               key={index}
-              ref={inputs[index]}
+              ref={input => {
+                inputs.current[index] = input;
+              }}
               style={styles.codigoCasilla}
               value={digito}
               onChangeText={texto => handleCambioDigito(texto, index)}
@@ -136,7 +140,7 @@ export default function VerificarCorreoScreen({ navigation, route }) {
           <View style={styles.modalCard}>
 
             <View style={styles.modalIconContainer}>
-              <Ionicons name="checkmark-circle-outline" size={36} color={PURPLE} />
+              <Ionicons name="checkmark-circle" size={36} color={PURPLE} />
             </View>
 
             <Text style={styles.modalTitulo}>Cuenta creada{'\n'}exitosamente</Text>
@@ -159,7 +163,7 @@ export default function VerificarCorreoScreen({ navigation, route }) {
           <View style={styles.modalCard}>
 
             <View style={styles.modalIconContainer}>
-              <Ionicons name="mail-outline" size={36} color={PURPLE} />
+              <Ionicons name="mail" size={36} color={PURPLE} />
             </View>
 
             <Text style={styles.modalTitulo}>Código reenviado{'\n'}correctamente</Text>

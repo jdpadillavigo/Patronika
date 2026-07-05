@@ -7,12 +7,13 @@ import {
   Image,
   TextInput,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { AdminBottomNavigationItem } from '../../../../../core/domain/BottomNavigationItem';
 import AppTopBar from '../../../../../core/presentation/designsystem/components/AppTopBar';
-import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
+import { PURPLE, REFRESH_ADMIN_LIST_OFFSET } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 import FloatingIconButton from '../../../../../core/presentation/designsystem/components/FloatingIconButton';
 import ScreenState from '../../../../../core/presentation/designsystem/components/ScreenState';
 import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
@@ -36,36 +37,36 @@ function formatFecha(fechaIso) {
 }
  
 // Card individual de cada usuario en el listado
-function UserCard({ user, isMenuOpen, onToggleMenu, onCloseMenu, onEdit, onToggleStatus, onDelete, onOpenUser }) {
+function UserCard({ user, isOwnAccount, isMenuOpen, onToggleMenu, onCloseMenu, onEdit, onToggleStatus, onDelete, onOpenUser }) {
   const isActive = user.status === 0; // status 0 = activo, otro valor = suspendido (igual que en PerfilScreen/User.ts)
   const [avatarFailed, setAvatarFailed] = useState(false);
   const showAvatar = !!user.profileImageUrl && !avatarFailed;
  
-  if(isMenuOpen) {
+  if(isMenuOpen && !isOwnAccount) {
     return (
     <View style={styles.actionsOverlay}>
         <TouchableOpacity style={styles.closeOverlayButton} onPress={onCloseMenu}>
-          <Ionicons name="close" size={14} color="white" />
+          <Ionicons name="close" size={16} color="white" />
         </TouchableOpacity>
  
         {/* Acciones del usuario seleccionado */}
         <TouchableOpacity style={styles.overlayAction} onPress={onEdit} activeOpacity={0.8}>
           <View style={styles.overlayIconCircle}>
-            <Ionicons name="pencil-outline" size={20} color="white" />
+            <Ionicons name="pencil" size={22} color="white" />
           </View>
           <Text style={styles.overlayActionLabel} numberOfLines={1}>Editar</Text>
         </TouchableOpacity>
  
         <TouchableOpacity style={styles.overlayAction} onPress={onToggleStatus} activeOpacity={0.8}>
           <View style={styles.overlayIconCircle}>
-            <Ionicons name={isActive ? 'happy-outline' : 'sad-outline'} size={20} color="white" />
+            <Ionicons name={isActive ? 'happy' : 'skull'} size={22} color="white" />
           </View>
           <Text style={styles.overlayActionLabel} numberOfLines={1}>Estado: {isActive ? 'Activo' : 'Suspendido'}</Text>
         </TouchableOpacity>
  
         <TouchableOpacity style={styles.overlayAction} onPress={onDelete} activeOpacity={0.8}>
           <View style={styles.overlayIconCircle}>
-            <Ionicons name="trash-outline" size={20} color="white" />
+            <Ionicons name="trash" size={22} color="white" />
           </View>
           <Text style={styles.overlayActionLabel} numberOfLines={1}>Eliminar</Text>
         </TouchableOpacity>
@@ -91,9 +92,11 @@ return (
       <View style={styles.userInfo}>
         <View style={styles.userTopRow}>
           <Text style={styles.userName} numberOfLines={1}>{user.username}</Text>
-          <TouchableOpacity style={styles.moreButton} onPress={onToggleMenu}>
-            <Ionicons name="ellipsis-vertical" size={18} color={PURPLE} />
-          </TouchableOpacity>
+          {!isOwnAccount ? (
+            <TouchableOpacity style={styles.moreButton} onPress={onToggleMenu}>
+              <Ionicons name="ellipsis-vertical" size={18} color={PURPLE} />
+            </TouchableOpacity>
+          ) : null}
         </View>
  
         <View style={styles.userEmailRow}>
@@ -119,6 +122,7 @@ return (
 export default function GestionUsuariosScreen({ navigation }) {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
   const [esAdmin, setEsAdmin] = useState(null); // null = aún verificando, true/false = resultado
@@ -126,6 +130,7 @@ export default function GestionUsuariosScreen({ navigation }) {
   const [deleteCandidate, setDeleteCandidate] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [activeFilter, setActiveFilter] = useState('todos');
   const [statusCandidate, setStatusCandidate] = useState(null);
   const [reactivateCandidate, setReactivateCandidate] = useState(null);
@@ -135,14 +140,20 @@ export default function GestionUsuariosScreen({ navigation }) {
   const [menuAbiertoId, setMenuAbiertoId] = useState(null); // id del usuario cuyo menú overlay está abierto
  
   // Verifica el rol del usuario actual antes de mostrar el listado (criterio de aceptación #3)
-  const verificarAccesoYCargar = useCallback(async () => {
-    setLoading(true);
+  const verificarAccesoYCargar = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     setError('');
     setActionError('');
  
     const currentUser = await ProfileUseCase.getCurrent().catch(() => null);
+    setCurrentUserId(currentUser?.id || null);
     if (!currentUser?.isAdmin) {
       setEsAdmin(false);
+      setRefreshing(false);
       setLoading(false);
       return;
     }
@@ -156,8 +167,13 @@ export default function GestionUsuariosScreen({ navigation }) {
     } else {
       setUsuarios(result.data || []);
     }
+    setRefreshing(false);
     setLoading(false);
   }, []);
+
+  const handleRefresh = useCallback(() => {
+    verificarAccesoYCargar(true);
+  }, [verificarAccesoYCargar]);
  
   useFocusEffect(useCallback(() => {
     verificarAccesoYCargar();
@@ -296,7 +312,7 @@ export default function GestionUsuariosScreen({ navigation }) {
           onPress={() => setActiveFilter('todos')}
           activeOpacity={0.8}
         >
-          <Ionicons name="grid" size={18} color={activeFilter === 'todos' ? 'white' : PURPLE} />
+          <Ionicons name="people" size={18} color={activeFilter === 'todos' ? 'white' : PURPLE} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -335,7 +351,13 @@ export default function GestionUsuariosScreen({ navigation }) {
           {actionError ? <Text style={styles.actionErrorText}>{actionError}</Text> : null}
  
           {usuariosFiltrados.length === 0 ? (
-            <ScreenState iconName="people-outline" text="No se encontraron usuarios" />
+            <FlatList
+              data={[]}
+              keyExtractor={item => item.id || item.email}
+              ListEmptyComponent={<ScreenState iconName="people-outline" text="No se encontraron usuarios" />}
+              contentContainerStyle={styles.emptyListContent}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_ADMIN_LIST_OFFSET} />}
+            />
           ) : (
             <FlatList
               data={usuariosFiltrados}
@@ -343,6 +365,7 @@ export default function GestionUsuariosScreen({ navigation }) {
               renderItem={({ item }) => (
                 <UserCard
                   user={item}
+                  isOwnAccount={!!currentUserId && item.id === currentUserId}
                   isMenuOpen={menuAbiertoId === (item.id || item.email)}
                   onToggleMenu={() => setMenuAbiertoId(item.id || item.email)}
                   onCloseMenu={() => setMenuAbiertoId(null)}
@@ -353,6 +376,7 @@ export default function GestionUsuariosScreen({ navigation }) {
                 />
               )}
               contentContainerStyle={styles.listContent}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_ADMIN_LIST_OFFSET} />}
             />
           )}
         </>
@@ -383,7 +407,7 @@ export default function GestionUsuariosScreen({ navigation }) {
         <View style={styles.deleteModalOverlay}>
           <View style={styles.deleteModalCard}>
             <View style={styles.deleteModalIcon}>
-              <Ionicons name="trash-outline" size={30} color={PURPLE} />
+              <Ionicons name="trash" size={30} color={PURPLE} />
             </View>
             <Text style={styles.deleteModalTitle}>¿Quieres eliminar este usuario?</Text>
             <View style={styles.deleteModalActions}>
@@ -485,7 +509,7 @@ export default function GestionUsuariosScreen({ navigation }) {
         <View style={styles.deleteModalOverlay}>
           <View style={styles.deleteModalCard}>
             <View style={styles.deleteModalIcon}>
-              <Ionicons name="play-circle-outline" size={32} color={PURPLE} />
+              <Ionicons name="play-circle" size={32} color={PURPLE} />
             </View>
             <Text style={styles.deleteModalTitle}>¿Quieres reactivar al usuario?</Text>
             <View style={styles.deleteModalActions}>

@@ -1,14 +1,15 @@
 import React, { useState, useCallback } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, RefreshControl } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { UserBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
 import AppTopBar from '../../../../core/presentation/designsystem/components/AppTopBar';
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
-import { tutorialesStyles as styles } from '../styles/TutorialesStyles';
+import { tutorialesStyles as styles, PURPLE } from '../styles/TutorialesStyles';
 import TutorialCard from '../components/TutorialCard';
 import TutorialUseCase from '../../domain/usecases/TutorialUseCase';
+import { REFRESH_TOP_BAR_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 export default function TutorialesScreen({ navigation }) {
   const [tutorials, setTutorials] = useState([]);
@@ -32,13 +33,23 @@ export default function TutorialesScreen({ navigation }) {
       {loading ? (
         <ScreenState loading text="Cargando tutoriales..." />
       ) : tutorials.length === 0 ? (
+        <ScrollView
+          contentContainerStyle={styles.emptyList}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={loading} onRefresh={loadTutorials} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+        >
         <ScreenState
           iconName="book-outline"
           text="Sin tutoriales aún"
           subtext="Vuelve pronto para ver contenido nuevo"
         />
+        </ScrollView>
       ) : (
-        <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={loading} onRefresh={loadTutorials} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+        >
           {tutorials.map(t => (
             <TutorialCard key={t.id} tutorial={t} />
           ))}

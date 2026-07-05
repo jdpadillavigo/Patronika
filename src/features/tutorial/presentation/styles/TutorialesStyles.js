@@ -33,6 +33,12 @@ export const tutorialesStyles = StyleSheet.create({
     paddingBottom: 16,
     gap: 16,
   },
+  emptyList: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 16,
+    paddingBottom: 16,
+  },
 
   // Tarjeta de tutorial
   card: {

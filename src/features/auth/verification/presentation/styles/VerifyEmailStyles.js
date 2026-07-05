@@ -5,6 +5,10 @@ export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from '../.
 
 export const verificarCorreoStyles = StyleSheet.create({
   ...recuperarBase,
+  descripcion: {
+    ...recuperarBase.descripcion,
+    width: '100%',
+  },
   // Casillas separadas para el codigo OTP.
   codigoContainer: {
     flexDirection: 'row',

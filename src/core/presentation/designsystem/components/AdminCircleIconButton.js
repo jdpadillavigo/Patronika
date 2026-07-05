@@ -16,7 +16,7 @@ export default function AdminCircleIconButton({
 
   return (
     <TouchableOpacity
-      style={[styles.button, disabled && styles.disabled, style]}
+      style={[styles.button, count > 0 && styles.buttonWithCount, disabled && styles.disabled, style]}
       onPress={onPress}
       activeOpacity={0.84}
       disabled={disabled}
@@ -45,6 +45,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+  },
+  buttonWithCount: {
+    minWidth: 48,
+    paddingHorizontal: 9,
   },
   countText: {
     color: 'white',

@@ -12,6 +12,7 @@ export const formularioStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    backgroundColor: PURPLE,
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 15,
@@ -19,7 +20,7 @@ export const formularioStyles = StyleSheet.create({
   headerTitle: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: PURPLE,
+    color: 'white',
   },
   content: {
     paddingHorizontal: 24,
@@ -37,9 +38,12 @@ export const formularioStyles = StyleSheet.create({
   },
   label: {
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '800',
     color: '#111',
-    textDecorationLine: 'underline',
+    paddingBottom: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: PURPLE,
+    alignSelf: 'flex-start',
   },
   input: {
     borderWidth: 1.5,

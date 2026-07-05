@@ -3,6 +3,8 @@ import { StyleSheet, Platform } from 'react-native';
 export const PURPLE = '#7B3F7E';
 export const DARK_BG = '#1A0B08';
 export const DARK_BANNER = '#1C1C1E';
+export const REFRESH_TOP_BAR_OFFSET = -2;
+export const REFRESH_ADMIN_LIST_OFFSET = -38;
 
 export const AUTH_GRADIENTS = [
   ['#3D1547', '#1A0B08', '#2C0D3A'],

@@ -55,6 +55,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
+    zIndex: 1
   },
   filtroGrid: {
     width: 38,
@@ -74,7 +75,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#F0F0F0'
   },
   filtroPillActivo: {
     backgroundColor: PURPLE,
@@ -110,6 +111,13 @@ export const gestionUsuariosStyles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 80,
     gap: 12,
+  },
+  emptyListContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 80,
   },
   addUserFab: {
     position: 'absolute',
@@ -231,7 +239,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     backgroundColor: PURPLE,
     borderRadius: 14,
     height: 116,
-    paddingVertical: 18,
+    paddingVertical: 16,
     paddingHorizontal: 12,
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -242,9 +250,9 @@ export const gestionUsuariosStyles = StyleSheet.create({
     position: 'absolute',
     top: -8,
     right: -8,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: '#E53935',
     alignItems: 'center',
     justifyContent: 'center',
@@ -253,13 +261,13 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
   overlayAction: {
     alignItems: 'center',
-    gap: 6,
+    gap: 7,
     width: 88,
   },
   overlayIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     borderWidth: 1.5,
     borderColor: 'white',
     alignItems: 'center',
@@ -267,7 +275,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
   overlayActionLabel: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '600',
     textAlign: 'center',
   },
@@ -353,18 +361,6 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
   deleteCancelButton: {
     flex: 1,
-    backgroundColor: PURPLE,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  deleteCancelButtonText: {
-    color: 'white',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  deleteConfirmButton: {
-    flex: 1,
     backgroundColor: 'white',
     borderWidth: 1.5,
     borderColor: PURPLE,
@@ -372,8 +368,20 @@ export const gestionUsuariosStyles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
   },
-  deleteConfirmButtonText: {
+  deleteCancelButtonText: {
     color: PURPLE,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  deleteConfirmButton: {
+    flex: 1,
+    backgroundColor: PURPLE,
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  deleteConfirmButtonText: {
+    color: 'white',
     fontSize: 15,
     fontWeight: '700',
   },

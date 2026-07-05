@@ -16,6 +16,7 @@ import HttpClient from '../../../../core/data/network/HttpClientExt';
 import UserRemoteDataSource from '../../../user/data/networking/UserRemoteDataSource';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
 import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
+import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 
 const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Otros'];
@@ -57,6 +58,9 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
   const [userMap, setUserMap] = useState({});
   const [authorAvatarFailed, setAuthorAvatarFailed] = useState(false);
   const [reportedComments, setReportedComments] = useState(new Set());
+  const [patternLoadDone, setPatternLoadDone] = useState(!initialPub?.patternId && !initialPub?.pattern?.id);
+  const [resultImageLoaded, setResultImageLoaded] = useState(!initialPub?.imageUrl);
+  const [patternImageLoaded, setPatternImageLoaded] = useState(false);
 
   // Clave de AsyncStorage por usuario para persistir los comentarios reportados
   const getReportKey = useCallback((userId) => `@patronika_reported_comments_${userId}`, []);
@@ -74,6 +78,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
   const { showConfirm, errorPopup } = useErrorPopup();
 
   const currentUserId = currentUser?.id || null;
+  const isAdmin = currentUser?.isAdmin === true;
   const isOwnPublication = pub?.user?.id && currentUserId && pub.user.id === currentUserId;
 
   // patternId puede venir como campo plano (nuevo backend) o dentro del objeto pattern (compatibilidad)
@@ -84,6 +89,9 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
     : null;
 
   const resultImageUri = pub?.imageUrl || null;
+  const loadingPublication = !patternLoadDone
+    || (!!resultImageUri && !resultImageLoaded)
+    || (!!patternImageUri && !patternImageLoaded);
 
   const openFullscreen = (uri) => {
     setFullscreenLoading(true);
@@ -104,21 +112,33 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
 
   // Fetch del patrón para obtener gridData y nombre
   useEffect(() => {
-    if (!patternId) return;
+    if (!patternId) {
+      setPatternLoadDone(true);
+      return;
+    }
+    setPatternLoadDone(false);
     PatternUseCase.getById(patternId).then(result => {
       if (result.success && result.data) setFetchedPattern(result.data);
-    });
+    }).finally(() => setPatternLoadDone(true));
   }, [patternId]);
+
+  useEffect(() => {
+    setResultImageLoaded(!resultImageUri);
+  }, [resultImageUri]);
+
+  useEffect(() => {
+    setPatternImageLoaded(!patternImageUri);
+  }, [patternImageUri]);
 
   // Verificar si el patrón ya está guardado (solo para publicaciones ajenas)
   useEffect(() => {
-    if (!patternId || !currentUserId || isOwnPublication) return;
+    if (!patternId || !currentUserId || isOwnPublication || isAdmin) return;
     PatternLibraryUseCase.listSaved().then(result => {
       if (result.success) {
         setIsSaved(result.data.some(entry => entry.pattern.id === patternId));
       }
     });
-  }, [patternId, currentUserId, isOwnPublication]);
+  }, [patternId, currentUserId, isOwnPublication, isAdmin]);
 
   const loadComments = useCallback(async () => {
     setLoadingComments(true);
@@ -158,13 +178,14 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
 
   const handleSend = async () => {
     if (!commentText.trim() || sending) return;
+    if (editingComment && commentText.trim() === editingComment.content.trim()) return;
     setSending(true);
 
     if (editingComment) {
       const result = await CommentUseCase.editComment(editingComment.id, publicationId, commentText);
       if (result.success) {
         setComments(prev => prev.map(c =>
-          c.id === editingComment.id ? { ...c, content: commentText.trim() } : c
+          c.id === editingComment.id ? { ...c, content: commentText.trim(), updatedAt: new Date().toISOString() } : c
         ));
         setEditingComment(null);
         setCommentText('');
@@ -244,7 +265,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
         <BackButton onPress={() => navigation.goBack()} />
         <View style={styles.headerTitleRow}>
           <Text style={styles.headerTitle}>Publicación</Text>
-          {!isOwnPublication && patternId && (
+          {!isAdmin && !isOwnPublication && patternId && (
             <TouchableOpacity style={styles.saveBtn} onPress={handleToggleSave} disabled={savingPattern}>
               {savingPattern
                 ? <ActivityIndicator size="small" color={PURPLE} />
@@ -270,7 +291,13 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
           {/* Foto del resultado */}
           {resultImageUri && (
             <TouchableOpacity style={styles.imageBlock} onPress={() => openFullscreen(resultImageUri)} activeOpacity={0.92}>
-              <Image source={{ uri: resultImageUri }} style={styles.image} resizeMode="cover" />
+              <Image
+                source={{ uri: resultImageUri }}
+                style={styles.image}
+                resizeMode="cover"
+                onLoadEnd={() => setResultImageLoaded(true)}
+                onError={() => setResultImageLoaded(true)}
+              />
               <View style={styles.imageLabelBadge}>
                 <Ionicons name="camera" size={11} color="white" />
                 <Text style={styles.imageLabelText}>Foto del resultado · toca para ampliar</Text>
@@ -284,7 +311,13 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
           {/* Patrón generado */}
           {patternImageUri ? (
             <TouchableOpacity style={styles.imageBlock} onPress={() => openFullscreen(patternImageUri)} activeOpacity={0.92}>
-              <Image source={{ uri: patternImageUri }} style={styles.imageSmall} resizeMode="contain" />
+              <Image
+                source={{ uri: patternImageUri }}
+                style={styles.imageSmall}
+                resizeMode="contain"
+                onLoadEnd={() => setPatternImageLoaded(true)}
+                onError={() => setPatternImageLoaded(true)}
+              />
               <View style={styles.imageLabelBadge}>
                 <Ionicons name="grid" size={11} color="white" />
                 <Text style={styles.imageLabelText}>Patrón generado · toca para ampliar</Text>
@@ -359,7 +392,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
                             <Ionicons name="trash-outline" size={14} color="#E53935" />
                           </TouchableOpacity>
                         </View>
-                      ) : (
+                      ) : !isAdmin ? (
                         <TouchableOpacity
                           style={styles.commentActionBtn}
                           onPress={() => handleReportComment(comment.id)}
@@ -371,10 +404,15 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
                             color={reportedComments.has(comment.id) ? '#E53935' : '#BBB'}
                           />
                         </TouchableOpacity>
-                      )}
+                      ) : null}
                     </View>
                     <Text style={styles.commentContent}>{comment.content}</Text>
-                    <Text style={styles.commentDate}>{formatDate(comment.createdAt)}</Text>
+                    <View style={styles.commentDateRow}>
+                      <Text style={styles.commentDate}>{formatDate(comment.createdAt)}</Text>
+                      {comment.updatedAt && comment.updatedAt !== comment.createdAt ? (
+                        <Text style={styles.commentEditedText}>(editado)</Text>
+                      ) : null}
+                    </View>
                   </View>
                 );
               })
@@ -406,9 +444,9 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
             onSubmitEditing={handleSend}
           />
           <TouchableOpacity
-            style={[styles.sendBtn, (!commentText.trim() || sending) && styles.sendBtnDisabled]}
+            style={[styles.sendBtn, (!commentText.trim() || sending || (editingComment && commentText.trim() === editingComment.content.trim())) && styles.sendBtnDisabled]}
             onPress={handleSend}
-            disabled={!commentText.trim() || sending}
+            disabled={!commentText.trim() || sending || (editingComment && commentText.trim() === editingComment.content.trim())}
           >
             {sending
               ? <ActivityIndicator size="small" color="white" />
@@ -459,6 +497,11 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
           </View>
         </View>
       </Modal>
+      {loadingPublication ? (
+        <View style={styles.loadingOverlay}>
+          <ScreenState loading text="Cargando publicación..." />
+        </View>
+      ) : null}
       {errorPopup}
     </View>
   );

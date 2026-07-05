@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -20,6 +21,7 @@ import UserPreviewModal from '../../../../../core/presentation/designsystem/comp
 import { gridDataToImageUri } from '../../../../../core/presentation/designsystem/utils/GridImage';
 import AdminCommunityUseCase from '../../domain/usecases/AdminCommunityUseCase';
 import { adminCommunityManagementStyles as styles, PURPLE } from '../styles/AdminCommunityManagementStyles';
+import { REFRESH_TOP_BAR_OFFSET } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
 const TABS = {
   COMMENTS: 'comments',
@@ -27,7 +29,8 @@ const TABS = {
 };
 
 function getReportCount(item) {
-  return item?.reportCount ?? item?.reportsCount ?? item?.reportedCount ?? item?.reportQuantity ?? 0;
+  const count = Number(item?.reportCount);
+  return Number.isFinite(count) ? count : 0;
 }
 
 const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Otros'];
@@ -68,9 +71,90 @@ function Avatar({ imageUrl, size = 58, onPress }) {
   );
 }
 
-function CommentCard({ item, onDelete, onOpenPublication, onOpenUser }) {
+function getActionWidth(action) {
+  return action?.props?.count > 0 ? 50 : 32;
+}
+
+function CardActionMenu({ actions, direction = 'left' }) {
+  const [open, setOpen] = useState(false);
+  const progress = React.useRef(new Animated.Value(0)).current;
+  const visibleActions = actions.filter(Boolean);
+  const isDown = direction === 'down';
+  const actionsLength = visibleActions.length;
+  const horizontalWidth = visibleActions.reduce((total, action, index) => (
+    total + getActionWidth(action) + (index > 0 ? 6 : 0)
+  ), 0);
+  const verticalHeight = actionsLength * 38;
+
+  React.useEffect(() => {
+    Animated.timing(progress, {
+      toValue: open ? 1 : 0,
+      duration: 220,
+      useNativeDriver: false,
+    }).start();
+  }, [open, progress]);
+
+  return (
+    <View style={[styles.cardActionMenu, isDown && styles.cardActionMenuDown]}>
+      {!isDown ? (
+        <Animated.View
+          style={[
+            styles.cardActionMenuItems,
+            {
+              width: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, horizontalWidth],
+              }),
+              opacity: progress,
+            },
+          ]}
+          pointerEvents={open ? 'auto' : 'none'}
+        >
+          {visibleActions.map(action => (
+            <View key={action.key} style={[styles.cardActionMenuItem, { width: getActionWidth(action) }]}>
+              <AdminCircleIconButton {...action.props} />
+            </View>
+          ))}
+        </Animated.View>
+      ) : null}
+      <TouchableOpacity
+        style={[styles.cardActionToggle, open && styles.cardActionToggleOpen]}
+        onPress={() => setOpen(value => !value)}
+        activeOpacity={0.84}
+        accessibilityRole="button"
+        accessibilityLabel={open ? 'Cerrar acciones' : 'Abrir acciones'}
+      >
+        <Ionicons name={open ? 'close' : 'ellipsis-vertical'} size={18} color={open ? PURPLE : 'white'} />
+      </TouchableOpacity>
+      {isDown ? (
+        <Animated.View
+          style={[
+            styles.cardActionMenuItemsDown,
+            {
+              height: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, verticalHeight],
+              }),
+              opacity: progress,
+            },
+          ]}
+          pointerEvents={open ? 'auto' : 'none'}
+        >
+          {visibleActions.map(action => (
+            <View key={action.key} style={[styles.cardActionMenuItem, { width: getActionWidth(action) }]}>
+              <AdminCircleIconButton {...action.props} />
+            </View>
+          ))}
+        </Animated.View>
+      ) : null}
+    </View>
+  );
+}
+
+function CommentCard({ item, onClearReports, onDelete, onSanction, onOpenPublication, onOpenUser }) {
   const username = item.user?.username || 'Usuario';
   const publicationName = item.publication?.pattern?.name || 'Publicación';
+  const reportCount = getReportCount(item);
 
   return (
     <View style={styles.commentCard}>
@@ -95,30 +179,77 @@ function CommentCard({ item, onDelete, onOpenPublication, onOpenUser }) {
         </Text>
       </View>
 
-      <AdminCircleIconButton
-        iconName="trash-outline"
-        label="Eliminar comentario"
-        onPress={() => onDelete(item)}
-        style={styles.commentDeleteButton}
+      <CardActionMenu
+        actions={[
+          reportCount > 0 ? {
+            key: 'clear',
+            props: {
+              iconName: 'checkmark',
+              label: 'Eliminar reportes del comentario',
+              onPress: () => onClearReports(item),
+            },
+          } : null,
+          {
+            key: 'sanction',
+            props: {
+              iconName: 'gavel',
+              iconLibrary: 'material',
+              label: 'Sancionar usuario y eliminar comentario',
+              count: reportCount,
+              onPress: () => onSanction(item),
+            },
+          },
+          {
+            key: 'delete',
+            props: {
+              iconName: 'trash',
+              label: 'Eliminar comentario',
+              onPress: () => onDelete(item),
+            },
+          },
+        ]}
       />
     </View>
   );
 }
 
-function PublicationCard({ publication, tall, onOpen, onReport }) {
+function PublicationCard({ publication, tall, onOpen, onClearReports, onDelete, onReport }) {
   const imageUri = publication.imageUrl
     || (publication.pattern?.gridData ? gridDataToImageUri(publication.pattern.gridData, { maxDimension: 300 }) : null);
   const reportCount = getReportCount(publication);
 
   return (
     <TouchableOpacity style={styles.publicationCard} onPress={onOpen} activeOpacity={0.88}>
-      <AdminCircleIconButton
-        iconName="gavel"
-        iconLibrary="material"
-        label="Sancionar publicación"
-        count={reportCount}
-        onPress={onReport}
-        style={styles.reportFab}
+      <CardActionMenu
+        direction="down"
+        actions={[
+          {
+            key: 'delete',
+            props: {
+              iconName: 'trash',
+              label: 'Eliminar publicación',
+              onPress: onDelete,
+            },
+          },
+          {
+            key: 'sanction',
+            props: {
+              iconName: 'gavel',
+              iconLibrary: 'material',
+              label: 'Sancionar publicación',
+              count: reportCount,
+              onPress: onReport,
+            },
+          },
+          reportCount > 0 ? {
+            key: 'clear',
+            props: {
+              iconName: 'checkmark',
+              label: 'Eliminar reportes de la publicación',
+              onPress: onClearReports,
+            },
+          } : null,
+        ]}
       />
 
       {imageUri ? (
@@ -154,6 +285,7 @@ function PublicationCard({ publication, tall, onOpen, onReport }) {
 
 export default function AdminCommunityManagementScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState(TABS.COMMENTS);
+  const [tabsWidth, setTabsWidth] = useState(0);
   const [activeFilter, setActiveFilter] = useState('todos');
   const [comments, setComments] = useState([]);
   const [publications, setPublications] = useState([]);
@@ -162,7 +294,19 @@ export default function AdminCommunityManagementScreen({ navigation }) {
   const [error, setError] = useState('');
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [commentToDelete, setCommentToDelete] = useState(null);
+  const [commentReportsToClear, setCommentReportsToClear] = useState(null);
+  const [publicationToDelete, setPublicationToDelete] = useState(null);
+  const [publicationReportsToClear, setPublicationReportsToClear] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const tabIndicator = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.timing(tabIndicator, {
+      toValue: activeTab === TABS.PUBLICATIONS ? 1 : 0,
+      duration: 230,
+      useNativeDriver: true,
+    }).start();
+  }, [activeTab, tabIndicator]);
 
   const loadDashboard = useCallback(async (isRefresh = false) => {
     if (!isRefresh) setLoading(true);
@@ -210,10 +354,69 @@ export default function AdminCommunityManagementScreen({ navigation }) {
     setComments(current => current.filter(item => item.id !== comment.id));
   }, [commentToDelete]);
 
+  const handleClearCommentReports = useCallback(async () => {
+    const comment = commentReportsToClear;
+    if (!comment) return;
+    const result = await AdminCommunityUseCase.clearCommentReports(comment.id);
+    if (!result.success) {
+      if (!result.sessionExpired) setError(result.error || 'No se pudieron eliminar los reportes del comentario');
+      return;
+    }
+    setComments(current => current.map(item => (
+      item.id === comment.id ? { ...item, reportCount: 0 } : item
+    )));
+    setCommentReportsToClear(null);
+  }, [commentReportsToClear]);
+
+  const handleClearPublicationReports = useCallback(async () => {
+    const publication = publicationReportsToClear;
+    if (!publication) return;
+    const result = await AdminCommunityUseCase.clearPublicationReports(publication.id);
+    if (!result.success) {
+      if (!result.sessionExpired) setError(result.error || 'No se pudieron eliminar los reportes de la publicación');
+      return;
+    }
+    setPublications(current => current.map(item => (
+      item.id === publication.id ? { ...item, reportCount: 0 } : item
+    )));
+    setPublicationReportsToClear(null);
+  }, [publicationReportsToClear]);
+
+  const handleDeletePublication = useCallback(async () => {
+    const publication = publicationToDelete;
+    if (!publication) return;
+
+    setActionLoadingId(publication.id);
+    const result = await AdminCommunityUseCase.deletePublication(publication.id);
+    setActionLoadingId(null);
+    setPublicationToDelete(null);
+    if (!result.success) {
+      if (!result.sessionExpired) setError(result.error || 'No se pudo eliminar la publicación');
+      return;
+    }
+    setPublications(current => current.filter(item => item.id !== publication.id));
+  }, [publicationToDelete]);
+
   const handleOpenCommentPublication = useCallback((comment) => {
     navigation.navigate('PublicacionDetalle', {
       publicationId: comment.publicationId,
       publication: comment.publication || undefined,
+    });
+  }, [navigation]);
+
+  const handleSanctionComment = useCallback((comment) => {
+    navigation.navigate('SancionarEliminarPublicacionAdmin', {
+      targetType: 'comment',
+      commentId: comment.id,
+      commentContent: comment.content,
+    });
+  }, [navigation]);
+
+  const handleSanctionPublication = useCallback((publication) => {
+    navigation.navigate('SancionarEliminarPublicacionAdmin', {
+      targetType: 'publication',
+      publicationId: publication.id,
+      publicationName: publication.pattern?.name || 'Publicación',
     });
   }, [navigation]);
 
@@ -252,18 +455,26 @@ export default function AdminCommunityManagementScreen({ navigation }) {
 
     if (activeTab === TABS.COMMENTS) {
       return filteredComments.length === 0 ? (
-        <ScreenState iconName="chatbubble-ellipses-outline" text="No hay comentarios para revisar" />
+        <ScrollView
+          style={styles.contentScroll}
+          contentContainerStyle={styles.emptyContent}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+        >
+          <ScreenState iconName="chatbubble-ellipses-outline" text="No hay comentarios para revisar" />
+        </ScrollView>
       ) : (
         <ScrollView
           style={styles.contentScroll}
           contentContainerStyle={styles.commentsContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PURPLE]} tintColor={PURPLE} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
         >
           {filteredComments.map(comment => (
             <View key={comment.id} style={actionLoadingId === comment.id && styles.disabledItem}>
               <CommentCard
                 item={comment}
+                onClearReports={setCommentReportsToClear}
                 onDelete={handleAskDeleteComment}
+                onSanction={handleSanctionComment}
                 onOpenPublication={handleOpenCommentPublication}
                 onOpenUser={setSelectedUser}
               />
@@ -274,12 +485,18 @@ export default function AdminCommunityManagementScreen({ navigation }) {
     }
 
     return filteredPublications.length === 0 ? (
-      <ScreenState iconName="images-outline" text="No hay publicaciones para revisar" />
+      <ScrollView
+        style={styles.contentScroll}
+        contentContainerStyle={styles.emptyContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+      >
+        <ScreenState iconName="images-outline" text="No hay publicaciones para revisar" />
+      </ScrollView>
     ) : (
       <ScrollView
         style={styles.contentScroll}
         contentContainerStyle={styles.publicationsContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PURPLE]} tintColor={PURPLE} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
       >
         <View style={styles.publicationColumns}>
           <View style={styles.publicationColumn}>
@@ -289,10 +506,9 @@ export default function AdminCommunityManagementScreen({ navigation }) {
                 publication={publication}
                 tall={index % 3 === 0}
                 onOpen={() => navigation.navigate('PublicacionDetalle', { publicationId: publication.id, publication })}
-                onReport={() => navigation.navigate('SancionarEliminarPublicacionAdmin', {
-                  publicationId: publication.id,
-                  publicationName: publication.pattern?.name || 'Publicación',
-                })}
+                onClearReports={() => setPublicationReportsToClear(publication)}
+                onDelete={() => setPublicationToDelete(publication)}
+                onReport={() => handleSanctionPublication(publication)}
               />
             ))}
           </View>
@@ -303,10 +519,9 @@ export default function AdminCommunityManagementScreen({ navigation }) {
                 publication={publication}
                 tall={index % 3 === 1}
                 onOpen={() => navigation.navigate('PublicacionDetalle', { publicationId: publication.id, publication })}
-                onReport={() => navigation.navigate('SancionarEliminarPublicacionAdmin', {
-                  publicationId: publication.id,
-                  publicationName: publication.pattern?.name || 'Publicación',
-                })}
+                onClearReports={() => setPublicationReportsToClear(publication)}
+                onDelete={() => setPublicationToDelete(publication)}
+                onReport={() => handleSanctionPublication(publication)}
               />
             ))}
           </View>
@@ -319,21 +534,37 @@ export default function AdminCommunityManagementScreen({ navigation }) {
     <View style={styles.safeArea}>
       <AppTopBar subtitle="Gestión de Comunidad" />
 
-      <View style={styles.tabs}>
+      <View style={styles.tabs} onLayout={event => setTabsWidth(event.nativeEvent.layout.width)}>
         <TouchableOpacity
-          style={[styles.tabButton, activeTab === TABS.COMMENTS && styles.tabButtonActive]}
+          style={styles.tabButton}
           onPress={() => setActiveTab(TABS.COMMENTS)}
           activeOpacity={0.8}
         >
           <Text style={[styles.tabText, activeTab === TABS.COMMENTS && styles.tabTextActive]}>Comentarios</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tabButton, activeTab === TABS.PUBLICATIONS && styles.tabButtonActive]}
+          style={styles.tabButton}
           onPress={() => setActiveTab(TABS.PUBLICATIONS)}
           activeOpacity={0.8}
         >
           <Text style={[styles.tabText, activeTab === TABS.PUBLICATIONS && styles.tabTextActive]}>Publicaciones</Text>
         </TouchableOpacity>
+        {tabsWidth > 0 ? (
+          <Animated.View
+            style={[
+              styles.tabIndicator,
+              {
+                width: tabsWidth / 2,
+                transform: [{
+                  translateX: tabIndicator.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, tabsWidth / 2],
+                  }),
+                }],
+              },
+            ]}
+          />
+        ) : null}
       </View>
 
       <View style={styles.filtrosContainer}>
@@ -342,7 +573,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
           onPress={() => setActiveFilter('todos')}
           activeOpacity={0.8}
         >
-          <Ionicons name="grid" size={18} color={activeFilter === 'todos' ? 'white' : PURPLE} />
+          <Ionicons name={activeTab === TABS.COMMENTS ? 'chatbubbles' : 'images'} size={18} color={activeFilter === 'todos' ? 'white' : PURPLE} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -374,6 +605,31 @@ export default function AdminCommunityManagementScreen({ navigation }) {
         loadingText="Eliminando..."
         onCancel={() => setCommentToDelete(null)}
         onConfirm={handleDeleteComment}
+      />
+
+      <ConfirmationModal
+        visible={!!commentReportsToClear}
+        title="¿Quieres eliminar todos los reportes de este comentario?"
+        confirmText="Eliminar"
+        onCancel={() => setCommentReportsToClear(null)}
+        onConfirm={handleClearCommentReports}
+      />
+
+      <ConfirmationModal
+        visible={!!publicationReportsToClear}
+        title="¿Quieres eliminar todos los reportes de esta publicación?"
+        confirmText="Eliminar"
+        onCancel={() => setPublicationReportsToClear(null)}
+        onConfirm={handleClearPublicationReports}
+      />
+
+      <ConfirmationModal
+        visible={!!publicationToDelete}
+        title="¿Quieres eliminar esta publicación?"
+        loading={!!actionLoadingId}
+        loadingText="Eliminando..."
+        onCancel={() => setPublicationToDelete(null)}
+        onConfirm={handleDeletePublication}
       />
 
       <UserPreviewModal

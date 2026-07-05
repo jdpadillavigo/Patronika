@@ -14,7 +14,7 @@ export default function SessionExpiredModal({ visible, onAccept }: Props) {
             <View style={styles.modalOverlay}>
                 <View style={styles.modalCard}>
                     <View style={styles.modalIconContainer}>
-                        <Ionicons name="time-outline" size={36} color={PURPLE} />
+                        <Ionicons name="time" size={36} color={PURPLE} />
                     </View>
 
                     <Text style={styles.modalTitle}>Sesión cerrada</Text>

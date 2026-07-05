@@ -25,6 +25,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
+    zIndex: 1
   },
   textBlock: {
     flex: 1,

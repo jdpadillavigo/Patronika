@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   View,
@@ -10,6 +11,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { AdminBottomNavigationItem, UserBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
 import { perfilStyles as styles } from '../styles/ProfileStyles';
+import { PURPLE, REFRESH_TOP_BAR_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
 import ProfileUseCase from '../../domain/usecases/ProfileUseCase';
 import SessionUseCase from '../../../auth/login/domain/usecases/SessionUseCase';
 import { isSessionExpiredError } from '../../../../core/data/network/HttpClientExt';
@@ -89,6 +91,7 @@ export default function PerfilScreen({ navigation, route }) {
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={loadingUsuario} onRefresh={loadProfile} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
         >
           <View style={styles.profileSummary}>
             <View style={styles.avatarFrame}>

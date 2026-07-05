@@ -24,8 +24,7 @@ function getFriendlyUserError(error: unknown, fallback: string): string {
 
     return message;
 }
- 
-// Obtiene el listado completo de usuarios registrados (requiere rol admin en backend)
+
 async function getAllUsers() {
     try {
         const users = await UserRepository.getAllUsers();
@@ -79,7 +78,7 @@ async function updateUser(user: User, profileImageUri?: string | null) {
     }
 }
 
-async function changeOwnPassword(currentPassword: string, newPassword: string, confirmPassword: string) {
+function validateOwnPasswordFields(currentPassword: string, newPassword: string, confirmPassword: string) {
     const currentValidation = validatePassword(currentPassword);
     if (!currentValidation.isValid) return { success: false, error: currentValidation.message };
 
@@ -89,6 +88,13 @@ async function changeOwnPassword(currentPassword: string, newPassword: string, c
     if (newPassword !== confirmPassword) {
         return { success: false, error: 'Las contraseñas nuevas no coinciden' };
     }
+
+    return { success: true };
+}
+
+async function changeOwnPassword(currentPassword: string, newPassword: string, confirmPassword: string) {
+    const validation = validateOwnPasswordFields(currentPassword, newPassword, confirmPassword);
+    if (!validation.success) return validation;
 
     try {
         const updated = await UserRepository.changePassword(currentPassword, newPassword);
@@ -182,16 +188,17 @@ async function deleteUser(user: User) {
         return { success: false, error: message };
     }
 }
- 
+
 const UserUseCase = {
     getAllUsers,
     getUserById,
     createUser,
     updateUser,
+    validateOwnPasswordFields,
     changeOwnPassword,
     updateProfileImage,
     updateUserStatus,
     deleteUser,
 };
- 
+
 export default UserUseCase;

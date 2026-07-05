@@ -21,6 +21,7 @@ export default function TutorialFormScreen({ route, navigation }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
+  const [initialValues, setInitialValues] = useState({ title: '', description: '', url: '' });
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -43,9 +44,17 @@ export default function TutorialFormScreen({ route, navigation }) {
         return;
       }
 
-      setTitle(result.data?.title || '');
-      setDescription(result.data?.description || '');
-      setUrl(TutorialUseCase.normalizeUrl(result.data?.url || ''));
+      const loadedTitle = result.data?.title || '';
+      const loadedDescription = result.data?.description || '';
+      const loadedUrl = TutorialUseCase.normalizeUrl(result.data?.url || '');
+      setTitle(loadedTitle);
+      setDescription(loadedDescription);
+      setUrl(loadedUrl);
+      setInitialValues({
+        title: loadedTitle,
+        description: loadedDescription,
+        url: loadedUrl,
+      });
       setLoading(false);
     }
 
@@ -55,7 +64,12 @@ export default function TutorialFormScreen({ route, navigation }) {
     };
   }, [tutorialId]);
 
-  const canSubmit = title.trim() && description.trim() && url.trim() && !saving;
+  const normalizedCurrentUrl = TutorialUseCase.normalizeUrl(url);
+  const hasChanges = !isEditing
+    || title.trim() !== initialValues.title.trim()
+    || description.trim() !== initialValues.description.trim()
+    || normalizedCurrentUrl.trim() !== initialValues.url.trim();
+  const canSubmit = title.trim() && description.trim() && url.trim() && hasChanges && !saving;
 
   const handleSave = useCallback(async () => {
     if (!canSubmit) return;

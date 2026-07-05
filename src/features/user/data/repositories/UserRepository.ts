@@ -2,7 +2,6 @@ import HttpClient from '../../../../core/data/network/HttpClientExt';
 import type { User } from '../../../../core/domain/models/User';
 import { createUser } from '../../../../core/domain/models/User';
 import UserRemoteDataSource, { type UserRequest } from '../networking/UserRemoteDataSource';
-import LoginRemoteDataSource from '../../../auth/login/data/network/LoginRemoteDataSource';
 import RegisterRemoteDataSource from '../../../auth/register/data/network/RegisterRemoteDataSource';
 
 // Construye el body JSON que acepta PUT /api/users/{id}.
@@ -74,9 +73,7 @@ async function changePassword(currentPassword: string, newPassword: string): Pro
         throw new Error('Inicia sesión nuevamente para cambiar tu contraseña');
     }
 
-    const tokens = await LoginRemoteDataSource.login(currentUser.username, currentPassword);
-    await HttpClient.saveTokens(tokens.accessToken, tokens.refreshToken);
-    const message = await UserRemoteDataSource.changePassword(currentUser.email, newPassword);
+    const message = await UserRemoteDataSource.changePassword(currentUser.email, currentPassword, newPassword);
 
     const updated = createUser(await UserRemoteDataSource.loadById(currentUser.id));
     await HttpClient.saveCurrentUser({ ...updated, avatar: currentUser.avatar || null });

@@ -77,11 +77,11 @@ export default function ErrorPopup({
   onCancel,
 }) {
   const iconName = type === 'success'
-    ? 'checkmark-circle-outline'
+    ? 'checkmark-circle'
     : type === 'info'
-    ? 'information-circle-outline'
+    ? 'information-circle'
     : type === 'warning'
-    ? 'warning-outline'
+    ? 'warning'
     : 'alert-outline';
 
   return (

@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
   View, Text, TouchableOpacity,
-  ScrollView, ActivityIndicator, Image, Modal,
+  ScrollView, ActivityIndicator, Image, Modal, RefreshControl,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +18,7 @@ import { gridDataToImageUri } from '../../../../core/presentation/designsystem/u
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
+import { REFRESH_TOP_BAR_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 // --- Normalización de datos ---
 function normalizeOwn(p, publishedIds) {
@@ -291,9 +292,21 @@ export default function MisPatronesScreen({ navigation }) {
         {loading ? (
           <ScreenState loading text="Cargando patrones..." />
         ) : patterns.length === 0 ? (
-          <ScreenState iconName="grid-outline" text={emptyText} />
+          <ScrollView
+            style={styles.gridScroll}
+            contentContainerStyle={styles.gridEmptyContainer}
+            showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl refreshing={loading} onRefresh={loadPatterns} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+          >
+            <ScreenState iconName="grid-outline" text={emptyText} />
+          </ScrollView>
         ) : (
-          <ScrollView style={styles.gridScroll} contentContainerStyle={styles.gridContainer} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            style={styles.gridScroll}
+            contentContainerStyle={styles.gridContainer}
+            showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl refreshing={loading} onRefresh={loadPatterns} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+          >
             <View style={styles.gridColumns}>
               <View style={styles.gridColumn}>
                 {leftCol.map(p => <GridCard key={p.id} pattern={p} onPress={setSelectedPattern} />)}
