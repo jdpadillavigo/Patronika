@@ -60,6 +60,11 @@ async function changePassword(email: string, password: string): Promise<string> 
     return assertApiSuccess(response, 'Contraseña actualizada correctamente') || 'Contraseña actualizada correctamente';
 }
 
+async function suspend(userId: string, adminId: string, days: number, reason: string): Promise<void> {
+    const response = await HttpClient.post<ApiResponse<string>>(`/api/users/${userId}/suspend`, { adminId, days, reason });
+    assertApiSuccess(response, 'No se pudo suspender el usuario');
+}
+
 const UserRemoteDataSource = {
     loadAll,
     loadById,
@@ -67,6 +72,7 @@ const UserRemoteDataSource = {
     remove,
     uploadAvatar,
     changePassword,
+    suspend,
 };
 
 export default UserRemoteDataSource;

@@ -43,11 +43,16 @@ async function getMyPublishedPatternIds(): Promise<Set<string>> {
     return myPatternIds;
 }
 
+async function reportPublication(id: string): Promise<void> {
+    return PublicationRemoteDataSource.report(id);
+}
+
 const PublicationRepository = {
     loadFeed,
     create,
     remove,
     getMyPublishedPatternIds,
+    reportPublication,
 };
 
 export default PublicationRepository;

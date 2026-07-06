@@ -166,7 +166,16 @@ async function createUser(
 }
 
 async function updateUserStatus(user: User, status: number, suspensionDraft?: { days: number; reason: string } | null) {
-    void suspensionDraft;
+    if (suspensionDraft && status !== 0) {
+        try {
+            const result = await UserRepository.suspendUser(user, suspensionDraft.days, suspensionDraft.reason);
+            return { success: true, data: result.user, message: result.message };
+        } catch (error: unknown) {
+            if (isSessionExpiredError(error)) return { success: false, sessionExpired: true };
+            const message = error instanceof Error ? error.message : 'Error al suspender el usuario';
+            return { success: false, error: message };
+        }
+    }
     return updateUser({ ...user, status });
 }
 

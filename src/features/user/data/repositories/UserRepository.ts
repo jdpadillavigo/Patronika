@@ -143,6 +143,22 @@ async function deleteUser(user: User): Promise<void> {
     await UserRemoteDataSource.remove(user.id, user.username);
 }
 
+async function suspendUser(user: User, days: number, reason: string): Promise<{ user: User; message: string }> {
+    if (!user.id) {
+        throw new Error('Usuario no encontrado');
+    }
+
+    const currentUser = await HttpClient.getCurrentUser<User>();
+    const adminId = currentUser?.id;
+    if (!adminId) {
+        throw new Error('No se encontró el administrador');
+    }
+
+    await UserRemoteDataSource.suspend(user.id, adminId, days, reason);
+    const updated = createUser(await UserRemoteDataSource.loadById(user.id));
+    return { user: updated, message: 'Usuario suspendido correctamente' };
+}
+
 const UserRepository = {
     getCurrent,
     updateProfile,
@@ -153,6 +169,7 @@ const UserRepository = {
     updateUser,
     updateProfileImage,
     deleteUser,
+    suspendUser,
 };
 
 export default UserRepository;

@@ -322,4 +322,19 @@ export const detalleStyles = StyleSheet.create({
     color: '#888',
     fontSize: 14,
   },
+  suspendedInputBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+    backgroundColor: '#FFF5F5',
+  },
+  suspendedInputText: {
+    fontSize: 13,
+    color: '#E53935',
+    flex: 1,
+  },
 });
