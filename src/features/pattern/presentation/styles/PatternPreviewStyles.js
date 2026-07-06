@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 import { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
-export const vistaPreviaStyles = StyleSheet.create({
+export const createVistaPreviaStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: PURPLE,
@@ -18,13 +19,13 @@ export const vistaPreviaStyles = StyleSheet.create({
     paddingBottom: 14,
   },
   headerTitle: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 26,
     fontWeight: 'bold',
   },
   content: {
     flexGrow: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingTop: 40,
@@ -38,7 +39,7 @@ export const vistaPreviaStyles = StyleSheet.create({
     borderWidth: 2,
     borderColor: PURPLE,
     overflow: 'hidden',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
   },
   patternImage: {
     width: '100%',
@@ -65,7 +66,7 @@ export const vistaPreviaStyles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonSolidText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -83,3 +84,4 @@ export const vistaPreviaStyles = StyleSheet.create({
   },
 });
 
+export const vistaPreviaStyles = createVistaPreviaStyles(Colors.light);

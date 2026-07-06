@@ -1,12 +1,13 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 import { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
-export const formularioStyles = StyleSheet.create({
+export const createFormularioStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -20,7 +21,7 @@ export const formularioStyles = StyleSheet.create({
   headerTitle: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: 'white',
+    color: Colors.fixedWhite,
   },
   content: {
     paddingHorizontal: 24,
@@ -39,7 +40,7 @@ export const formularioStyles = StyleSheet.create({
   label: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#111',
+    color: colors.textStrong,
     paddingBottom: 2,
     borderBottomWidth: 1,
     borderBottomColor: PURPLE,
@@ -52,7 +53,7 @@ export const formularioStyles = StyleSheet.create({
     paddingHorizontal: 16,
     height: 48,
     fontSize: 15,
-    color: '#111',
+    color: colors.textStrong,
   },
   stepper: {
     flexDirection: 'row',
@@ -65,7 +66,7 @@ export const formularioStyles = StyleSheet.create({
   stepperBtn: {
     paddingHorizontal: 20,
     paddingVertical: 14,
-    backgroundColor: '#f5eef6',
+    backgroundColor: colors.stepperButtonBackground,
   },
   stepperSymbol: {
     fontSize: 22,
@@ -73,13 +74,13 @@ export const formularioStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
   stepperDisabled: {
-    color: '#ccc',
+    color: colors.textDisabled,
   },
   stepperInput: {
     flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#111',
+    color: colors.textStrong,
     height: 52,
   },
   button: {
@@ -90,22 +91,22 @@ export const formularioStyles = StyleSheet.create({
     marginTop: 8,
   },
   buttonDisabled: {
-    backgroundColor: '#b89aba',
+    backgroundColor: colors.disabledButtonBackground,
   },
   buttonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 16,
     fontWeight: 'bold',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.overlayStrong,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 28,
   },
   modalCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 28,
     width: '100%',
@@ -115,7 +116,7 @@ export const formularioStyles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#111',
+    color: colors.textStrong,
     textAlign: 'center',
   },
   infoRow: {
@@ -131,11 +132,11 @@ export const formularioStyles = StyleSheet.create({
   infoLabel: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#111',
+    color: colors.textStrong,
   },
   infoDesc: {
     fontSize: 13,
-    color: '#555',
+    color: colors.textSecondary,
     lineHeight: 18,
   },
   modalBtn: {
@@ -146,9 +147,10 @@ export const formularioStyles = StyleSheet.create({
     marginTop: 4,
   },
   modalBtnText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: 'bold',
   },
 });
 
+export const formularioStyles = createFormularioStyles(Colors.light);

@@ -1,4 +1,5 @@
 import { StyleSheet, Platform, Dimensions } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 import { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from '../../../../core/presentation/designsystem/components/CommonStyles';
@@ -8,10 +9,10 @@ const GRID_PADDING = 12;
 const GRID_GAP = 8;
 export const CARD_WIDTH = (SCREEN_WIDTH - GRID_PADDING * 2 - GRID_GAP) / 2;
 
-export const misPatronesStyles = StyleSheet.create({
+export const createMisPatronesStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: colors.background,
   },
   header: {
     backgroundColor: PURPLE,
@@ -20,7 +21,7 @@ export const misPatronesStyles = StyleSheet.create({
     paddingBottom: 14,
   },
   headerTitle: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 28,
     fontWeight: 'bold',
   },
@@ -32,16 +33,16 @@ export const misPatronesStyles = StyleSheet.create({
     paddingVertical: 10,
     gap: 8,
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: colors.border,
     zIndex: 1
   },
   filtroGrid: {
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#F3EDF4',
+    backgroundColor: colors.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -55,7 +56,7 @@ export const misPatronesStyles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: colors.borderSoft,
   },
   filtroPillActivo: {
     backgroundColor: PURPLE,
@@ -63,10 +64,10 @@ export const misPatronesStyles = StyleSheet.create({
   filtroPillText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#555',
+    color: colors.textSecondary,
   },
   filtroPillTextActivo: {
-    color: 'white',
+    color: Colors.fixedWhite,
   },
 
   // --- Estado vacío / loading ---
@@ -81,7 +82,7 @@ export const misPatronesStyles = StyleSheet.create({
   },
   vacioText: {
     fontSize: 15,
-    color: '#999',
+    color: colors.textSubtle,
   },
 
   // --- Grid Pinterest ---
@@ -109,9 +110,9 @@ export const misPatronesStyles = StyleSheet.create({
   gridCard: {
     borderRadius: 14,
     overflow: 'hidden',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -119,7 +120,7 @@ export const misPatronesStyles = StyleSheet.create({
   gridCardImage: {
     width: CARD_WIDTH,
     height: CARD_WIDTH,
-    backgroundColor: '#F3EDF4',
+    backgroundColor: colors.primarySubtle,
     overflow: 'hidden',
   },
   gridCardImg: {
@@ -131,7 +132,7 @@ export const misPatronesStyles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F3EDF4',
+    backgroundColor: colors.primarySubtle,
   },
   gridCardBadge: {
     position: 'absolute',
@@ -158,21 +159,21 @@ export const misPatronesStyles = StyleSheet.create({
   gridCardFooter: {
     paddingHorizontal: 8,
     paddingVertical: 7,
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
   },
   gridCardName: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text,
   },
 
   // --- Modal detalle (bottom sheet) ---
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: colors.overlaySoft,
   },
   modalSheet: {
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: Platform.OS === 'ios' ? 36 : 24,
@@ -183,7 +184,7 @@ export const misPatronesStyles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#DDD',
+    backgroundColor: colors.modalHandle,
     alignSelf: 'center',
     marginBottom: 16,
   },
@@ -196,7 +197,7 @@ export const misPatronesStyles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     fontWeight: '700',
-    color: '#222',
+    color: colors.text,
   },
   modalCloseBtn: {
     padding: 4,
@@ -205,14 +206,14 @@ export const misPatronesStyles = StyleSheet.create({
     width: '100%',
     height: SCREEN_WIDTH * 0.55,
     borderRadius: 12,
-    backgroundColor: '#F3EDF4',
+    backgroundColor: colors.surface,
     marginBottom: 20,
   },
   modalPreviewPlaceholder: {
     width: '100%',
     height: SCREEN_WIDTH * 0.55,
     borderRadius: 12,
-    backgroundColor: '#F3EDF4',
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
@@ -227,10 +228,10 @@ export const misPatronesStyles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 14,
-    backgroundColor: '#F5F0F5',
+    backgroundColor: colors.actionBackground,
   },
   actionBtnDanger: {
-    backgroundColor: '#FFF0F0',
+    backgroundColor: colors.dangerBackground,
   },
   actionBtnText: {
     fontSize: 15,
@@ -238,13 +239,13 @@ export const misPatronesStyles = StyleSheet.create({
     color: PURPLE,
   },
   actionBtnTextDanger: {
-    color: '#E53935',
+    color: Colors.errorStrong,
   },
 
   // --- Fullscreen ---
   fullscreenOverlay: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: Colors.fixedBlack,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -256,7 +257,7 @@ export const misPatronesStyles = StyleSheet.create({
     position: 'absolute',
     top: 50,
     right: 16,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.overlayStrong,
     borderRadius: 20,
     padding: 8,
     zIndex: 10,
@@ -269,14 +270,16 @@ export const misPatronesStyles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(123, 63, 126, 0.85)', // morado semitransparente, igual al PURPLE
+    backgroundColor: Colors.primaryAlpha85, // morado semitransparente, igual al PURPLE
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     zIndex: 10, // asegura que quede encima de la imagen
   },
 });
+
+export const misPatronesStyles = createMisPatronesStyles(Colors.light);

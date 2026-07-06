@@ -1,4 +1,5 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   RefreshControl,
   ScrollView,
@@ -16,12 +17,14 @@ import FloatingIconButton from '../../../../core/presentation/designsystem/compo
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import TutorialUseCase from '../../domain/usecases/TutorialUseCase';
 import TutorialCard from '../components/TutorialCard';
-import { adminTutorialManagementStyles as styles, PURPLE } from '../styles/AdminTutorialManagementStyles';
+import { createAdminTutorialManagementStyles, adminTutorialManagementStyles as styles, PURPLE } from '../styles/AdminTutorialManagementStyles';
 import { REFRESH_ADMIN_LIST_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 const UNKNOWN_CONNECTION_ERROR = 'Ocurrió un error desconocido o de conexión. Inténtalo de nuevo.';
 
-export default function AdminTutorialManagementScreen({ navigation }) {
+export default function AdminTutorialManagementScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createAdminTutorialManagementStyles(colors), [colors]);
   const [tutorials, setTutorials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

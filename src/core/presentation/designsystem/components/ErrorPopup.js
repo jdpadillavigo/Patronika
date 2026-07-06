@@ -1,8 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { useAppTheme } from '../Theme';
 import { Modal, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { errorPopupStyles as styles, PURPLE } from './ErrorPopupStyles';
+import { createErrorPopupStyles, errorPopupStyles as styles, PURPLE } from './ErrorPopupStyles';
 
 export function useErrorPopup() {
   const [popupState, setPopupState] = useState({
@@ -66,8 +67,7 @@ export function useErrorPopup() {
   return { showError, showPopup, showConfirm, errorPopup };
 }
 
-export default function ErrorPopup({
-  visible,
+export default function ErrorPopup({visible,
   title = 'Error',
   message,
   type = 'error',
@@ -76,6 +76,8 @@ export default function ErrorPopup({
   onAccept,
   onCancel,
 }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createErrorPopupStyles(colors), [colors]);
   const iconName = type === 'success'
     ? 'checkmark-circle'
     : type === 'info'

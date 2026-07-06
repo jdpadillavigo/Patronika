@@ -1,4 +1,5 @@
 import React from 'react';
+import Colors from '../Colors';
 import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { PURPLE } from './CommonStyles';
@@ -24,7 +25,7 @@ export default function AdminCircleIconButton({
       accessibilityLabel={label}
     >
       {count > 0 ? <Text style={styles.countText}>{count}</Text> : null}
-      <Icon name={iconName} size={18} color="white" />
+      <Icon name={iconName} size={18} color={Colors.fixedWhite} />
     </TouchableOpacity>
   );
 }
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 8,
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: Colors.fixedBlack,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -51,7 +52,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
   },
   countText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 12,
     fontWeight: '800',
   },

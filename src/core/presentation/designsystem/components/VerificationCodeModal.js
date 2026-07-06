@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Text, TextInput, TouchableOpacity, View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { errorPopupStyles as popupStyles, PURPLE } from './ErrorPopupStyles';
+import { createErrorPopupStyles, PURPLE } from './ErrorPopupStyles';
+import { useAppTheme } from '../Theme';
 
 export default function VerificationCodeModal({
   visible,
@@ -15,6 +16,8 @@ export default function VerificationCodeModal({
   onResend,
   onSubmit,
 }) {
+  const { colors } = useAppTheme();
+  const popupStyles = useMemo(() => createErrorPopupStyles(colors), [colors]);
   const codeLength = 6;
   const [code, setCode] = useState(Array(codeLength).fill(''));
   const [resendVisible, setResendVisible] = useState(false);
@@ -73,7 +76,7 @@ export default function VerificationCodeModal({
                 maxLength={1}
                 editable={!loading}
                 textAlign="center"
-                style={styles.codeInput}
+                style={[styles.codeInput, { color: colors.textStrong }]}
               />
             ))}
           </View>
@@ -130,7 +133,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: PURPLE,
     borderRadius: 8,
-    color: '#111',
     fontSize: 20,
     lineHeight: 22,
     fontWeight: '800',

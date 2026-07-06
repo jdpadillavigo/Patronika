@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import { View, ScrollView, RefreshControl } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -6,12 +7,14 @@ import { UserBottomNavigationItem } from '../../../../core/domain/BottomNavigati
 import AppTopBar from '../../../../core/presentation/designsystem/components/AppTopBar';
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
-import { tutorialesStyles as styles, PURPLE } from '../styles/TutorialesStyles';
+import { createTutorialesStyles, tutorialesStyles as styles, PURPLE } from '../styles/TutorialesStyles';
 import TutorialCard from '../components/TutorialCard';
 import TutorialUseCase from '../../domain/usecases/TutorialUseCase';
 import { REFRESH_TOP_BAR_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
-export default function TutorialesScreen({ navigation }) {
+export default function TutorialesScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createTutorialesStyles(colors), [colors]);
   const [tutorials, setTutorials] = useState([]);
   const [loading, setLoading] = useState(true);
 

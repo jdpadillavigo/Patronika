@@ -1,25 +1,26 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../Colors';
 import { PURPLE } from './CommonStyles';
 
 export { PURPLE } from './CommonStyles';
 
-export const userPreviewModalStyles = StyleSheet.create({
+export const createUserPreviewModalStyles = (colors = Colors.light) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: colors.overlay,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 34,
   },
   card: {
     width: '100%',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 18,
     paddingHorizontal: 28,
     paddingVertical: 30,
     alignItems: 'center',
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -37,7 +38,7 @@ export const userPreviewModalStyles = StyleSheet.create({
     borderRadius: 83,
     borderWidth: 3,
     borderColor: PURPLE,
-    backgroundColor: '#F3EDF4',
+    backgroundColor: colors.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -48,7 +49,7 @@ export const userPreviewModalStyles = StyleSheet.create({
     height: '100%',
   },
   username: {
-    color: '#1A1A1A',
+    color: colors.textHeading,
     fontSize: 20,
     fontWeight: '800',
     textAlign: 'center',
@@ -56,9 +57,11 @@ export const userPreviewModalStyles = StyleSheet.create({
     maxWidth: '100%',
   },
   email: {
-    color: '#666',
+    color: colors.textSecondary,
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
   },
 });
+
+export const userPreviewModalStyles = createUserPreviewModalStyles(Colors.light);

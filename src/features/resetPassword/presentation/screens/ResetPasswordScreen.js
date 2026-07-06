@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   View,
   Text,
@@ -7,12 +8,14 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { restablecerStyles as styles, PURPLE } from '../styles/ResetPasswordStyles';
+import { createRestablecerStyles, restablecerStyles as styles, PURPLE } from '../styles/ResetPasswordStyles';
 import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
 import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 
-export default function RestablecerContrasenaScreen({ navigation, route }) {
+export default function RestablecerContrasenaScreen({navigation, route }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createRestablecerStyles(colors), [colors]);
   const { email = '' } = route.params || {};
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -57,7 +60,7 @@ export default function RestablecerContrasenaScreen({ navigation, route }) {
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
-            placeholderTextColor="#BDBDBD"
+            placeholderTextColor={colors.inputUnderline}
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
@@ -68,7 +71,7 @@ export default function RestablecerContrasenaScreen({ navigation, route }) {
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               size={20}
-              color="#BDBDBD"
+              color={colors.inputUnderline}
             />
           </TouchableOpacity>
         </View>
@@ -77,7 +80,7 @@ export default function RestablecerContrasenaScreen({ navigation, route }) {
           <TextInput
             style={styles.input}
             placeholder="Repetir contraseña"
-            placeholderTextColor="#BDBDBD"
+            placeholderTextColor={colors.inputUnderline}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry={!showConfirmPassword}
@@ -88,7 +91,7 @@ export default function RestablecerContrasenaScreen({ navigation, route }) {
             <Ionicons
               name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
               size={20}
-              color="#BDBDBD"
+              color={colors.inputUnderline}
             />
           </TouchableOpacity>
         </View>

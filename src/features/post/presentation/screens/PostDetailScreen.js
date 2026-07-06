@@ -1,4 +1,6 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import Colors from '../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
   TextInput, ActivityIndicator,
@@ -7,7 +9,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { detalleStyles as styles, PURPLE } from '../styles/PostDetailStyles';
+import { createDetalleStyles, detalleStyles as styles, PURPLE } from '../styles/PostDetailStyles';
+let themedStyles = styles;
 import CommentUseCase from '../../domain/usecases/CommentUseCase';
 import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
 import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
@@ -27,19 +30,22 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function CommentAvatar({ initial, imageUrl }) {
+function CommentAvatar({ initial, imageUrl, styles }) {
   const [imageFailed, setImageFailed] = useState(false);
   if (imageUrl && !imageFailed) {
-    return <Image source={{ uri: imageUrl }} style={styles.commentAvatarImage} onError={() => setImageFailed(true)} />;
+    return <Image source={{ uri: imageUrl }} style={themedStyles.commentAvatarImage} onError={() => setImageFailed(true)} />;
   }
   return (
-    <View style={styles.commentAvatar}>
-      <Ionicons name="person" size={16} color="white" />
+    <View style={themedStyles.commentAvatar}>
+      <Ionicons name="person" size={16} color={Colors.fixedWhite} />
     </View>
   );
 }
 
-export default function PublicacionDetalleScreen({ navigation, route }) {
+export default function PublicacionDetalleScreen({navigation, route }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createDetalleStyles(colors), [colors]);
+  themedStyles = styles;
   const { publication: initialPub, publicationId } = route.params || {};
   const [pub] = useState(initialPub);
   const [fetchedPattern, setFetchedPattern] = useState(null);
@@ -275,7 +281,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
           )}
           {isOwnPublication && (
             <TouchableOpacity style={styles.deleteBtn} onPress={() => setShowDeleteModal(true)}>
-              <Ionicons name="trash-outline" size={20} color="#E53935" />
+              <Ionicons name="trash-outline" size={20} color={Colors.errorStrong} />
             </TouchableOpacity>
           )}
         </View>
@@ -299,7 +305,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
                 onError={() => setResultImageLoaded(true)}
               />
               <View style={styles.imageLabelBadge}>
-                <Ionicons name="camera" size={11} color="white" />
+                <Ionicons name="camera" size={11} color={Colors.fixedWhite} />
                 <Text style={styles.imageLabelText}>Foto del resultado · toca para ampliar</Text>
               </View>
             </TouchableOpacity>
@@ -319,7 +325,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
                 onError={() => setPatternImageLoaded(true)}
               />
               <View style={styles.imageLabelBadge}>
-                <Ionicons name="grid" size={11} color="white" />
+                <Ionicons name="grid" size={11} color={Colors.fixedWhite} />
                 <Text style={styles.imageLabelText}>Patrón generado · toca para ampliar</Text>
               </View>
             </TouchableOpacity>
@@ -339,7 +345,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
                 />
               ) : (
                 <View style={styles.avatar}>
-                  <Ionicons name="person" size={20} color="white" />
+                  <Ionicons name="person" size={20} color={Colors.fixedWhite} />
                 </View>
               )}
               <View style={styles.authorInfo}>
@@ -368,7 +374,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
             {loadingComments ? (
               <View style={{ alignItems: 'center', marginVertical: 16 }}>
                 <ActivityIndicator color={PURPLE} />
-                <Text style={{ color: '#888', fontSize: 14, marginTop: 8 }}>Cargando comentarios...</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 8 }}>Cargando comentarios...</Text>
               </View>
             ) : comments.length === 0 ? (
               <Text style={styles.noComments}>¡Sé el primero en comentar!</Text>
@@ -381,15 +387,15 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
                 return (
                   <View key={comment.id} style={styles.commentItem}>
                     <View style={styles.commentHeader}>
-                      <CommentAvatar initial={displayUsername[0]} imageUrl={displayAvatar} />
+                      <CommentAvatar initial={displayUsername[0]} imageUrl={displayAvatar} styles={styles} />
                       <Text style={styles.commentAuthor}>@{displayUsername}</Text>
                       {isOwnComment ? (
                         <View style={styles.commentActions}>
                           <TouchableOpacity style={styles.commentActionBtn} onPress={() => handleEditComment(comment)}>
-                            <Ionicons name="pencil-outline" size={14} color="#888" />
+                            <Ionicons name="pencil-outline" size={14} color={colors.textMuted} />
                           </TouchableOpacity>
                           <TouchableOpacity style={styles.commentActionBtn} onPress={() => handleDeleteComment(comment.id)}>
-                            <Ionicons name="trash-outline" size={14} color="#E53935" />
+                            <Ionicons name="trash-outline" size={14} color={Colors.errorStrong} />
                           </TouchableOpacity>
                         </View>
                       ) : !isAdmin ? (
@@ -401,7 +407,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
                           <Ionicons
                             name={reportedComments.has(comment.id) ? 'flag' : 'flag-outline'}
                             size={14}
-                            color={reportedComments.has(comment.id) ? '#E53935' : '#BBB'}
+                            color={reportedComments.has(comment.id) ? Colors.errorStrong : colors.textDisabled}
                           />
                         </TouchableOpacity>
                       ) : null}
@@ -434,7 +440,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
             ref={inputRef}
             style={styles.input}
             placeholder="Escribe un comentario..."
-            placeholderTextColor="#BBB"
+            placeholderTextColor={colors.textDisabled}
             value={commentText}
             onChangeText={setCommentText}
             multiline
@@ -449,8 +455,8 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
             disabled={!commentText.trim() || sending || (editingComment && commentText.trim() === editingComment.content.trim())}
           >
             {sending
-              ? <ActivityIndicator size="small" color="white" />
-              : <Ionicons name="send" size={18} color="white" />
+              ? <ActivityIndicator size="small" color={Colors.fixedWhite} />
+              : <Ionicons name="send" size={18} color={Colors.fixedWhite} />
             }
           </TouchableOpacity>
         </View>
@@ -464,12 +470,12 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
       >
         <View style={styles.fullscreenOverlay}>
           <TouchableOpacity style={styles.fullscreenClose} onPress={() => setFullscreenUri(null)}>
-            <Ionicons name="close" size={22} color="white" />
+            <Ionicons name="close" size={22} color={Colors.fixedWhite} />
           </TouchableOpacity>
           {fullscreenUri && (
             <>
               {fullscreenLoading && (
-                <ActivityIndicator size="large" color="white" style={{ position: 'absolute' }} />
+                <ActivityIndicator size="large" color={Colors.fixedWhite} style={{ position: 'absolute' }} />
               )}
               <Image
                 source={{ uri: fullscreenUri }}
@@ -485,7 +491,7 @@ export default function PublicacionDetalleScreen({ navigation, route }) {
       <Modal visible={showDeleteModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Ionicons name="trash-outline" size={40} color="#E53935" />
+            <Ionicons name="trash-outline" size={40} color={Colors.errorStrong} />
             <Text style={styles.modalTitle}>Eliminar publicación</Text>
             <Text style={styles.modalMessage}>Esta acción no se puede deshacer.</Text>
             <TouchableOpacity style={styles.modalDanger} onPress={handleDeletePublication} disabled={deletingPub}>

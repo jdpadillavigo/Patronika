@@ -1,7 +1,9 @@
 import React from 'react';
+import Colors from '../Colors';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PURPLE } from './CommonStyles';
+import { useAppTheme } from '../Theme';
 
 export default function ScreenState({
   loading = false,
@@ -11,15 +13,17 @@ export default function ScreenState({
   actionText,
   onAction,
 }) {
+  const { colors } = useAppTheme();
+
   return (
     <View style={styles.container}>
       {loading ? (
         <ActivityIndicator size="large" color={PURPLE} />
       ) : iconName ? (
-        <Ionicons name={iconName} size={52} color="#CCC" />
+        <Ionicons name={iconName} size={52} color={colors.textDisabled} />
       ) : null}
-      {text ? <Text style={styles.text}>{text}</Text> : null}
-      {subtext ? <Text style={styles.subtext}>{subtext}</Text> : null}
+      {text ? <Text style={[styles.text, { color: colors.placeholder }]}>{text}</Text> : null}
+      {subtext ? <Text style={[styles.subtext, { color: colors.textDisabled }]}>{subtext}</Text> : null}
       {actionText && onAction ? (
         <TouchableOpacity style={styles.button} onPress={onAction}>
           <Text style={styles.buttonText}>{actionText}</Text>
@@ -38,13 +42,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   text: {
-    color: '#999',
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
   },
   subtext: {
-    color: '#BBB',
     fontSize: 13,
     textAlign: 'center',
   },
@@ -56,7 +58,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   buttonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 14,
     fontWeight: '700',
   },

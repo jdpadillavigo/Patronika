@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useAppTheme } from '../Theme';
 import { Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { userPreviewModalStyles as styles, PURPLE } from './UserPreviewModalStyles';
+import { createUserPreviewModalStyles, userPreviewModalStyles as styles, PURPLE } from './UserPreviewModalStyles';
 
-export default function UserPreviewModal({ visible, user, onClose }) {
+export default function UserPreviewModal({visible, user, onClose }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createUserPreviewModalStyles(colors), [colors]);
   const [imageFailed, setImageFailed] = useState(false);
   const imageUrl = user?.avatar || user?.profileImageUrl || null;
   const showImage = !!imageUrl && !imageFailed;

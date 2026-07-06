@@ -1,7 +1,9 @@
 import React from 'react';
+import Colors from '../Colors';
 import { Modal, Text, TouchableOpacity, View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PURPLE } from './CommonStyles';
+import { useAppTheme } from '../Theme';
 
 export default function ConfirmationModal({
   visible,
@@ -14,6 +16,7 @@ export default function ConfirmationModal({
   onCancel,
   onConfirm,
 }) {
+  const { colors } = useAppTheme();
   const filledIconName = typeof iconName === 'string' ? iconName.replace('-outline', '') : iconName;
 
   return (
@@ -23,14 +26,14 @@ export default function ConfirmationModal({
       animationType="fade"
       onRequestClose={() => !loading && onCancel?.()}
     >
-      <View style={styles.overlay}>
-        <View style={styles.card}>
+      <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+        <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.shadow }]}>
           <View style={styles.icon}>
             <Ionicons name={filledIconName} size={30} color={PURPLE} />
           </View>
-          <Text style={styles.title}>{title}</Text>
+          <Text style={[styles.title, { color: colors.textHeading }]}>{title}</Text>
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onCancel} disabled={loading}>
+            <TouchableOpacity style={[styles.cancelButton, { backgroundColor: colors.surface }]} onPress={onCancel} disabled={loading}>
               <Text style={styles.cancelButtonText}>{cancelText}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.confirmButton} onPress={onConfirm} disabled={loading}>
@@ -48,19 +51,16 @@ export default function ConfirmationModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 34,
   },
   card: {
     width: '100%',
-    backgroundColor: 'white',
     borderRadius: 18,
     padding: 26,
     alignItems: 'center',
     elevation: 10,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    color: '#1A1A1A',
     fontSize: 18,
     fontWeight: '800',
     textAlign: 'center',
@@ -90,7 +89,6 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: 'white',
     borderWidth: 1.5,
     borderColor: PURPLE,
     borderRadius: 10,
@@ -110,7 +108,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   confirmButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '700',
   },

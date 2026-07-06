@@ -8,6 +8,7 @@ import GeneratePatternScreen from '../features/pattern/presentation/screens/Gene
 import PatternFormScreen from '../features/pattern/presentation/screens/PatternFormScreen.js';
 import PatternPreviewScreen from '../features/pattern/presentation/screens/PatternPreviewScreen.js';
 import { GeneratePatternFlowContext } from './GeneratePatternFlowContext';
+import { useAppTheme } from '../core/presentation/designsystem/Theme';
 
 const Stack = createNativeStackNavigator();
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -15,6 +16,7 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 type Props = NativeStackScreenProps<RootStackParamList, 'GenerarPatron'>;
 
 export default function GeneratePatternNavigator({ navigation }: Props) {
+    const { colors } = useAppTheme();
     const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
     const isClosing = useRef(false);
 
@@ -48,12 +50,13 @@ export default function GeneratePatternNavigator({ navigation }: Props) {
 
     return (
         <GeneratePatternFlowContext.Provider value={actions}>
-            <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
+            <Animated.View style={[styles.container, { backgroundColor: colors.background, transform: [{ translateY }] }]}>
                 <Stack.Navigator
                     initialRouteName="GenerarPatronInicio"
                     screenOptions={{
                         headerShown: false,
                         animation: 'fade',
+                        contentStyle: { backgroundColor: colors.background },
                     }}
                 >
                     <Stack.Screen name="GenerarPatronInicio" component={GeneratePatternScreen} />
@@ -67,7 +70,6 @@ export default function GeneratePatternNavigator({ navigation }: Props) {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: 'white',
+        flex: 1
     },
 });

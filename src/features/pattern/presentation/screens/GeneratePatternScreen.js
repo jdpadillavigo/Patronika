@@ -1,4 +1,6 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useMemo } from 'react';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 import {
   View,
   Text,
@@ -10,11 +12,13 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { generarPatronStyles as styles, PURPLE } from '../styles/GeneratePatternStyles';
+import { createGenerarPatronStyles, generarPatronStyles as styles, PURPLE } from '../styles/GeneratePatternStyles';
 import { useGeneratePatternFlow } from '../../../../main/GeneratePatternFlowContext';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 
-export default function GenerarPatronScreen({ navigation }) {
+export default function GenerarPatronScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createGenerarPatronStyles(colors), [colors]);
   const { closeFlow } = useGeneratePatternFlow();
   const [image, setImage] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -88,7 +92,7 @@ export default function GenerarPatronScreen({ navigation }) {
           <Text style={styles.headerTitle}>Generar patrón</Text>
         </View>
         <TouchableOpacity onPress={closeFlow} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="close" size={26} color="white" />
+          <Ionicons name="close" size={26} color={Colors.fixedWhite} />
         </TouchableOpacity>
       </View>
 
@@ -98,7 +102,7 @@ export default function GenerarPatronScreen({ navigation }) {
       </View>
 
       <TouchableOpacity style={styles.banner} onPress={handleOpenTerms} activeOpacity={0.8}>
-        <Ionicons name="help-circle" size={22} color="#4A9EDB" />
+        <Ionicons name="help-circle" size={22} color={Colors.infoSoft} />
         <Text style={styles.bannerText}>Lea los términos y condiciones de uso</Text>
       </TouchableOpacity>
 
@@ -114,7 +118,7 @@ export default function GenerarPatronScreen({ navigation }) {
               <Image source={{ uri: image }} style={styles.image} resizeMode="cover" />
               {/* NUEVO: el badge de edición también abre el Alert de selección */}
               <TouchableOpacity style={styles.editBadge} onPress={handleSelectImage}>
-                <Ionicons name="pencil" size={14} color="white" />
+                <Ionicons name="pencil" size={14} color={Colors.fixedWhite} />
               </TouchableOpacity>
             </>
           ) : (

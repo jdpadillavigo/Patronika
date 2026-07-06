@@ -1,4 +1,6 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
+import Colors from '../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   Image,
   RefreshControl,
@@ -10,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { AdminBottomNavigationItem, UserBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
-import { perfilStyles as styles } from '../styles/ProfileStyles';
+import { createPerfilStyles, perfilStyles as styles } from '../styles/ProfileStyles';
 import { PURPLE, REFRESH_TOP_BAR_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
 import ProfileUseCase from '../../domain/usecases/ProfileUseCase';
 import SessionUseCase from '../../../auth/login/domain/usecases/SessionUseCase';
@@ -22,7 +24,9 @@ import ProfileActionButton from '../../../../core/presentation/designsystem/comp
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
 
-export default function PerfilScreen({ navigation, route }) {
+export default function PerfilScreen({navigation, route }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createPerfilStyles(colors), [colors]);
   const [usuario, setUsuario] = useState(null);
   const [loadingUsuario, setLoadingUsuario] = useState(true);
   const [avatarFailed, setAvatarFailed] = useState(false);
@@ -102,7 +106,7 @@ export default function PerfilScreen({ navigation, route }) {
                   onError={() => setAvatarFailed(true)}
                 />
               ) : (
-                <Ionicons name="person" size={108} color="#000" />
+                <Ionicons name="person" size={108} color={Colors.fixedBlack} />
               )}
             </View>
 

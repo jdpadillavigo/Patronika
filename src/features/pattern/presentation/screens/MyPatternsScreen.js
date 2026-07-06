@@ -1,4 +1,6 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
+import Colors from '../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   View, Text, TouchableOpacity,
   ScrollView, ActivityIndicator, Image, Modal, RefreshControl,
@@ -9,7 +11,7 @@ import { File, Paths } from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 
 import { UserBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
-import { misPatronesStyles as styles, PURPLE, CARD_WIDTH } from '../styles/MyPatternsStyles';
+import { createMisPatronesStyles, misPatronesStyles as styles, PURPLE, CARD_WIDTH } from '../styles/MyPatternsStyles';
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
 import PatternLibraryUseCase from '../../domain/usecases/PatternLibraryUseCase';
 import PublicationUseCase from '../../../post/domain/usecases/PublicationUseCase';
@@ -19,6 +21,7 @@ import ScreenState from '../../../../core/presentation/designsystem/components/S
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 import { REFRESH_TOP_BAR_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
+let themedStyles = styles;
 
 // --- Normalización de datos ---
 function normalizeOwn(p, publishedIds) {
@@ -32,7 +35,7 @@ function normalizeAll(p, currentUserId, publishedIds) {
 }
 
 // --- Tarjeta de patrón (grid Pinterest) ---
-const GridCard = memo(function GridCard({ pattern, onPress }) {
+const GridCard = memo(function GridCard({ pattern, onPress, styles }) {
   const uri = pattern.gridData
     ? gridDataToImageUri(pattern.gridData, { maxDimension: 300 })
     : null;
@@ -46,20 +49,20 @@ const GridCard = memo(function GridCard({ pattern, onPress }) {
 
   return (
     <TouchableOpacity
-      style={[styles.gridCard, { width: CARD_WIDTH }]}
+      style={[themedStyles.gridCard, { width: CARD_WIDTH }]}
       onPress={() => onPress(pattern)}
       activeOpacity={0.82}
     >
-      <View style={[styles.gridCardImage, { width: CARD_WIDTH, height: CARD_WIDTH }]}>
+      <View style={[themedStyles.gridCardImage, { width: CARD_WIDTH, height: CARD_WIDTH }]}>
         {(!uri || imageLoading || imageFailed) ? (
-          <View style={styles.gridCardPlaceholder}>
+          <View style={themedStyles.gridCardPlaceholder}>
             <Ionicons name="image-outline" size={32} color={PURPLE} />
           </View>
         ) : null}
         {uri && !imageFailed ? (
           <Image
             source={{ uri }}
-            style={styles.gridCardImg}
+            style={themedStyles.gridCardImg}
             resizeMode="cover"
             onLoadStart={() => setImageLoading(true)}
             onLoadEnd={() => setImageLoading(false)}
@@ -70,25 +73,28 @@ const GridCard = memo(function GridCard({ pattern, onPress }) {
           />
         ) : null}
         {pattern.isPublished && (
-          <View style={styles.gridCardPublishedBadge}>
-            <Ionicons name="earth" size={12} color="white" />
+          <View style={themedStyles.gridCardPublishedBadge}>
+            <Ionicons name="earth" size={12} color={Colors.fixedWhite} />
           </View>
         )}
         {pattern.isSaved && (
-          <View style={styles.gridCardBadge}>
-            <Ionicons name="bookmark" size={12} color="white" />
+          <View style={themedStyles.gridCardBadge}>
+            <Ionicons name="bookmark" size={12} color={Colors.fixedWhite} />
           </View>
         )}
       </View>
-      <View style={styles.gridCardFooter}>
-        <Text style={styles.gridCardName} numberOfLines={1}>{pattern.name}</Text>
+      <View style={themedStyles.gridCardFooter}>
+        <Text style={themedStyles.gridCardName} numberOfLines={1}>{pattern.name}</Text>
       </View>
     </TouchableOpacity>
   );
 });
 
 // --- Pantalla principal ---
-export default function MisPatronesScreen({ navigation }) {
+export default function MisPatronesScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createMisPatronesStyles(colors), [colors]);
+  themedStyles = styles;
   const [activeFilter, setActiveFilter] = useState('todos');
   const [patterns, setPatterns] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -262,7 +268,7 @@ export default function MisPatronesScreen({ navigation }) {
           onPress={() => handleFilterChange('todos')}
           activeOpacity={0.8}
         >
-          <Ionicons name="grid" size={18} color={activeFilter === 'todos' ? 'white' : PURPLE} />
+          <Ionicons name="grid" size={18} color={activeFilter === 'todos' ? Colors.fixedWhite : PURPLE} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -270,7 +276,7 @@ export default function MisPatronesScreen({ navigation }) {
           onPress={() => handleFilterChange('guardados')}
           activeOpacity={0.8}
         >
-          <Ionicons name="bookmark" size={14} color={activeFilter === 'guardados' ? 'white' : '#555'} />
+          <Ionicons name="bookmark" size={14} color={activeFilter === 'guardados' ? Colors.fixedWhite : colors.textSecondary} />
           <Text style={[styles.filtroPillText, activeFilter === 'guardados' && styles.filtroPillTextActivo]}>
             Guardados
           </Text>
@@ -309,10 +315,10 @@ export default function MisPatronesScreen({ navigation }) {
           >
             <View style={styles.gridColumns}>
               <View style={styles.gridColumn}>
-                {leftCol.map(p => <GridCard key={p.id} pattern={p} onPress={setSelectedPattern} />)}
+                {leftCol.map(p => <GridCard key={p.id} pattern={p} styles={styles} onPress={setSelectedPattern} />)}
               </View>
               <View style={styles.gridColumn}>
-                {rightCol.map(p => <GridCard key={p.id} pattern={p} onPress={setSelectedPattern} />)}
+                {rightCol.map(p => <GridCard key={p.id} pattern={p} styles={styles} onPress={setSelectedPattern} />)}
               </View>
             </View>
           </ScrollView>
@@ -333,7 +339,7 @@ export default function MisPatronesScreen({ navigation }) {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle} numberOfLines={2}>{selectedPattern?.name}</Text>
             <TouchableOpacity style={styles.modalCloseBtn} onPress={closeModal}>
-              <Ionicons name="close" size={22} color="#555" />
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -364,16 +370,16 @@ export default function MisPatronesScreen({ navigation }) {
             {selectedPattern?.isSaved ? (
               <TouchableOpacity style={[styles.actionBtn, styles.actionBtnDanger]} onPress={handleRemoveSaved} disabled={!!actionLoading}>
                 {actionLoading === 'remove'
-                  ? <ActivityIndicator size="small" color="#E53935" />
-                  : <Ionicons name="bookmark-outline" size={20} color="#E53935" />
+                  ? <ActivityIndicator size="small" color={Colors.errorStrong} />
+                  : <Ionicons name="bookmark-outline" size={20} color={Colors.errorStrong} />
                 }
                 <Text style={[styles.actionBtnText, styles.actionBtnTextDanger]}>Quitar de guardados</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity style={[styles.actionBtn, styles.actionBtnDanger]} onPress={handleDelete} disabled={!!actionLoading}>
                 {actionLoading === 'delete'
-                  ? <ActivityIndicator size="small" color="#E53935" />
-                  : <Ionicons name="trash-outline" size={20} color="#E53935" />
+                  ? <ActivityIndicator size="small" color={Colors.errorStrong} />
+                  : <Ionicons name="trash-outline" size={20} color={Colors.errorStrong} />
                 }
                 <Text style={[styles.actionBtnText, styles.actionBtnTextDanger]}>Eliminar patrón</Text>
               </TouchableOpacity>
@@ -386,7 +392,7 @@ export default function MisPatronesScreen({ navigation }) {
       <Modal visible={fullscreenVisible} transparent animationType="fade" onRequestClose={() => setFullscreenVisible(false)}>
         <View style={styles.fullscreenOverlay}>
           <TouchableOpacity style={styles.fullscreenClose} onPress={() => setFullscreenVisible(false)}>
-            <Ionicons name="close" size={22} color="white" />
+            <Ionicons name="close" size={22} color={Colors.fixedWhite} />
           </TouchableOpacity>
           {previewUri && (
             <Image source={{ uri: previewUri }} style={styles.fullscreenImage} resizeMode="contain" />

@@ -1,23 +1,24 @@
 import { StyleSheet, Platform } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 
-export const PURPLE = '#763A6C';
+export const PURPLE = Colors.primary;
 
-export const detalleStyles = StyleSheet.create({
+export const createDetalleStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
   header: {
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-    backgroundColor: 'white',
+    borderBottomColor: colors.border,
+    backgroundColor: colors.background,
     paddingBottom: 14,
   },
   headerTitle: {
     flex: 1,
     fontSize: 30,
     fontWeight: '800',
-    color: '#222',
+    color: colors.text,
   },
   headerTitleRow: {
     flexDirection: 'row',
@@ -39,17 +40,17 @@ export const detalleStyles = StyleSheet.create({
   image: {
     width: '100%',
     height: 280,
-    backgroundColor: '#EEE',
+    backgroundColor: colors.imageBackground,
   },
   imageSmall: {
     width: '100%',
     height: 200,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.background,
   },
   imagePlaceholder: {
     width: '100%',
     height: 200,
-    backgroundColor: '#F0E8EF',
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -57,7 +58,7 @@ export const detalleStyles = StyleSheet.create({
     position: 'absolute',
     bottom: 8,
     left: 10,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: colors.overlayStrong,
     borderRadius: 8,
     paddingHorizontal: 9,
     paddingVertical: 4,
@@ -67,13 +68,13 @@ export const detalleStyles = StyleSheet.create({
     zIndex: 1,
   },
   imageLabelText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 11,
     fontWeight: '600',
   },
   imageDivider: {
     height: 3,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: colors.borderSoft,
   },
   body: {
     padding: 16,
@@ -98,7 +99,7 @@ export const detalleStyles = StyleSheet.create({
     borderRadius: 19,
   },
   avatarText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -108,46 +109,46 @@ export const detalleStyles = StyleSheet.create({
   authorName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#222',
+    color: colors.text,
   },
   publishedDate: {
     fontSize: 12,
-    color: '#AAA',
+    color: colors.iconMuted,
     marginTop: 1,
   },
   techniqueBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#F0E8EF',
+    backgroundColor: colors.primarySoft,
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
     marginBottom: 10,
   },
   techniqueBadgeText: {
-    color: PURPLE,
+    color: colors.communityTechniqueText,
     fontSize: 12,
     fontWeight: '600',
   },
   description: {
     fontSize: 15,
-    color: '#333',
+    color: colors.text,
     lineHeight: 22,
     marginBottom: 8,
   },
   patternName: {
     fontSize: 13,
-    color: '#888',
+    color: colors.textMuted,
     marginBottom: 16,
   },
   divider: {
     height: 1,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: colors.border,
     marginVertical: 16,
   },
   commentsTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#222',
+    color: colors.text,
     marginBottom: 12,
   },
   commentItem: {
@@ -173,7 +174,7 @@ export const detalleStyles = StyleSheet.create({
     borderRadius: 14,
   },
   commentAvatarText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 11,
     fontWeight: '700',
   },
@@ -181,7 +182,7 @@ export const detalleStyles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text,
   },
   commentActions: {
     flexDirection: 'row',
@@ -192,13 +193,13 @@ export const detalleStyles = StyleSheet.create({
   },
   commentContent: {
     fontSize: 14,
-    color: '#444',
+    color: colors.text,
     lineHeight: 20,
     paddingLeft: 36,
   },
   commentDate: {
     fontSize: 11,
-    color: '#BBB',
+    color: colors.textDisabled,
   },
   commentDateRow: {
     flexDirection: 'row',
@@ -209,12 +210,12 @@ export const detalleStyles = StyleSheet.create({
   },
   commentEditedText: {
     fontSize: 11,
-    color: '#999',
+    color: colors.textSubtle,
     fontWeight: '600',
   },
   noComments: {
     fontSize: 14,
-    color: '#BBB',
+    color: colors.textDisabled,
     textAlign: 'center',
     paddingVertical: 16,
   },
@@ -226,20 +227,20 @@ export const detalleStyles = StyleSheet.create({
     paddingVertical: 10,
     paddingBottom: Platform.OS === 'ios' ? 26 : 12,
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
-    backgroundColor: 'white',
+    borderTopColor: colors.border,
+    backgroundColor: colors.background,
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.border,
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 8,
     fontSize: 14,
-    color: '#333',
+    color: colors.text,
     height: 38,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: colors.surface,
   },
   sendBtn: {
     width: 38,
@@ -250,7 +251,7 @@ export const detalleStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   sendBtnDisabled: {
-    backgroundColor: '#DDD',
+    backgroundColor: colors.modalHandle,
   },
   loadingOverlay: {
     position: 'absolute',
@@ -258,7 +259,7 @@ export const detalleStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     zIndex: 20,
   },
   cancelEditBtn: {
@@ -266,7 +267,7 @@ export const detalleStyles = StyleSheet.create({
     paddingVertical: 8,
   },
   editingBanner: {
-    backgroundColor: '#F0E8EF',
+    backgroundColor: colors.primarySoft,
     paddingHorizontal: 12,
     paddingVertical: 6,
     flexDirection: 'row',
@@ -280,7 +281,7 @@ export const detalleStyles = StyleSheet.create({
   },
   fullscreenOverlay: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: Colors.fixedBlack,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -292,19 +293,19 @@ export const detalleStyles = StyleSheet.create({
     position: 'absolute',
     top: 50,
     right: 16,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.overlayStrong,
     borderRadius: 20,
     padding: 8,
     zIndex: 10,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 18,
     padding: 24,
     width: '80%',
@@ -314,15 +315,15 @@ export const detalleStyles = StyleSheet.create({
   modalTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#222',
+    color: colors.text,
   },
   modalMessage: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   modalDanger: {
-    backgroundColor: '#E53935',
+    backgroundColor: Colors.errorStrong,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -330,7 +331,7 @@ export const detalleStyles = StyleSheet.create({
     alignItems: 'center',
   },
   modalDangerText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontWeight: '700',
     fontSize: 15,
   },
@@ -338,7 +339,9 @@ export const detalleStyles = StyleSheet.create({
     paddingVertical: 8,
   },
   modalCancelText: {
-    color: '#888',
+    color: colors.textMuted,
     fontSize: 14,
   },
 });
+
+export const detalleStyles = createDetalleStyles(Colors.light);

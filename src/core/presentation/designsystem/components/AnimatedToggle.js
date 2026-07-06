@@ -1,8 +1,11 @@
 import React, { useEffect, useRef } from 'react';
+import Colors from '../Colors';
 import { Animated, Pressable, StyleSheet } from 'react-native';
 import { PURPLE } from './CommonStyles';
+import { useAppTheme } from '../Theme';
 
 export default function AnimatedToggle({ value, onValueChange, disabled = false }) {
+  const { colors } = useAppTheme();
   const progress = useRef(new Animated.Value(value ? 1 : 0)).current;
 
   useEffect(() => {
@@ -20,7 +23,7 @@ export default function AnimatedToggle({ value, onValueChange, disabled = false 
 
   const backgroundColor = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#F8F8F8', PURPLE],
+    outputRange: [colors.background, PURPLE],
   });
 
   return (
@@ -51,9 +54,9 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: 'white',
+    backgroundColor: Colors.fixedWhite,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: Colors.fixedBlack,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.18,
     shadowRadius: 2,

@@ -1,12 +1,13 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
 import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
-export const adminCommunityManagementStyles = StyleSheet.create({
+export const createAdminCommunityManagementStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
   header: {
     backgroundColor: PURPLE,
@@ -15,16 +16,16 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     paddingBottom: 16,
   },
   headerTitle: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 28,
     fontWeight: '800',
   },
   tabs: {
     height: 42,
     flexDirection: 'row',
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#D8D8D8',
+    borderBottomColor: colors.borderSoft,
     position: 'relative',
   },
   tabButton: {
@@ -43,7 +44,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     backgroundColor: PURPLE,
   },
   tabText: {
-    color: '#111',
+    color: colors.textStrong,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -56,16 +57,16 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     paddingVertical: 10,
     gap: 8,
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: colors.border,
     zIndex: 1
   },
   filtroGrid: {
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#F3EDF4',
+    backgroundColor: colors.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -79,7 +80,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: colors.borderSoft,
   },
   filtroPillActivo: {
     backgroundColor: PURPLE,
@@ -87,14 +88,14 @@ export const adminCommunityManagementStyles = StyleSheet.create({
   filtroPillText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#555',
+    color: colors.textSecondary,
   },
   filtroPillTextActivo: {
-    color: 'white',
+    color: Colors.fixedWhite,
   },
   body: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: colors.inputBackground,
   },
   contentScroll: {
     flex: 1,
@@ -114,13 +115,13 @@ export const adminCommunityManagementStyles = StyleSheet.create({
   },
   commentCard: {
     minHeight: 98,
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 7,
@@ -134,17 +135,17 @@ export const adminCommunityManagementStyles = StyleSheet.create({
   avatarImage: {
     borderWidth: 1.5,
     borderColor: PURPLE,
-    backgroundColor: '#EEE',
+    backgroundColor: colors.imageBackground,
   },
   avatarFallback: {
     borderWidth: 1.5,
     borderColor: PURPLE,
-    backgroundColor: '#D9D9D9',
+    backgroundColor: colors.modalHandle,
     alignItems: 'center',
     justifyContent: 'center',
   },
   commentUserName: {
-    color: '#111',
+    color: colors.textStrong,
     fontSize: 12,
     fontWeight: '800',
     maxWidth: 82,
@@ -160,11 +161,11 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     marginBottom: 6,
   },
   commentMeta: {
-    color: '#9B9B9B',
+    color: colors.textSubtle,
     fontSize: 12,
   },
   commentMetaSeparator: {
-    color: '#C8C8C8',
+    color: Colors.gray475,
     fontSize: 12,
   },
   commentPublicationLink: {
@@ -173,7 +174,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     fontWeight: '800',
   },
   commentText: {
-    color: '#A0A0A0',
+    color: colors.textSubtle,
     fontSize: 12,
     lineHeight: 16,
   },
@@ -218,13 +219,13 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: PURPLE,
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
   cardActionToggleOpen: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
   },
   publicationsContent: {
     padding: 8,
@@ -239,10 +240,10 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     gap: 8,
   },
   publicationCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 14,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -251,7 +252,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
   publicationImage: {
     width: '100%',
     height: 160,
-    backgroundColor: '#EEE',
+    backgroundColor: colors.imageBackground,
   },
   publicationImageTall: {
     height: 210,
@@ -259,12 +260,12 @@ export const adminCommunityManagementStyles = StyleSheet.create({
   publicationPlaceholder: {
     width: '100%',
     height: 160,
-    backgroundColor: '#F0E8EF',
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   reportCountText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 12,
     fontWeight: '800',
   },
@@ -272,7 +273,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     padding: 10,
   },
   publicationDescription: {
-    color: '#333',
+    color: colors.text,
     fontSize: 12,
     lineHeight: 17,
     marginBottom: 6,
@@ -284,20 +285,20 @@ export const adminCommunityManagementStyles = StyleSheet.create({
   },
   publicationAuthor: {
     flex: 1,
-    color: '#888',
+    color: colors.textMuted,
     fontSize: 11,
     fontWeight: '500',
   },
   techniqueBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#F0E8EF',
+    backgroundColor: colors.primarySoft,
     borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 2,
     marginBottom: 5,
   },
   techniqueBadgeText: {
-    color: PURPLE,
+    color: colors.communityTechniqueText,
     fontSize: 10,
     fontWeight: '700',
   },
@@ -309,7 +310,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     gap: 12,
   },
   emptyText: {
-    color: '#999',
+    color: colors.textSubtle,
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
@@ -321,7 +322,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     paddingVertical: 11,
   },
   retryButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 14,
     fontWeight: '800',
   },
@@ -330,19 +331,19 @@ export const adminCommunityManagementStyles = StyleSheet.create({
   },
   deleteModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 34,
   },
   deleteModalCard: {
     width: '100%',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 18,
     padding: 26,
     alignItems: 'center',
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -358,7 +359,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     marginBottom: 16,
   },
   deleteModalTitle: {
-    color: '#1A1A1A',
+    color: colors.textHeading,
     fontSize: 18,
     fontWeight: '800',
     textAlign: 'center',
@@ -378,13 +379,13 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     alignItems: 'center',
   },
   deleteCancelButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '700',
   },
   deleteConfirmButton: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderWidth: 1.5,
     borderColor: PURPLE,
     borderRadius: 10,
@@ -398,7 +399,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
   },
   reportSafeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
   reportContent: {
     flex: 1,
@@ -409,7 +410,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     marginLeft: -32,
   },
   reportTitle: {
-    color: '#262626',
+    color: colors.textStrong,
     fontSize: 29,
     fontWeight: '800',
     lineHeight: 36,
@@ -420,7 +421,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
   },
   reportLabel: {
     alignSelf: 'flex-start',
-    color: '#111',
+    color: colors.textStrong,
     fontSize: 15,
     fontWeight: '800',
     paddingBottom: 2,
@@ -434,7 +435,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     borderRadius: 7,
     height: 46,
     paddingHorizontal: 14,
-    color: '#333',
+    color: colors.text,
     fontSize: 15,
   },
   reportTextArea: {
@@ -443,7 +444,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   reportErrorText: {
-    color: '#C0392B',
+    color: Colors.errorDark,
     fontSize: 13,
     fontWeight: '600',
     textAlign: 'center',
@@ -459,7 +460,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     marginTop: 34,
   },
   reportPrimaryButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '800',
   },
@@ -472,7 +473,7 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     marginTop: 18,
   },
   reportDangerButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '800',
   },
@@ -480,3 +481,5 @@ export const adminCommunityManagementStyles = StyleSheet.create({
     opacity: 0.65,
   },
 });
+
+export const adminCommunityManagementStyles = createAdminCommunityManagementStyles(Colors.light);

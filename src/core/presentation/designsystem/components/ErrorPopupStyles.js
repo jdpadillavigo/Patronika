@@ -1,24 +1,25 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../Colors';
 import { PURPLE } from './CommonStyles';
 
 export { PURPLE } from './CommonStyles';
 
-export const errorPopupStyles = StyleSheet.create({
+export const createErrorPopupStyles = (colors = Colors.light) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
   },
   modalCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 32,
     alignItems: 'center',
     width: '100%',
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -36,14 +37,14 @@ export const errorPopupStyles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#1A1A1A',
+    color: colors.textHeading,
     textAlign: 'center',
     lineHeight: 28,
     marginBottom: 8,
   },
   modalMessage: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 24,
@@ -86,8 +87,10 @@ export const errorPopupStyles = StyleSheet.create({
     fontWeight: '700',
   },
   modalButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '700',
   },
 });
+
+export const errorPopupStyles = createErrorPopupStyles(Colors.light);

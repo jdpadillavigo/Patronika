@@ -1,4 +1,5 @@
-﻿import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef, useMemo } from 'react';
+import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
 import {
   View,
   Text,
@@ -7,13 +8,15 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { verificarCorreoStyles as styles, PURPLE } from '../styles/VerifyEmailStyles';
+import { createVerificarCorreoStyles, verificarCorreoStyles as styles, PURPLE } from '../styles/VerifyEmailStyles';
 import RegisterUseCase from '../../../register/domain/usecases/RegisterUseCase';
 import PasswordRecoveryUseCase from '../../../../resetPassword/domain/usecases/PasswordRecoveryUseCase';
 import BackButton from '../../../../../core/presentation/designsystem/components/BackButton';
 import { useErrorPopup } from '../../../../../core/presentation/designsystem/components/ErrorPopup';
 
-export default function VerificarCorreoScreen({ navigation, route }) {
+export default function VerificarCorreoScreen({navigation, route }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createVerificarCorreoStyles(colors), [colors]);
   const { mode = 'recovery', email, username, password, profileImageUri } = route.params || {};
   const codeLength = 6;
 

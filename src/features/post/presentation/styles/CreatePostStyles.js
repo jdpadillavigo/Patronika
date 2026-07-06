@@ -1,21 +1,22 @@
 import { StyleSheet, Platform } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 
-export const PURPLE = '#763A6C';
+export const PURPLE = Colors.primary;
 
-export const crearStyles = StyleSheet.create({
+export const createCrearStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
   header: {
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: colors.border,
     paddingBottom: 14,
   },
   headerTitle: {
     fontSize: 30,
     fontWeight: '800',
-    color: '#222',
+    color: colors.text,
     paddingHorizontal: 20,
   },
   scroll: {
@@ -32,7 +33,7 @@ export const crearStyles = StyleSheet.create({
   sectionLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#555',
+    color: colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -45,7 +46,7 @@ export const crearStyles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: 'transparent',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.surface,
   },
   patternCardSelected: {
     borderColor: PURPLE,
@@ -53,18 +54,18 @@ export const crearStyles = StyleSheet.create({
   patternThumb: {
     width: 110,
     height: 90,
-    backgroundColor: '#EEE',
+    backgroundColor: colors.imageBackground,
   },
   patternThumbPlaceholder: {
     width: 110,
     height: 90,
-    backgroundColor: '#F0E8EF',
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   patternCardName: {
     fontSize: 11,
-    color: '#555',
+    color: colors.textSecondary,
     padding: 6,
     fontWeight: '500',
   },
@@ -74,20 +75,20 @@ export const crearStyles = StyleSheet.create({
   },
   noPatterns: {
     fontSize: 14,
-    color: '#AAA',
+    color: colors.iconMuted,
     textAlign: 'center',
     paddingVertical: 20,
   },
   textArea: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.border,
     borderRadius: 12,
     padding: 12,
     fontSize: 14,
-    color: '#333',
+    color: colors.text,
     height: 90,
     textAlignVertical: 'top',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: colors.surface,
   },
   techniqueRow: {
     flexDirection: 'row',
@@ -96,23 +97,23 @@ export const crearStyles = StyleSheet.create({
   },
   techniquePill: {
     borderWidth: 1.5,
-    borderColor: '#DDD',
+    borderColor: colors.modalHandle,
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 7,
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
   },
   techniquePillSelected: {
     borderColor: PURPLE,
-    backgroundColor: '#F0E8EF',
+    backgroundColor: colors.primarySoft,
   },
   techniquePillText: {
     fontSize: 13,
-    color: '#666',
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   techniquePillTextSelected: {
-    color: PURPLE,
+    color: colors.communityTechniqueText,
     fontWeight: '700',
   },
   otrosInput: {
@@ -122,24 +123,24 @@ export const crearStyles = StyleSheet.create({
     paddingHorizontal: 12,
     height: 42,
     fontSize: 14,
-    color: '#333',
-    backgroundColor: '#FAFAFA',
+    color: colors.text,
+    backgroundColor: colors.surface,
     marginTop: 8,
   },
   imagePickerBtn: {
     borderWidth: 1.5,
-    borderColor: '#DDD',
+    borderColor: colors.modalHandle,
     borderRadius: 12,
     borderStyle: 'dashed',
     height: 120,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: colors.surface,
   },
   imagePickerText: {
     fontSize: 13,
-    color: '#888',
+    color: colors.textMuted,
   },
   selectedImageContainer: {
     borderRadius: 12,
@@ -155,7 +156,7 @@ export const crearStyles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: colors.overlayStrong,
     borderRadius: 14,
     padding: 4,
   },
@@ -167,10 +168,10 @@ export const crearStyles = StyleSheet.create({
     marginTop: 8,
   },
   submitBtnDisabled: {
-    backgroundColor: '#CCC',
+    backgroundColor: colors.disabledButtonBackground,
   },
   submitBtnText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 16,
     fontWeight: '700',
   },
@@ -182,7 +183,7 @@ export const crearStyles = StyleSheet.create({
   },
   savedPatternNote: {
     fontSize: 12,
-    color: '#E53935',
+    color: Colors.errorStrong,
     marginBottom: 8,
     marginTop: 2,
   },
@@ -199,3 +200,5 @@ export const crearStyles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+export const crearStyles = createCrearStyles(Colors.light);

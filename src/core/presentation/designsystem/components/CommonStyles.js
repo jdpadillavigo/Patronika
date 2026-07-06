@@ -1,23 +1,24 @@
 import { StyleSheet, Platform } from 'react-native';
+import Colors from '../Colors';
 
-export const PURPLE = '#7B3F7E';
-export const DARK_BG = '#1A0B08';
-export const DARK_BANNER = '#1C1C1E';
+export const PURPLE = Colors.primaryAlt;
+export const DARK_BG = Colors.authDarkBackground;
+export const DARK_BANNER = Colors.authDarkBanner;
 export const REFRESH_TOP_BAR_OFFSET = -2;
 export const REFRESH_ADMIN_LIST_OFFSET = -38;
 
 export const AUTH_GRADIENTS = [
-  ['#3D1547', '#1A0B08', '#2C0D3A'],
-  ['#1C0B2E', '#4A1259', '#0D0518'],
-  ['#2C1654', '#1A0B08', '#3D1050'],
+  [Colors.authGradientStart, Colors.authDarkBackground, Colors.authGradientMiddle],
+  [Colors.authGradientDeep, Colors.authGradientAccent, Colors.authGradientEnd],
+  [Colors.authGradientBlue, Colors.authDarkBackground, Colors.authGradientPurple],
 ];
 
 export const absoluteFill = StyleSheet.absoluteFill;
 
-export const recuperarBase = {
+export const createRecuperarBase = (colors = Colors.light) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
   volverBtn: {
     paddingHorizontal: 20,
@@ -26,7 +27,7 @@ export const recuperarBase = {
     alignSelf: 'flex-start',
   },
   volverText: {
-    color: PURPLE,
+    color: Colors.primaryAlt,
     fontSize: 15,
     fontWeight: '500',
   },
@@ -38,39 +39,41 @@ export const recuperarBase = {
   titulo: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#1A1A1A',
+    color: colors.textHeading,
     lineHeight: 40,
     marginBottom: 16,
     letterSpacing: -0.5,
   },
   descripcion: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     lineHeight: 22,
     marginBottom: 36,
   },
   input: {
     flex: 1,
     fontSize: 15,
-    color: '#1A1A1A',
+    color: colors.textHeading,
     paddingVertical: Platform.OS === 'ios' ? 14 : 10,
   },
   boton: {
-    backgroundColor: PURPLE,
+    backgroundColor: Colors.primaryAlt,
     borderRadius: 10,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 32,
     elevation: 3,
-    shadowColor: PURPLE,
+    shadowColor: Colors.primaryAlt,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
   },
   botonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-};
+});
+
+export const recuperarBase = createRecuperarBase(Colors.light);

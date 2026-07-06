@@ -1,9 +1,10 @@
 import { StyleSheet, Platform } from 'react-native';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
 import { PURPLE, DARK_BG } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
-export const loginStyles = StyleSheet.create({
+export const createLoginStyles = (colors = Colors.light) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: DARK_BG,
@@ -25,11 +26,11 @@ export const loginStyles = StyleSheet.create({
   title: {
     fontSize: 38,
     fontWeight: 'bold',
-    color: 'white',
+    color: Colors.fixedWhite,
   },
   subtitle: {
     fontSize: 15,
-    color: 'rgba(255,255,255,0.7)',
+    color: Colors.whiteAlpha70,
   },
   form: {
     flex: 1,
@@ -40,13 +41,13 @@ export const loginStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.35)',
+    borderBottomColor: Colors.whiteAlpha35,
     paddingBottom: 10,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: 'white',
+    color: Colors.fixedWhite,
     paddingVertical: 4,
   },
   button: {
@@ -57,10 +58,10 @@ export const loginStyles = StyleSheet.create({
     marginTop: 8,
   },
   buttonDisabled: {
-    backgroundColor: 'rgba(123,63,126,0.45)',
+    backgroundColor: Colors.primaryAlpha45,
   },
   buttonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: 'bold',
     letterSpacing: 1,
@@ -69,7 +70,7 @@ export const loginStyles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: 'rgba(255,255,255,0.65)',
+    color: Colors.whiteAlpha65,
     fontSize: 14,
   },
   bottom: {
@@ -79,7 +80,7 @@ export const loginStyles = StyleSheet.create({
     paddingTop: 32,
   },
   bottomText: {
-    color: 'rgba(255,255,255,0.65)',
+    color: Colors.whiteAlpha65,
     fontSize: 14,
   },
   bottomLink: {
@@ -89,3 +90,4 @@ export const loginStyles = StyleSheet.create({
   },
 });
 
+export const loginStyles = createLoginStyles(Colors.light);

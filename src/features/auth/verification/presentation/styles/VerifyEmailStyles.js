@@ -1,12 +1,13 @@
 import { StyleSheet, Platform } from 'react-native';
-import { PURPLE, recuperarBase } from '../../../../../core/presentation/designsystem/components/CommonStyles';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
+import { PURPLE, createRecuperarBase } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
-export const verificarCorreoStyles = StyleSheet.create({
-  ...recuperarBase,
+export const createVerificarCorreoStyles = (colors = Colors.light) => StyleSheet.create({
+  ...createRecuperarBase(colors),
   descripcion: {
-    ...recuperarBase.descripcion,
+    ...createRecuperarBase(colors).descripcion,
     width: '100%',
   },
   // Casillas separadas para el codigo OTP.
@@ -20,10 +21,10 @@ export const verificarCorreoStyles = StyleSheet.create({
     flex: 1,
     height: 56,
     borderBottomWidth: 2,
-    borderBottomColor: '#BDBDBD',
+    borderBottomColor: colors.inputUnderline,
     fontSize: 24,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: colors.textHeading,
     textAlign: 'center',
   },
   reenviarText: {
@@ -36,19 +37,19 @@ export const verificarCorreoStyles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
   },
   modalCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 32,
     alignItems: 'center',
     width: '100%',
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -66,7 +67,7 @@ export const verificarCorreoStyles = StyleSheet.create({
   modalTitulo: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#1A1A1A',
+    color: colors.textHeading,
     textAlign: 'center',
     lineHeight: 28,
     marginBottom: 24,
@@ -85,8 +86,10 @@ export const verificarCorreoStyles = StyleSheet.create({
     shadowRadius: 6,
   },
   modalBotonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '700',
   },
 });
+
+export const verificarCorreoStyles = createVerificarCorreoStyles(Colors.light);

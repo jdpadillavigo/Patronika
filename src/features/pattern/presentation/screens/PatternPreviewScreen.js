@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import Colors from '../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   View,
   Text,
@@ -8,12 +10,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { vistaPreviaStyles as styles, PURPLE } from '../styles/PatternPreviewStyles';
+import { createVistaPreviaStyles, vistaPreviaStyles as styles, PURPLE } from '../styles/PatternPreviewStyles';
 import { useGeneratePatternFlow } from '../../../../main/GeneratePatternFlowContext';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
 
-export default function VistaPreviaScreen({ navigation, route }) {
+export default function VistaPreviaScreen({navigation, route }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createVistaPreviaStyles(colors), [colors]);
   const { closeFlow, acceptPattern } = useGeneratePatternFlow();
   const { patronUrl, imageUri, pattern } = route?.params || {};
   const [generatedUri, setGeneratedUri] = useState(null);
@@ -66,7 +70,7 @@ export default function VistaPreviaScreen({ navigation, route }) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Vista previa</Text>
         <TouchableOpacity onPress={closeAndDiscard} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="close" size={26} color="white" />
+          <Ionicons name="close" size={26} color={Colors.fixedWhite} />
         </TouchableOpacity>
       </View>
 

@@ -1,10 +1,11 @@
 import { StyleSheet, Platform } from 'react-native';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
 import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
  
-export const gestionUsuariosStyles = StyleSheet.create({
+export const createGestionUsuariosStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
  
   // Header morado — mismo patrón que MisPatronesScreen
@@ -20,7 +21,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 24,
     fontWeight: 'bold',
   },
@@ -34,7 +35,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: colors.searchBarBackground,
     borderRadius: 10,
     paddingHorizontal: 12,
     gap: 8,
@@ -44,7 +45,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     height: 40,
     paddingVertical: Platform.OS === 'ios' ? 10 : 6,
     fontSize: 14,
-    color: '#333',
+    color: colors.searchBarText,
   },
   filtrosContainer: {
     flexDirection: 'row',
@@ -52,16 +53,16 @@ export const gestionUsuariosStyles = StyleSheet.create({
     paddingVertical: 10,
     gap: 8,
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: colors.border,
     zIndex: 1
   },
   filtroGrid: {
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#F3EDF4',
+    backgroundColor: colors.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -75,7 +76,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#F0F0F0'
+    backgroundColor: colors.borderSoft
   },
   filtroPillActivo: {
     backgroundColor: PURPLE,
@@ -83,22 +84,23 @@ export const gestionUsuariosStyles = StyleSheet.create({
   filtroPillText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#555',
+    color: colors.textSecondary,
   },
   filtroPillTextActivo: {
-    color: 'white',
+    color: Colors.fixedWhite,
   },
  
   // Contador de resultados 
   resultsCount: {
     fontSize: 13,
-    color: '#555',
+    color: colors.textSecondary,
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 4,
+    backgroundColor: colors.background,
   },
   actionErrorText: {
-    color: '#C0392B',
+    color: Colors.errorDark,
     fontSize: 13,
     fontWeight: '600',
     paddingHorizontal: 16,
@@ -131,7 +133,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 12,
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -139,16 +141,16 @@ export const gestionUsuariosStyles = StyleSheet.create({
  
   // Card de cada usuario
   userCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#EFEFEF',
+    borderColor: colors.borderSoft,
     height: 116,
     padding: 12,
     flexDirection: 'row',
     alignItems: 'flex-start',
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 3,
@@ -166,7 +168,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#E4E4E4',
+    backgroundColor: colors.borderSoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -182,7 +184,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
   userName: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: colors.textHeading,
   },
   moreButton: {
     padding: 4,
@@ -195,11 +197,11 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
   userEmail: {
     fontSize: 12.5,
-    color: '#777',
+    color: colors.textMuted,
   },
   userId: {
     fontSize: 12,
-    color: '#999',
+    color: colors.textSubtle,
   },
   userMetaRow: {
     flexDirection: 'row',
@@ -207,16 +209,16 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
   userMetaText: {
     fontSize: 12.5,
-    color: '#555',
+    color: colors.textSecondary,
   },
   userMetaSeparator: {
     fontSize: 12.5,
-    color: '#CCC',
+    color: colors.textDisabled,
     marginHorizontal: 6,
   },
   userDateText: {
     fontSize: 12,
-    color: '#888',
+    color: colors.textMuted,
     marginTop: 4,
   },
   rolAdminText: {
@@ -224,11 +226,11 @@ export const gestionUsuariosStyles = StyleSheet.create({
     fontWeight: '700',
   },
   estadoActivoText: {
-    color: '#1F9254',
+    color: Colors.successDark,
     fontWeight: '600',
   },
   estadoSuspendidoText: {
-    color: '#C0392B',
+    color: Colors.errorDark,
     fontWeight: '600',
   },
  
@@ -253,7 +255,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#E53935',
+    backgroundColor: Colors.errorStrong,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
@@ -269,12 +271,12 @@ export const gestionUsuariosStyles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     borderWidth: 1.5,
-    borderColor: 'white',
+    borderColor: Colors.fixedWhite,
     alignItems: 'center',
     justifyContent: 'center',
   },
   overlayActionLabel: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 12.5,
     fontWeight: '600',
     textAlign: 'center',
@@ -288,7 +290,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   centerStateText: {
-    color: '#888',
+    color: colors.textMuted,
     fontSize: 14,
     textAlign: 'center',
     marginTop: 12,
@@ -301,37 +303,37 @@ export const gestionUsuariosStyles = StyleSheet.create({
     borderRadius: 10,
   },
   retryButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontWeight: '700',
     fontSize: 14,
   },
   deniedTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: colors.textHeading,
     marginBottom: 6,
     marginTop: 12,
   },
   deniedText: {
     fontSize: 14,
-    color: '#888',
+    color: colors.textMuted,
     textAlign: 'center',
   },
   deleteModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 34,
   },
   deleteModalCard: {
     width: '100%',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 18,
     padding: 26,
     alignItems: 'center',
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -347,7 +349,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     marginBottom: 16,
   },
   deleteModalTitle: {
-    color: '#1A1A1A',
+    color: colors.textHeading,
     fontSize: 18,
     fontWeight: '800',
     textAlign: 'center',
@@ -361,7 +363,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
   deleteCancelButton: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderWidth: 1.5,
     borderColor: PURPLE,
     borderRadius: 10,
@@ -381,7 +383,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     alignItems: 'center',
   },
   deleteConfirmButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -392,7 +394,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
   suspensionLabel: {
     alignSelf: 'flex-start',
-    color: '#111',
+    color: colors.textStrong,
     fontSize: 14,
     fontWeight: '800',
     paddingBottom: 2,
@@ -406,7 +408,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     borderRadius: 8,
     height: 44,
     paddingHorizontal: 12,
-    color: '#333',
+    color: colors.text,
     fontSize: 14,
   },
   suspensionTextArea: {
@@ -415,13 +417,13 @@ export const gestionUsuariosStyles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   suspensionHelpText: {
-    color: '#666',
+    color: colors.textSecondary,
     fontSize: 14,
     textAlign: 'center',
     marginBottom: 22,
   },
   suspensionErrorText: {
-    color: '#C0392B',
+    color: Colors.errorDark,
     fontSize: 13,
     fontWeight: '600',
     textAlign: 'center',
@@ -429,7 +431,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
   editSafeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
   editContent: {
     flexGrow: 1,
@@ -441,7 +443,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     marginLeft: -32,
   },
   editTitle: {
-    color: '#262626',
+    color: colors.textStrong,
     fontSize: 30,
     fontWeight: '800',
     marginBottom: 28,
@@ -451,7 +453,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
   editLabel: {
     alignSelf: 'flex-start',
-    color: '#111',
+    color: colors.textStrong,
     fontSize: 15,
     fontWeight: '800',
     paddingBottom: 2,
@@ -465,7 +467,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     borderRadius: 7,
     height: 46,
     paddingHorizontal: 14,
-    color: '#333',
+    color: colors.text,
     fontSize: 15,
   },
   editSelectButton: {
@@ -479,7 +481,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   editSelectText: {
-    color: '#333',
+    color: colors.text,
     fontSize: 15,
   },
   editSaveButton: {
@@ -494,7 +496,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     opacity: 0.65,
   },
   editSaveButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '800',
   },
@@ -506,7 +508,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     marginBottom: 22,
   },
   passwordToggleText: {
-    color: '#111',
+    color: colors.textStrong,
     fontSize: 15,
     fontWeight: '800',
   },
@@ -517,7 +519,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     marginTop: 0,
   },
   editErrorText: {
-    color: '#C0392B',
+    color: Colors.errorDark,
     fontSize: 13,
     fontWeight: '600',
     textAlign: 'center',
@@ -543,7 +545,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     width: 192,
     height: 192,
     borderRadius: 96,
-    backgroundColor: '#D9D9D9',
+    backgroundColor: colors.modalHandle,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -567,7 +569,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: colors.avatarBadgeBorder,
   },
   editAvatarWrapper: {
     alignSelf: 'center',
@@ -578,7 +580,7 @@ export const gestionUsuariosStyles = StyleSheet.create({
     width: 192,
     height: 192,
     borderRadius: 96,
-    backgroundColor: '#D9D9D9',
+    backgroundColor: colors.modalHandle,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -602,11 +604,11 @@ export const gestionUsuariosStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: colors.avatarBadgeBorder,
   },
   lockedInputContainer: {
-    backgroundColor: '#EFEFEF',
-    borderColor: '#CFCFCF',
+    backgroundColor: colors.borderSoft,
+    borderColor: colors.borderMuted,
   },
   fieldActionIcons: {
     flexDirection: 'row',
@@ -624,22 +626,22 @@ export const gestionUsuariosStyles = StyleSheet.create({
   },
   addPasswordInput: {
     flex: 1,
-    color: '#333',
+    color: colors.text,
     fontSize: 15,
     paddingVertical: 0,
   },
   statusModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: colors.overlaySoft,
     justifyContent: 'center',
     paddingHorizontal: 52,
   },
   statusModalCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: '#EFEFEF',
+    borderColor: colors.borderSoft,
   },
   statusOption: {
     paddingHorizontal: 18,
@@ -649,8 +651,10 @@ export const gestionUsuariosStyles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   statusOptionText: {
-    color: '#333',
+    color: colors.text,
     fontSize: 15,
     fontWeight: '600',
   },
 });
+
+export const gestionUsuariosStyles = createGestionUsuariosStyles(Colors.light);

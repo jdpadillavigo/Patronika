@@ -1,4 +1,5 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
+import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -10,10 +11,12 @@ import {
 } from 'react-native';
 
 import BackButton from '../../../../../core/presentation/designsystem/components/BackButton';
-import { sanctionUserDeletePublicationStyles as styles } from '../styles/SanctionUserDeletePublicationStyles';
+import { createSanctionUserDeletePublicationStyles, sanctionUserDeletePublicationStyles as styles } from '../styles/SanctionUserDeletePublicationStyles';
 import AdminCommunityUseCase from '../../domain/usecases/AdminCommunityUseCase';
 
-export default function SanctionUserDeletePublicationScreen({ route, navigation }) {
+export default function SanctionUserDeletePublicationScreen({route, navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createSanctionUserDeletePublicationStyles(colors), [colors]);
   const targetType = route?.params?.targetType === 'comment' ? 'comment' : 'publication';
   const targetId = targetType === 'comment' ? route?.params?.commentId : route?.params?.publicationId;
   const [suspensionDays, setSuspensionDays] = useState('');
@@ -69,12 +72,12 @@ export default function SanctionUserDeletePublicationScreen({ route, navigation 
         </Text>
 
         <View style={styles.reportFieldGroup}>
-          <Text style={styles.reportLabel}>Cantidad de dias</Text>
+          <Text style={styles.reportLabel}>Cantidad de días</Text>
           <TextInput
             value={suspensionDays}
             onChangeText={text => setSuspensionDays(text.replace(/[^0-9]/g, ''))}
             placeholder="Días"
-            placeholderTextColor="#555"
+            placeholderTextColor={colors.textSecondary}
             keyboardType="number-pad"
             maxLength={3}
             style={styles.reportInput}
@@ -87,7 +90,7 @@ export default function SanctionUserDeletePublicationScreen({ route, navigation 
             value={reason}
             onChangeText={setReason}
             placeholder="Motivo"
-            placeholderTextColor="#555"
+            placeholderTextColor={colors.textSecondary}
             multiline
             maxLength={250}
             scrollEnabled={false}

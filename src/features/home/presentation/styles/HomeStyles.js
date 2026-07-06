@@ -1,11 +1,12 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 
-export const PURPLE = '#763A6C';
+export const PURPLE = Colors.primary;
 
-export const homeStyles = StyleSheet.create({
+export const createHomeStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: colors.background,
   },
   header: {
     backgroundColor: PURPLE,
@@ -17,13 +18,13 @@ export const homeStyles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerTitle: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 22,
     fontWeight: '700',
     letterSpacing: 0.3,
   },
   addBtn: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: Colors.whiteAlpha20,
     borderRadius: 20,
     padding: 6,
   },
@@ -43,10 +44,10 @@ export const homeStyles = StyleSheet.create({
     gap: 8,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 14,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -55,7 +56,7 @@ export const homeStyles = StyleSheet.create({
   cardImage: {
     width: '100%',
     height: 160,
-    backgroundColor: '#EEE',
+    backgroundColor: colors.imageBackground,
     overflow: 'hidden',
   },
   cardImageTall: {
@@ -63,7 +64,7 @@ export const homeStyles = StyleSheet.create({
   },
   cardPlaceholder: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#F0E8EF',
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -77,7 +78,7 @@ export const homeStyles = StyleSheet.create({
   },
   cardDesc: {
     fontSize: 12,
-    color: '#333',
+    color: colors.text,
     lineHeight: 17,
     marginBottom: 6,
   },
@@ -100,18 +101,18 @@ export const homeStyles = StyleSheet.create({
     borderRadius: 10,
   },
   cardAvatarText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 9,
     fontWeight: '700',
   },
   cardAuthor: {
     fontSize: 11,
-    color: '#888',
+    color: colors.textMuted,
     fontWeight: '500',
   },
   techniqueBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#F0E8EF',
+    backgroundColor: colors.primarySoft,
     borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -119,7 +120,7 @@ export const homeStyles = StyleSheet.create({
   },
   techniqueBadgeText: {
     fontSize: 10,
-    color: PURPLE,
+    color: colors.communityTechniqueText,
     fontWeight: '600',
   },
   emptyContainer: {
@@ -131,13 +132,15 @@ export const homeStyles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#AAA',
+    color: colors.iconMuted,
     fontWeight: '500',
   },
   emptySubtext: {
     fontSize: 13,
-    color: '#BBB',
+    color: colors.textDisabled,
     textAlign: 'center',
     paddingHorizontal: 40,
   },
 });
+
+export const homeStyles = createHomeStyles(Colors.light);

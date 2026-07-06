@@ -1,14 +1,15 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 
-export const PURPLE = '#763A6C';
+export const PURPLE = Colors.primary;
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const THUMBNAIL_HEIGHT = (SCREEN_WIDTH - 32) * (9 / 16);
 
-export const tutorialesStyles = StyleSheet.create({
+export const createTutorialesStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: colors.background,
   },
   header: {
     backgroundColor: PURPLE,
@@ -17,12 +18,12 @@ export const tutorialesStyles = StyleSheet.create({
     paddingBottom: 14,
   },
   headerTitle: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 28,
     fontWeight: 'bold',
   },
   headerSubtitle: {
-    color: 'rgba(255,255,255,0.75)',
+    color: Colors.whiteAlpha75,
     fontSize: 13,
     marginTop: 2,
   },
@@ -42,11 +43,11 @@ export const tutorialesStyles = StyleSheet.create({
 
   // Tarjeta de tutorial
   card: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     overflow: 'hidden',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -64,7 +65,7 @@ export const tutorialesStyles = StyleSheet.create({
   thumbnail: {
     width: '100%',
     height: THUMBNAIL_HEIGHT,
-    backgroundColor: '#111',
+    backgroundColor: colors.textStrong,
   },
   thumbnailTouchable: {
     width: '100%',
@@ -77,19 +78,19 @@ export const tutorialesStyles = StyleSheet.create({
   videoPlayer: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#000',
+    backgroundColor: Colors.fixedBlack,
   },
   thumbnailPlaceholder: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#222',
+    backgroundColor: colors.text,
   },
   playOverlay: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: colors.overlaySoft,
   },
 
   // Contenido de la tarjeta
@@ -100,11 +101,11 @@ export const tutorialesStyles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#222',
+    color: colors.text,
   },
   cardDescription: {
     fontSize: 13,
-    color: '#777',
+    color: colors.textMuted,
     lineHeight: 18,
   },
 
@@ -117,11 +118,13 @@ export const tutorialesStyles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#999',
+    color: colors.textSubtle,
     fontWeight: '600',
   },
   emptySubtext: {
     fontSize: 13,
-    color: '#BBB',
+    color: colors.textDisabled,
   },
 });
+
+export const tutorialesStyles = createTutorialesStyles(Colors.light);

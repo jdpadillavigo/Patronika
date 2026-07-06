@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import Colors from '../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
   TextInput, ActivityIndicator,
@@ -7,7 +9,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-import { crearStyles as styles, PURPLE } from '../styles/CreatePostStyles';
+import { createCrearStyles, crearStyles as styles, PURPLE } from '../styles/CreatePostStyles';
+let themedStyles = styles;
 import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
 import PatternLibraryUseCase from '../../../pattern/domain/usecases/PatternLibraryUseCase';
 import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
@@ -20,15 +23,18 @@ const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Ot
 
 function PatternThumb({ pattern }) {
   const uri = pattern.gridData ? gridDataToImageUri(pattern.gridData, { maxDimension: 220 }) : null;
-  if (uri) return <Image source={{ uri }} style={styles.patternThumb} resizeMode="cover" />;
+  if (uri) return <Image source={{ uri }} style={themedStyles.patternThumb} resizeMode="cover" />;
   return (
-    <View style={styles.patternThumbPlaceholder}>
+    <View style={themedStyles.patternThumbPlaceholder}>
       <Ionicons name="grid-outline" size={28} color={PURPLE} />
     </View>
   );
 }
 
-export default function CrearPublicacionScreen({ navigation }) {
+export default function CrearPublicacionScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createCrearStyles(colors), [colors]);
+  themedStyles = styles;
   const [patterns, setPatterns] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [loadingPatterns, setLoadingPatterns] = useState(true);
@@ -175,7 +181,7 @@ export default function CrearPublicacionScreen({ navigation }) {
             <TextInput
               style={styles.textArea}
               placeholder="Cuéntanos sobre este patrón..."
-              placeholderTextColor="#BBB"
+              placeholderTextColor={colors.textDisabled}
               value={description}
               onChangeText={setDescription}
               multiline
@@ -204,7 +210,7 @@ export default function CrearPublicacionScreen({ navigation }) {
               <TextInput
                 style={styles.otrosInput}
                 placeholder="Escribe la técnica..."
-                placeholderTextColor="#BBB"
+                placeholderTextColor={colors.textDisabled}
                 value={customTechnique}
                 onChangeText={setCustomTechnique}
                 maxLength={60}
@@ -226,12 +232,12 @@ export default function CrearPublicacionScreen({ navigation }) {
               <View style={styles.selectedImageContainer}>
                 <Image source={{ uri: imageUri }} style={styles.selectedImage} resizeMode="cover" />
                 <TouchableOpacity style={styles.removeImageBtn} onPress={() => setImageUri(null)}>
-                  <Ionicons name="close" size={16} color="white" />
+                  <Ionicons name="close" size={16} color={Colors.fixedWhite} />
                 </TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity style={styles.imagePickerBtn} onPress={pickImage}>
-                <Ionicons name="camera-outline" size={28} color="#AAA" />
+                <Ionicons name="camera-outline" size={28} color={colors.iconMuted} />
                 <Text style={styles.imagePickerText}>Agregar foto del tejido terminado</Text>
               </TouchableOpacity>
             )}
@@ -245,7 +251,7 @@ export default function CrearPublicacionScreen({ navigation }) {
           >
             {publishing ? (
               <View style={styles.loadingRow}>
-                <ActivityIndicator size="small" color="white" />
+                <ActivityIndicator size="small" color={Colors.fixedWhite} />
                 <Text style={styles.submitBtnText}>Publicando...</Text>
               </View>
             ) : (

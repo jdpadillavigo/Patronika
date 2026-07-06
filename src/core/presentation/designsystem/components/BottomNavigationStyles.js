@@ -1,11 +1,12 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../Colors';
 
-export const PURPLE = '#763A6C';
+export const PURPLE = Colors.primary;
 
 const FAB_SIZE = 58;
 const FAB_PROTRUSION = 20; // cuánto sube el FAB sobre la barra
 
-export const bottomNavigationStyles = StyleSheet.create({
+export const createBottomNavigationStyles = (colors = Colors.light) => StyleSheet.create({
   wrapper: {
     // El wrapper es más alto que la barra para dar espacio al FAB elevado
     backgroundColor: 'transparent',
@@ -21,8 +22,8 @@ export const bottomNavigationStyles = StyleSheet.create({
     justifyContent: 'center',
     // Anillo blanco para simular el efecto de "bump"
     borderWidth: 3,
-    borderColor: 'white',
-    shadowColor: '#000',
+    borderColor: Colors.fixedWhite,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
@@ -32,9 +33,9 @@ export const bottomNavigationStyles = StyleSheet.create({
   navBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     borderTopWidth: 1,
-    borderTopColor: '#ECECEC',
+    borderTopColor: colors.borderSoft,
     paddingTop: FAB_PROTRUSION + 4,
     paddingBottom: 10,
     paddingHorizontal: 4,
@@ -51,7 +52,7 @@ export const bottomNavigationStyles = StyleSheet.create({
   },
   navLabel: {
     fontSize: 10,
-    color: '#AAA',
+    color: colors.iconMuted,
     textAlign: 'center',
   },
   navLabelActive: {
@@ -59,3 +60,5 @@ export const bottomNavigationStyles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+export const bottomNavigationStyles = createBottomNavigationStyles(Colors.light);

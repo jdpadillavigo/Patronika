@@ -1,16 +1,19 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useMemo } from 'react';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-import { olvidasteStyles as styles } from '../styles/ForgotPasswordStyles';
+import { createOlvidasteStyles, olvidasteStyles as styles } from '../styles/ForgotPasswordStyles';
 import PasswordRecoveryUseCase from '../../domain/usecases/PasswordRecoveryUseCase';
 import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 
-export default function OlvidasteContrasenaScreen({ navigation }) {
+export default function OlvidasteContrasenaScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createOlvidasteStyles(colors), [colors]);
   const [email, setEmail] = useState('');
   const { showError, errorPopup } = useErrorPopup();
 
@@ -39,7 +42,7 @@ export default function OlvidasteContrasenaScreen({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
-          placeholderTextColor="#BDBDBD"
+          placeholderTextColor={colors.inputUnderline}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"

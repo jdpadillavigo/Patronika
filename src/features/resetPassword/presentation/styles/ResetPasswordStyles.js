@@ -1,16 +1,17 @@
 import { StyleSheet, Platform } from 'react-native';
-import { PURPLE, recuperarBase } from '../../../../core/presentation/designsystem/components/CommonStyles';
+import Colors from '../../../../core/presentation/designsystem/Colors';
+import { PURPLE, createRecuperarBase } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
-export const restablecerStyles = StyleSheet.create({
-  ...recuperarBase,
+export const createRestablecerStyles = (colors = Colors.light) => StyleSheet.create({
+  ...createRecuperarBase(colors),
   // Fila con input y boton para mostrar/ocultar.
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#BDBDBD',
+    borderBottomColor: colors.inputUnderline,
     marginBottom: 20,
   },
   botonDisabled: {
@@ -19,20 +20,20 @@ export const restablecerStyles = StyleSheet.create({
   // Modal overlay oscuro
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
   },
   // Tarjeta blanca del modal
   modalCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 32,
     alignItems: 'center',
     width: '100%',
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -53,14 +54,14 @@ export const restablecerStyles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 10,
     padding: 2,
   },
   modalTitulo: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#1A1A1A',
+    color: colors.textHeading,
     textAlign: 'center',
     lineHeight: 28,
     marginBottom: 24,
@@ -79,8 +80,10 @@ export const restablecerStyles = StyleSheet.create({
     shadowRadius: 6,
   },
   modalBotonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '700',
   },
 });
+
+export const restablecerStyles = createRestablecerStyles(Colors.light);

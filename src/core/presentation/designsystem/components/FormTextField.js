@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import Colors from '../Colors';
 import { Text, TextInput, TouchableOpacity, View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PURPLE } from './CommonStyles';
+import { useAppTheme } from '../Theme';
 
 export default function FormTextField({
   label,
@@ -17,13 +19,14 @@ export default function FormTextField({
   inputStyle,
   style,
 }) {
+  const { colors } = useAppTheme();
   const [visible, setVisible] = useState(false);
   const isPassword = secureTextEntry;
 
   return (
     <View style={[styles.group, style]}>
       <View style={styles.labelRow}>
-        <Text style={styles.label}>{label}</Text>
+        <Text style={[styles.label, { color: colors.textStrong }]}>{label}</Text>
         {labelRightAction ? <View style={styles.labelAction}>{labelRightAction}</View> : null}
       </View>
       <View style={[styles.inputContainer, multiline && styles.textAreaContainer, inputContainerStyle]}>
@@ -31,7 +34,7 @@ export default function FormTextField({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder || label}
-          placeholderTextColor="#555"
+          placeholderTextColor={colors.textSecondary}
           secureTextEntry={isPassword && !visible}
           autoCapitalize="none"
           autoCorrect={false}
@@ -39,7 +42,7 @@ export default function FormTextField({
           multiline={multiline}
           scrollEnabled={multiline}
           textAlignVertical={multiline ? 'top' : 'center'}
-          style={[styles.input, multiline && styles.textAreaInput, inputStyle]}
+          style={[styles.input, { color: colors.text }, multiline && styles.textAreaInput, inputStyle]}
           {...inputProps}
         />
         {isPassword ? (
@@ -47,7 +50,7 @@ export default function FormTextField({
             onPress={() => setVisible(current => !current)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name={visible ? 'eye-outline' : 'eye-off-outline'} size={20} color="#999" />
+            <Ionicons name={visible ? 'eye-outline' : 'eye-off-outline'} size={20} color={colors.placeholder} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -61,7 +64,6 @@ const styles = StyleSheet.create({
   },
   label: {
     alignSelf: 'flex-start',
-    color: '#111',
     fontSize: 15,
     fontWeight: '800',
     paddingBottom: 2,
@@ -90,7 +92,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#333',
     fontSize: 15,
     paddingVertical: 0,
   },

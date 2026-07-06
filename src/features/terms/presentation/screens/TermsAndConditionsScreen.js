@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   ScrollView,
   Text,
   View,
 } from 'react-native';
 import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
-import { termsAndConditionsStyles as styles } from '../styles/TermsAndConditionsStyles';
+import { createTermsAndConditionsStyles, termsAndConditionsStyles as styles } from '../styles/TermsAndConditionsStyles';
 
 const appTermsSections = [
   {
@@ -108,7 +109,9 @@ const termsContent = {
   camera: cameraTermsSections,
 };
 
-export default function TermsAndConditionsScreen({ navigation, route }) {
+export default function TermsAndConditionsScreen({navigation, route }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createTermsAndConditionsStyles(colors), [colors]);
   const kind = route.params?.kind === 'camera' ? 'camera' : 'app';
   const sections = termsContent[kind];
 

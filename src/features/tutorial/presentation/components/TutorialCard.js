@@ -1,12 +1,16 @@
 import React, { useMemo, useState } from 'react';
+import Colors from '../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 
 import TutorialUseCase from '../../domain/usecases/TutorialUseCase';
-import { tutorialesStyles as styles } from '../styles/TutorialesStyles';
+import { createTutorialesStyles, tutorialesStyles as styles } from '../styles/TutorialesStyles';
 
-export default function TutorialCard({ tutorial, actions }) {
+export default function TutorialCard({tutorial, actions }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createTutorialesStyles(colors), [colors]);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoSource = useMemo(
     () => TutorialUseCase.getAllowedVideoSource(tutorial.url || ''),
@@ -44,12 +48,12 @@ export default function TutorialCard({ tutorial, actions }) {
               <Image source={{ uri: videoSource.thumbnailUrl }} style={styles.thumbnailImage} resizeMode="cover" />
             ) : (
               <View style={styles.thumbnailPlaceholder}>
-                <Ionicons name="videocam-outline" size={32} color="#AAA" />
+                <Ionicons name="videocam-outline" size={32} color={colors.iconMuted} />
               </View>
             )}
             {videoSource?.embedUrl ? (
               <View style={styles.playOverlay}>
-                <Ionicons name="play-circle" size={40} color="white" />
+                <Ionicons name="play-circle" size={40} color={Colors.fixedWhite} />
               </View>
             ) : null}
           </TouchableOpacity>

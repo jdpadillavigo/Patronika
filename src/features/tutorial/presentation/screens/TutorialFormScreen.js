@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -13,9 +14,11 @@ import FormTextField from '../../../../core/presentation/designsystem/components
 import ResourceFormHeader from '../../../../core/presentation/designsystem/components/ResourceFormHeader';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 import TutorialUseCase from '../../domain/usecases/TutorialUseCase';
-import { adminTutorialManagementStyles as styles, PURPLE } from '../styles/AdminTutorialManagementStyles';
+import { createAdminTutorialManagementStyles, adminTutorialManagementStyles as styles, PURPLE } from '../styles/AdminTutorialManagementStyles';
 
-export default function TutorialFormScreen({ route, navigation }) {
+export default function TutorialFormScreen({route, navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createAdminTutorialManagementStyles(colors), [colors]);
   const tutorialId = route?.params?.tutorialId || null;
   const isEditing = !!tutorialId;
   const [title, setTitle] = useState('');

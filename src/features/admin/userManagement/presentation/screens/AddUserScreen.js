@@ -1,4 +1,6 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
 import {
   Image,
   KeyboardAvoidingView,
@@ -13,11 +15,13 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 import BackButton from '../../../../../core/presentation/designsystem/components/BackButton';
-import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
+import { createGestionUsuariosStyles, gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
 import { useErrorPopup } from '../../../../../core/presentation/designsystem/components/ErrorPopup';
 
-export default function AddUserScreen({ navigation }) {
+export default function AddUserScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createGestionUsuariosStyles(colors), [colors]);
   const [avatarUri, setAvatarUri] = useState(null);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -90,11 +94,11 @@ export default function AddUserScreen({ navigation }) {
             <Image source={{ uri: avatarUri }} style={styles.addAvatarImage} />
           ) : (
             <View style={styles.addAvatarPlaceholder}>
-              <Ionicons name="person" size={96} color="#888" />
+              <Ionicons name="person" size={96} color={colors.textMuted} />
             </View>
           )}
           <View style={styles.addAvatarBadge}>
-            <Ionicons name={avatarUri ? 'pencil' : 'add'} size={22} color="white" />
+            <Ionicons name={avatarUri ? 'pencil' : 'add'} size={22} color={Colors.fixedWhite} />
           </View>
         </TouchableOpacity>
 
@@ -104,7 +108,7 @@ export default function AddUserScreen({ navigation }) {
             value={username}
             onChangeText={setUsername}
             placeholder="Nombre de usuario"
-            placeholderTextColor="#555"
+            placeholderTextColor={colors.textSecondary}
             autoCapitalize="none"
             autoCorrect={false}
             maxLength={40}
@@ -118,7 +122,7 @@ export default function AddUserScreen({ navigation }) {
             value={email}
             onChangeText={setEmail}
             placeholder="Correo electrónico"
-            placeholderTextColor="#555"
+            placeholderTextColor={colors.textSecondary}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
@@ -134,14 +138,14 @@ export default function AddUserScreen({ navigation }) {
               value={password}
               onChangeText={setPassword}
               placeholder="Contraseña"
-              placeholderTextColor="#555"
+              placeholderTextColor={colors.textSecondary}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
               maxLength={80}
               style={styles.addPasswordInput}
             />
             <TouchableOpacity onPress={() => setShowPassword(value => !value)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color="#999" />
+              <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={colors.placeholder} />
             </TouchableOpacity>
           </View>
         </View>
@@ -153,14 +157,14 @@ export default function AddUserScreen({ navigation }) {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Confirmar contraseña"
-              placeholderTextColor="#555"
+              placeholderTextColor={colors.textSecondary}
               secureTextEntry={!showConfirmPassword}
               autoCapitalize="none"
               maxLength={80}
               style={styles.addPasswordInput}
             />
             <TouchableOpacity onPress={() => setShowConfirmPassword(value => !value)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color="#999" />
+              <Ionicons name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={colors.placeholder} />
             </TouchableOpacity>
           </View>
         </View>

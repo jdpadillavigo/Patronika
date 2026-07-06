@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import Colors from '../core/presentation/designsystem/Colors';
 import { ActivityIndicator, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,19 +26,22 @@ import ResetPasswordScreen from '../features/resetPassword/presentation/screens/
 import TermsAndConditionsScreen from '../features/terms/presentation/screens/TermsAndConditionsScreen.js';
 import GeneratePatternNavigator from './GeneratePatternNavigator';
 import type { RootStackParamList } from './navigationTypes';
+import { useAppTheme } from '../core/presentation/designsystem/Theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const ONBOARDING_KEY = '@patronika_onboarding_done';
 const tabLikeScreenOptions = { animation: 'none' as const };
-const bottomSheetScreenOptions = {
-    animation: 'none' as const,
-    presentation: 'modal' as const,
-    gestureDirection: 'vertical' as const,
-};
-
 export default function NavigationRoot() {
+    const { colors } = useAppTheme();
     const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList | null>(null);
+
+    const bottomSheetScreenOptions = useMemo(() => ({
+        animation: 'none' as const,
+        presentation: 'modal' as const,
+        gestureDirection: 'vertical' as const,
+        contentStyle: { backgroundColor: colors.background },
+    }), [colors.background]);
 
     useEffect(() => {
         async function checkOnboarding() {
@@ -56,7 +60,7 @@ export default function NavigationRoot() {
     if (initialRoute === null) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color="#763A6C" />
+                <ActivityIndicator size="large" color={Colors.primary} />
             </View>
         );
     }

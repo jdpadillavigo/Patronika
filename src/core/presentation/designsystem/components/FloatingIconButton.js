@@ -1,4 +1,5 @@
 import React from 'react';
+import Colors from '../Colors';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PURPLE } from './CommonStyles';
@@ -19,7 +20,7 @@ export default function FloatingIconButton({
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Ionicons name={iconName} size={30} color="white" />
+      <Ionicons name={iconName} size={30} color={Colors.fixedWhite} />
     </TouchableOpacity>
   );
 }
@@ -37,7 +38,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 12,
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: Colors.fixedBlack,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,

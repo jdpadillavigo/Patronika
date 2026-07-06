@@ -1,4 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
 import {
   View,
   Text,
@@ -16,7 +18,8 @@ import AppTopBar from '../../../../../core/presentation/designsystem/components/
 import { PURPLE, REFRESH_ADMIN_LIST_OFFSET } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 import FloatingIconButton from '../../../../../core/presentation/designsystem/components/FloatingIconButton';
 import ScreenState from '../../../../../core/presentation/designsystem/components/ScreenState';
-import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
+import { createGestionUsuariosStyles, gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
+let themedStyles = styles;
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
 import ProfileUseCase from '../../../../profile/domain/usecases/ProfileUseCase';
 import AdminBottomBar from '../../../../../core/presentation/designsystem/components/AdminBottomBar';
@@ -35,7 +38,7 @@ function formatFecha(fechaIso) {
     return 'Sin fecha';
   }
 }
- 
+
 // Card individual de cada usuario en el listado
 function UserCard({ user, isOwnAccount, isMenuOpen, onToggleMenu, onCloseMenu, onEdit, onToggleStatus, onDelete, onOpenUser }) {
   const isActive = user.status === 0; // status 0 = activo, otro valor = suspendido (igual que en PerfilScreen/User.ts)
@@ -44,82 +47,85 @@ function UserCard({ user, isOwnAccount, isMenuOpen, onToggleMenu, onCloseMenu, o
  
   if(isMenuOpen && !isOwnAccount) {
     return (
-    <View style={styles.actionsOverlay}>
-        <TouchableOpacity style={styles.closeOverlayButton} onPress={onCloseMenu}>
-          <Ionicons name="close" size={16} color="white" />
+    <View style={themedStyles.actionsOverlay}>
+        <TouchableOpacity style={themedStyles.closeOverlayButton} onPress={onCloseMenu}>
+          <Ionicons name="close" size={16} color={Colors.fixedWhite} />
         </TouchableOpacity>
- 
+
         {/* Acciones del usuario seleccionado */}
-        <TouchableOpacity style={styles.overlayAction} onPress={onEdit} activeOpacity={0.8}>
-          <View style={styles.overlayIconCircle}>
-            <Ionicons name="pencil" size={22} color="white" />
+        <TouchableOpacity style={themedStyles.overlayAction} onPress={onEdit} activeOpacity={0.8}>
+          <View style={themedStyles.overlayIconCircle}>
+            <Ionicons name="pencil" size={22} color={Colors.fixedWhite} />
           </View>
-          <Text style={styles.overlayActionLabel} numberOfLines={1}>Editar</Text>
+          <Text style={themedStyles.overlayActionLabel} numberOfLines={1}>Editar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={themedStyles.overlayAction} onPress={onToggleStatus} activeOpacity={0.8}>
+          <View style={themedStyles.overlayIconCircle}>
+            <Ionicons name={isActive ? 'happy' : 'skull'} size={22} color={Colors.fixedWhite} />
+          </View>
+          <Text style={themedStyles.overlayActionLabel} numberOfLines={1}>Estado: {isActive ? 'Activo' : 'Suspendido'}</Text>
         </TouchableOpacity>
  
-        <TouchableOpacity style={styles.overlayAction} onPress={onToggleStatus} activeOpacity={0.8}>
-          <View style={styles.overlayIconCircle}>
-            <Ionicons name={isActive ? 'happy' : 'skull'} size={22} color="white" />
+        <TouchableOpacity style={themedStyles.overlayAction} onPress={onDelete} activeOpacity={0.8}>
+          <View style={themedStyles.overlayIconCircle}>
+            <Ionicons name="trash" size={22} color={Colors.fixedWhite} />
           </View>
-          <Text style={styles.overlayActionLabel} numberOfLines={1}>Estado: {isActive ? 'Activo' : 'Suspendido'}</Text>
-        </TouchableOpacity>
- 
-        <TouchableOpacity style={styles.overlayAction} onPress={onDelete} activeOpacity={0.8}>
-          <View style={styles.overlayIconCircle}>
-            <Ionicons name="trash" size={22} color="white" />
-          </View>
-          <Text style={styles.overlayActionLabel} numberOfLines={1}>Eliminar</Text>
+          <Text style={themedStyles.overlayActionLabel} numberOfLines={1}>Eliminar</Text>
         </TouchableOpacity>
       </View>
   );
 }
 return (
-    <View style={styles.userCard}>
+    <View style={themedStyles.userCard}>
       <TouchableOpacity onPress={() => onOpenUser(user)} activeOpacity={0.78}>
         {showAvatar ? (
           <Image
             source={{ uri: user.profileImageUrl }}
-            style={styles.avatarImage}
+            style={themedStyles.avatarImage}
             onError={() => setAvatarFailed(true)}
           />
         ) : (
-          <View style={styles.avatarPlaceholder}>
+          <View style={themedStyles.avatarPlaceholder}>
             <Ionicons name="person" size={26} color={PURPLE} />
           </View>
         )}
       </TouchableOpacity>
  
-      <View style={styles.userInfo}>
-        <View style={styles.userTopRow}>
-          <Text style={styles.userName} numberOfLines={1}>{user.username}</Text>
+      <View style={themedStyles.userInfo}>
+        <View style={themedStyles.userTopRow}>
+          <Text style={themedStyles.userName} numberOfLines={1}>{user.username}</Text>
           {!isOwnAccount ? (
-            <TouchableOpacity style={styles.moreButton} onPress={onToggleMenu}>
+            <TouchableOpacity style={themedStyles.moreButton} onPress={onToggleMenu}>
               <Ionicons name="ellipsis-vertical" size={18} color={PURPLE} />
             </TouchableOpacity>
           ) : null}
         </View>
  
-        <View style={styles.userEmailRow}>
-          <Text style={styles.userEmail} numberOfLines={1}>{user.email}</Text>
+        <View style={themedStyles.userEmailRow}>
+          <Text style={themedStyles.userEmail} numberOfLines={1}>{user.email}</Text>
         </View>
  
-        <View style={styles.userMetaRow}>
-          <Text style={[styles.userMetaText, user.isAdmin && styles.rolAdminText]}>
+        <View style={themedStyles.userMetaRow}>
+          <Text style={[themedStyles.userMetaText, user.isAdmin && themedStyles.rolAdminText]}>
             Rol: {user.isAdmin ? 'Admin' : 'Usuario'}
           </Text>
-          <Text style={styles.userMetaSeparator}>|</Text>
-          <Text style={[styles.userMetaText, isActive ? styles.estadoActivoText : styles.estadoSuspendidoText]}>
+          <Text style={themedStyles.userMetaSeparator}>|</Text>
+          <Text style={[themedStyles.userMetaText, isActive ? themedStyles.estadoActivoText : themedStyles.estadoSuspendidoText]}>
             Estado: {isActive ? 'Activo' : 'Suspendido'}
           </Text>
         </View>
  
-        <Text style={styles.userDateText}>Fecha de registro: {formatFecha(user.registeredDate)}</Text>
+        <Text style={themedStyles.userDateText}>Fecha de registro: {formatFecha(user.registeredDate)}</Text>
       </View>
     </View>
   );
 }
  
-export default function GestionUsuariosScreen({ navigation }) {
+export default function GestionUsuariosScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createGestionUsuariosStyles(colors), [colors]);
+  themedStyles = styles;
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -279,7 +285,7 @@ export default function GestionUsuariosScreen({ navigation }) {
       <View style={styles.safeArea}>
         <AppTopBar subtitle="Gestión de Usuarios" />
         <View style={styles.centerState}>
-          <Ionicons name="lock-closed-outline" size={48} color="#CCC" />
+          <Ionicons name="lock-closed-outline" size={48} color={colors.textDisabled} />
           <Text style={styles.deniedTitle}>Acceso restringido</Text>
           <Text style={styles.deniedText}>Esta sección solo está disponible para administradores.</Text>
         </View>
@@ -293,11 +299,11 @@ export default function GestionUsuariosScreen({ navigation }) {
 
       <View style={styles.searchHeader}>
         <View style={styles.searchBar}>
-          <Ionicons name="search" size={18} color="#888" />
+          <Ionicons name="search" size={18} color={colors.textMuted} />
           <TextInput
             style={styles.searchInput}
             placeholder="Buscar.."
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.placeholder}
             value={busqueda}
             onChangeText={setBusqueda}
             autoCapitalize="none"
@@ -312,7 +318,7 @@ export default function GestionUsuariosScreen({ navigation }) {
           onPress={() => setActiveFilter('todos')}
           activeOpacity={0.8}
         >
-          <Ionicons name="people" size={18} color={activeFilter === 'todos' ? 'white' : PURPLE} />
+          <Ionicons name="people" size={18} color={activeFilter === 'todos' ? Colors.fixedWhite : PURPLE} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -320,7 +326,7 @@ export default function GestionUsuariosScreen({ navigation }) {
           onPress={() => setActiveFilter('suspendidos')}
           activeOpacity={0.8}
         >
-          <MaterialCommunityIcons name="gavel" size={14} color={activeFilter === 'suspendidos' ? 'white' : '#555'} />
+          <MaterialCommunityIcons name="gavel" size={14} color={activeFilter === 'suspendidos' ? Colors.fixedWhite : colors.textSecondary} />
           <Text style={[styles.filtroPillText, activeFilter === 'suspendidos' && styles.filtroPillTextActivo]}>
             Suspendidos
           </Text>
@@ -452,7 +458,7 @@ export default function GestionUsuariosScreen({ navigation }) {
                   value={suspensionDays}
                   onChangeText={text => setSuspensionDays(text.replace(/[^0-9]/g, ''))}
                   placeholder="Días"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.placeholder}
                   keyboardType="number-pad"
                   maxLength={3}
                   style={styles.suspensionInput}
@@ -464,7 +470,7 @@ export default function GestionUsuariosScreen({ navigation }) {
                   value={suspensionReason}
                   onChangeText={setSuspensionReason}
                   placeholder="Motivo"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.placeholder}
                   multiline
                   maxLength={250}
                   scrollEnabled={false}

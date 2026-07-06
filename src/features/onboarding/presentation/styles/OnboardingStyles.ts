@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 import type { AppColors } from '../../../../core/presentation/designsystem/Theme';
 
 export function createOnboardingStyles(colors: AppColors) {

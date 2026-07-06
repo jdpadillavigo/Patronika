@@ -1,21 +1,22 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 import { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
-export const termsAndConditionsStyles = StyleSheet.create({
+export const createTermsAndConditionsStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#E3E3E3',
+    borderBottomColor: colors.border,
     paddingBottom: 18,
   },
   title: {
-    color: '#222',
+    color: colors.text,
     fontSize: 30,
     fontWeight: '800',
     lineHeight: 38,
@@ -27,7 +28,7 @@ export const termsAndConditionsStyles = StyleSheet.create({
     paddingBottom: 44,
   },
   updatedAt: {
-    color: '#2A2A2A',
+    color: colors.text,
     fontSize: 14,
     lineHeight: 22,
     marginBottom: 22,
@@ -36,14 +37,14 @@ export const termsAndConditionsStyles = StyleSheet.create({
     fontWeight: '800',
   },
   paragraph: {
-    color: '#2A2A2A',
+    color: colors.text,
     fontSize: 14,
     lineHeight: 22,
     textAlign: 'justify',
     marginBottom: 22,
   },
   sectionTitle: {
-    color: '#2A2A2A',
+    color: colors.text,
     fontSize: 15,
     lineHeight: 22,
     fontWeight: '800',
@@ -51,3 +52,5 @@ export const termsAndConditionsStyles = StyleSheet.create({
     marginBottom: 14,
   },
 });
+
+export const termsAndConditionsStyles = createTermsAndConditionsStyles(Colors.light);

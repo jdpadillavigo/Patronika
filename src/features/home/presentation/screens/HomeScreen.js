@@ -1,11 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import Colors from '../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { homeStyles as styles, PURPLE } from '../styles/HomeStyles';
+import { createHomeStyles, homeStyles as styles, PURPLE } from '../styles/HomeStyles';
 import { UserBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
 import AppTopBar from '../../../../core/presentation/designsystem/components/AppTopBar';
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
@@ -14,22 +16,23 @@ import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
 import { REFRESH_TOP_BAR_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
+let themedStyles = styles;
 
 const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Otros'];
 
-function AvatarCircle({ imageUrl }) {
+function AvatarCircle({ imageUrl, styles }) {
   const [imageFailed, setImageFailed] = useState(false);
   if (imageUrl && !imageFailed) {
-    return <Image source={{ uri: imageUrl }} style={styles.cardAvatarImage} onError={() => setImageFailed(true)} />;
+    return <Image source={{ uri: imageUrl }} style={themedStyles.cardAvatarImage} onError={() => setImageFailed(true)} />;
   }
   return (
-    <View style={styles.cardAvatar}>
-      <Ionicons name="person" size={13} color="white" />
+    <View style={themedStyles.cardAvatar}>
+      <Ionicons name="person" size={13} color={Colors.fixedWhite} />
     </View>
   );
 }
 
-function PublicationCard({ pub, onPress, tall }) {
+function PublicationCard({ pub, onPress, tall, styles }) {
   const imageUri = pub.imageUrl
     || (pub.patternGridData ? gridDataToImageUri(pub.patternGridData, { maxDimension: 300 }) : null);
   const [imageLoading, setImageLoading] = useState(Boolean(imageUri));
@@ -41,17 +44,17 @@ function PublicationCard({ pub, onPress, tall }) {
   }, [imageUri]);
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.88}>
-      <View style={[styles.cardImage, tall && styles.cardImageTall]}>
+    <TouchableOpacity style={themedStyles.card} onPress={onPress} activeOpacity={0.88}>
+      <View style={[themedStyles.cardImage, tall && themedStyles.cardImageTall]}>
         {(!imageUri || imageLoading || imageFailed) ? (
-          <View style={styles.cardPlaceholder}>
+          <View style={themedStyles.cardPlaceholder}>
             <Ionicons name="image-outline" size={36} color={PURPLE} />
           </View>
         ) : null}
         {imageUri && !imageFailed ? (
           <Image
             source={{ uri: imageUri }}
-            style={styles.cardImageContent}
+            style={themedStyles.cardImageContent}
             resizeMode="cover"
             onLoadStart={() => setImageLoading(true)}
             onLoadEnd={() => setImageLoading(false)}
@@ -62,23 +65,26 @@ function PublicationCard({ pub, onPress, tall }) {
           />
         ) : null}
       </View>
-      <View style={styles.cardInfo}>
+      <View style={themedStyles.cardInfo}>
         {TECHNIQUES[pub.technique] && (
-          <View style={styles.techniqueBadge}>
-            <Text style={styles.techniqueBadgeText}>{TECHNIQUES[pub.technique]}</Text>
+          <View style={themedStyles.techniqueBadge}>
+            <Text style={themedStyles.techniqueBadgeText}>{TECHNIQUES[pub.technique]}</Text>
           </View>
         )}
-        <Text style={styles.cardDesc} numberOfLines={2}>{pub.description}</Text>
-        <View style={styles.cardAuthorRow}>
-          <AvatarCircle imageUrl={pub.user?.profileImageUrl} />
-          <Text style={styles.cardAuthor}>@{pub.user?.username}</Text>
+        <Text style={themedStyles.cardDesc} numberOfLines={2}>{pub.description}</Text>
+        <View style={themedStyles.cardAuthorRow}>
+          <AvatarCircle imageUrl={pub.user?.profileImageUrl} styles={styles} />
+          <Text style={themedStyles.cardAuthor}>@{pub.user?.username}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 }
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createHomeStyles(colors), [colors]);
+  themedStyles = styles;
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -132,7 +138,7 @@ export default function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('CrearPublicacion')}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="add" size={22} color="white" />
+            <Ionicons name="add" size={22} color={Colors.fixedWhite} />
           </TouchableOpacity>
         )}
       />
@@ -158,6 +164,7 @@ export default function HomeScreen({ navigation }) {
                   key={pub.id}
                   pub={pub}
                   tall={i % 3 === 0}
+                  styles={styles}
                   onPress={() => navigation.navigate('PublicacionDetalle', { publicationId: pub.id, publication: pub })}
                 />
               ))}
@@ -168,6 +175,7 @@ export default function HomeScreen({ navigation }) {
                   key={pub.id}
                   pub={pub}
                   tall={i % 3 === 1}
+                  styles={styles}
                   onPress={() => navigation.navigate('PublicacionDetalle', { publicationId: pub.id, publication: pub })}
                 />
               ))}

@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 import { PURPLE, DARK_BANNER } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
-export const generarPatronStyles = StyleSheet.create({
+export const createGenerarPatronStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: PURPLE,
@@ -21,17 +22,17 @@ export const generarPatronStyles = StyleSheet.create({
     flex: 1,
   },
   headerTitle: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 26,
     fontWeight: 'bold',
   },
   subtitleContainer: {
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
   subtitle: {
-    color: '#555',
+    color: colors.textSecondary,
     fontSize: 14,
   },
   banner: {
@@ -43,13 +44,13 @@ export const generarPatronStyles = StyleSheet.create({
     gap: 10,
   },
   bannerText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 13,
     textDecorationLine: 'underline',
   },
   content: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingTop: 32,
@@ -63,7 +64,7 @@ export const generarPatronStyles = StyleSheet.create({
     borderWidth: 2,
     borderColor: PURPLE,
     overflow: 'hidden',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
   },
   image: {
     width: '100%',
@@ -76,6 +77,8 @@ export const generarPatronStyles = StyleSheet.create({
     backgroundColor: PURPLE,
     borderRadius: 8,
     padding: 8,
+    borderWidth: 2,
+    borderColor: colors.avatarBadgeBorder,
   },
   placeholder: {
     flex: 1,
@@ -95,22 +98,22 @@ export const generarPatronStyles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonDisabled: {
-    backgroundColor: '#4a2750',
+    backgroundColor: colors.disabledButtonBackground,
   },
   buttonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 16,
     fontWeight: 'bold',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.overlayStrong,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
   },
   modalCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 32,
     alignItems: 'center',
@@ -121,8 +124,9 @@ export const generarPatronStyles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#111',
+    color: colors.textStrong,
     lineHeight: 30,
   },
 });
 
+export const generarPatronStyles = createGenerarPatronStyles(Colors.light);

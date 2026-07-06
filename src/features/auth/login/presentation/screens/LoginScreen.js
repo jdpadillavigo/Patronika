@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
 import {
   View,
   Text,
@@ -9,12 +11,14 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { loginStyles as styles } from '../styles/LoginStyles';
+import { createLoginStyles, loginStyles as styles } from '../styles/LoginStyles';
 import LoginUseCase from '../../domain/usecases/LoginUseCase';
 import AuthGradientBackground from '../../../../../core/presentation/designsystem/components/AuthGradientBackground';
 import { useErrorPopup } from '../../../../../core/presentation/designsystem/components/ErrorPopup';
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createLoginStyles(colors), [colors]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -63,7 +67,7 @@ export default function LoginScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Nombre de usuario"
-                placeholderTextColor="rgba(255,255,255,0.45)"
+                placeholderTextColor={Colors.whiteAlpha45}
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
@@ -76,7 +80,7 @@ export default function LoginScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Contraseña"
-                placeholderTextColor="rgba(255,255,255,0.45)"
+                placeholderTextColor={Colors.whiteAlpha45}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -90,7 +94,7 @@ export default function LoginScreen({ navigation }) {
                 <Ionicons
                   name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={22}
-                  color="rgba(255,255,255,0.55)"
+                  color={Colors.whiteAlpha55}
                 />
               </TouchableOpacity>
             </View>

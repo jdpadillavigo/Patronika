@@ -1,9 +1,10 @@
 import { StyleSheet, Platform } from 'react-native';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
 import { PURPLE, DARK_BG } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
-export const registroStyles = StyleSheet.create({
+export const createRegistroStyles = (colors = Colors.light) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: DARK_BG,
@@ -24,11 +25,11 @@ export const registroStyles = StyleSheet.create({
   title: {
     fontSize: 34,
     fontWeight: 'bold',
-    color: 'white',
+    color: Colors.fixedWhite,
   },
   subtitle: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.7)',
+    color: Colors.whiteAlpha70,
     lineHeight: 20,
   },
   avatarWrapper: {
@@ -39,7 +40,7 @@ export const registroStyles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#ccc',
+    backgroundColor: colors.textDisabled,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -59,7 +60,7 @@ export const registroStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: DARK_BG,
+    borderColor: colors.avatarBadgeBorder,
   },
   form: {
     gap: 22,
@@ -68,13 +69,13 @@ export const registroStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.35)',
+    borderBottomColor: Colors.whiteAlpha35,
     paddingBottom: 10,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: 'white',
+    color: Colors.fixedWhite,
     paddingVertical: 4,
   },
   checkRow: {
@@ -87,7 +88,7 @@ export const registroStyles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.5)',
+    borderColor: Colors.whiteAlpha50,
     borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
@@ -97,20 +98,20 @@ export const registroStyles = StyleSheet.create({
     borderColor: PURPLE,
   },
   checkLabel: {
-    color: 'rgba(255,255,255,0.7)',
+    color: Colors.whiteAlpha70,
     fontSize: 14,
   },
   checkLabelLink: {
     textDecorationLine: 'underline',
-    color: 'white',
+    color: Colors.fixedWhite,
   },
   fieldError: {
-    color: '#ff6b6b',
+    color: Colors.errorSoft,
     fontSize: 13,
     marginTop: -14,
   },
   formError: {
-    color: '#ff6b6b',
+    color: Colors.errorSoft,
     fontSize: 13,
     textAlign: 'center',
     marginTop: -8,
@@ -123,10 +124,10 @@ export const registroStyles = StyleSheet.create({
     marginTop: 4,
   },
   buttonDisabled: {
-    backgroundColor: 'rgba(123,63,126,0.45)',
+    backgroundColor: Colors.primaryAlpha45,
   },
   buttonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: 'bold',
   },
@@ -137,7 +138,7 @@ export const registroStyles = StyleSheet.create({
     paddingTop: 28,
   },
   bottomText: {
-    color: 'rgba(255,255,255,0.65)',
+    color: Colors.whiteAlpha65,
     fontSize: 14,
   },
   bottomLink: {
@@ -147,3 +148,4 @@ export const registroStyles = StyleSheet.create({
   },
 });
 
+export const registroStyles = createRegistroStyles(Colors.light);

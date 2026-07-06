@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
 import {
   View,
   Text,
@@ -11,11 +13,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { registroStyles as styles } from '../styles/RegisterStyles';
+import { createRegistroStyles, registroStyles as styles } from '../styles/RegisterStyles';
 import RegisterUseCase from '../../domain/usecases/RegisterUseCase';
 import AuthGradientBackground from '../../../../../core/presentation/designsystem/components/AuthGradientBackground';
 
-export default function RegistroScreen({ navigation }) {
+export default function RegistroScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createRegistroStyles(colors), [colors]);
   const [avatarUri, setAvatarUri] = useState(null);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -106,11 +110,11 @@ export default function RegistroScreen({ navigation }) {
               <Image source={{ uri: avatarUri }} style={styles.avatarImg} />
             ) : (
               <View style={styles.avatarPlaceholder}>
-                <Ionicons name="person" size={52} color="#888" />
+                <Ionicons name="person" size={52} color={colors.textMuted} />
               </View>
             )}
             <View style={styles.avatarBadge}>
-              <Ionicons name="add" size={16} color="white" />
+              <Ionicons name="add" size={16} color={Colors.fixedWhite} />
             </View>
           </TouchableOpacity>
 
@@ -119,7 +123,7 @@ export default function RegistroScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Nombre de usuario"
-                placeholderTextColor="rgba(255,255,255,0.45)"
+                placeholderTextColor={Colors.whiteAlpha45}
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
@@ -128,11 +132,11 @@ export default function RegistroScreen({ navigation }) {
               />
             </View>
 
-            <View style={[styles.inputWrapper, emailError ? { borderBottomColor: '#ff6b6b' } : null]}>
+            <View style={[styles.inputWrapper, emailError ? { borderBottomColor: Colors.errorSoft } : null]}>
               <TextInput
                 style={styles.input}
                 placeholder="Correo electrónico"
-                placeholderTextColor="rgba(255,255,255,0.45)"
+                placeholderTextColor={Colors.whiteAlpha45}
                 value={email}
                 onChangeText={value => {
                   setEmail(value);
@@ -154,7 +158,7 @@ export default function RegistroScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Contraseña"
-                placeholderTextColor="rgba(255,255,255,0.45)"
+                placeholderTextColor={Colors.whiteAlpha45}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -168,7 +172,7 @@ export default function RegistroScreen({ navigation }) {
                 <Ionicons
                   name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={22}
-                  color="rgba(255,255,255,0.55)"
+                  color={Colors.whiteAlpha55}
                 />
               </TouchableOpacity>
             </View>
@@ -177,7 +181,7 @@ export default function RegistroScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Confirmar contraseña"
-                placeholderTextColor="rgba(255,255,255,0.45)"
+                placeholderTextColor={Colors.whiteAlpha45}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
@@ -191,7 +195,7 @@ export default function RegistroScreen({ navigation }) {
                 <Ionicons
                   name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={22}
-                  color="rgba(255,255,255,0.55)"
+                  color={Colors.whiteAlpha55}
                 />
               </TouchableOpacity>
             </View>
@@ -202,7 +206,7 @@ export default function RegistroScreen({ navigation }) {
               activeOpacity={0.7}
             >
               <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
-                {acceptedTerms && <Ionicons name="checkmark" size={13} color="white" />}
+                {acceptedTerms && <Ionicons name="checkmark" size={13} color={Colors.fixedWhite} />}
               </View>
               <Text style={styles.checkLabel}>
                 Aceptar{' '}

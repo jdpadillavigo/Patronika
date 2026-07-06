@@ -1,4 +1,6 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useMemo } from 'react';
+import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 import {
   View,
   Text,
@@ -9,7 +11,8 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { formularioStyles as styles, PURPLE } from '../styles/PatternFormStyles';
+import { createFormularioStyles, formularioStyles as styles, PURPLE } from '../styles/PatternFormStyles';
+let themedStyles = styles;
 import PatternUseCase from '../../domain/usecases/PatternUseCase';
 import { useGeneratePatternFlow } from '../../../../main/GeneratePatternFlowContext';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
@@ -25,26 +28,29 @@ function NumericStepper({ valor, onChange }) {
   };
 
   return (
-    <View style={styles.stepper}>
-      <TouchableOpacity style={styles.stepperBtn} onPress={decrement} disabled={valor <= 1}>
-        <Text style={[styles.stepperSymbol, valor <= 1 && styles.stepperDisabled]}>-</Text>
+    <View style={themedStyles.stepper}>
+      <TouchableOpacity style={themedStyles.stepperBtn} onPress={decrement} disabled={valor <= 1}>
+        <Text style={[themedStyles.stepperSymbol, valor <= 1 && themedStyles.stepperDisabled]}>-</Text>
       </TouchableOpacity>
       <TextInput
-        style={styles.stepperInput}
+        style={themedStyles.stepperInput}
         value={String(valor)}
         onChangeText={handleText}
         keyboardType="numeric"
         maxLength={3}
         textAlign="center"
       />
-      <TouchableOpacity style={styles.stepperBtn} onPress={increment} disabled={valor >= 100}>
-        <Text style={[styles.stepperSymbol, valor >= 100 && styles.stepperDisabled]}>+</Text>
+      <TouchableOpacity style={themedStyles.stepperBtn} onPress={increment} disabled={valor >= 100}>
+        <Text style={[themedStyles.stepperSymbol, valor >= 100 && themedStyles.stepperDisabled]}>+</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-export default function FormularioPatronScreen({ navigation, route }) {
+export default function FormularioPatronScreen({navigation, route }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createFormularioStyles(colors), [colors]);
+  themedStyles = styles;
   const { closeFlow } = useGeneratePatternFlow();
   const { imageUri } = route?.params || {};
   const [nombre, setNombre] = useState('');
@@ -80,7 +86,7 @@ export default function FormularioPatronScreen({ navigation, route }) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Generar patrón</Text>
         <TouchableOpacity onPress={closeFlow} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="close" size={24} color="white" />
+          <Ionicons name="close" size={24} color={Colors.fixedWhite} />
         </TouchableOpacity>
       </View>
 
@@ -91,7 +97,7 @@ export default function FormularioPatronScreen({ navigation, route }) {
           <TextInput
             style={styles.input}
             placeholder="Nombre de patrón"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={colors.iconMuted}
             value={nombre}
             onChangeText={setNombre}
             maxLength={60}

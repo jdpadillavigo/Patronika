@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
+import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
 import {
   ActivityIndicator,
   Animated,
@@ -17,7 +19,7 @@ import FormTextField from '../../../../../core/presentation/designsystem/compone
 import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 import { useErrorPopup } from '../../../../../core/presentation/designsystem/components/ErrorPopup';
 import VerificationCodeModal from '../../../../../core/presentation/designsystem/components/VerificationCodeModal';
-import { gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
+import { createGestionUsuariosStyles, gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
 import VerificationRepository from '../../../../auth/verification/data/repositories/VerificationRepository';
 
@@ -25,7 +27,9 @@ const EMAIL_CODE_MESSAGE = 'Ingresa el código enviado a tu correo actual para c
 const PASSWORD_CODE_MESSAGE = 'Ingresa el código enviado a tu correo para actualizar tu contraseña.';
 const CODE_LENGTH = 6;
 
-export default function EditUserScreen({ route, navigation }) {
+export default function EditUserScreen({route, navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createGestionUsuariosStyles(colors), [colors]);
   const userId = route?.params?.userId;
   const editingOwnProfile = route?.params?.editingOwnProfile === true;
   const [user, setUser] = useState(null);
@@ -450,11 +454,11 @@ export default function EditUserScreen({ route, navigation }) {
                 />
               ) : (
                 <View style={styles.editAvatarPlaceholder}>
-                  <Ionicons name="person" size={96} color="#888" />
+                  <Ionicons name="person" size={96} color={colors.textMuted} />
                 </View>
               )}
               <View style={styles.editAvatarBadge}>
-                <Ionicons name={showAvatar ? 'pencil' : 'add'} size={22} color="white" />
+                <Ionicons name={showAvatar ? 'pencil' : 'add'} size={22} color={Colors.fixedWhite} />
               </View>
             </TouchableOpacity>
 

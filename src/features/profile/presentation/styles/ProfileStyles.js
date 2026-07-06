@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 
-export const perfilStyles = StyleSheet.create({
+export const createPerfilStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
   scroll: {
     flex: 1,
@@ -21,7 +22,7 @@ export const perfilStyles = StyleSheet.create({
     width: 192,
     height: 192,
     borderRadius: 96,
-    backgroundColor: '#CFCFCF',
+    backgroundColor: colors.borderMuted,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -33,14 +34,14 @@ export const perfilStyles = StyleSheet.create({
     borderRadius: 96,
   },
   username: {
-    color: '#111',
+    color: colors.textStrong,
     fontSize: 22,
     fontWeight: '400',
     textAlign: 'center',
     marginBottom: 8,
   },
   email: {
-    color: '#111',
+    color: colors.textStrong,
     fontSize: 15,
     fontWeight: '400',
     textAlign: 'center',
@@ -49,3 +50,5 @@ export const perfilStyles = StyleSheet.create({
     marginTop: 72,
   },
 });
+
+export const perfilStyles = createPerfilStyles(Colors.light);

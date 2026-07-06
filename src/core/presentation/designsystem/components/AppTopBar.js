@@ -1,4 +1,5 @@
 import React from 'react';
+import Colors from '../Colors';
 import { StyleSheet, Text, View } from 'react-native';
 import { PURPLE } from './CommonStyles';
 
@@ -31,18 +32,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 28,
     fontWeight: 'bold',
   },
   subtitle: {
-    color: 'rgba(255,255,255,0.86)',
+    color: Colors.whiteAlpha86,
     fontSize: 14,
     fontWeight: '700',
     marginTop: 2,
   },
   description: {
-    color: 'rgba(255,255,255,0.75)',
+    color: Colors.whiteAlpha75,
     fontSize: 13,
     marginTop: 2,
   },

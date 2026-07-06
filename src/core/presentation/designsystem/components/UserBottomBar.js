@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import Colors from '../Colors';
+import { useAppTheme } from '../Theme';
 import { Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { UserBottomNavigationItem } from '../../../domain/BottomNavigationItem';
-import { PURPLE, bottomNavigationStyles as styles } from './BottomNavigationStyles';
+import { PURPLE, createBottomNavigationStyles, bottomNavigationStyles as styles } from './BottomNavigationStyles';
 
 const FAB_SIZE = 58;
 
-export default function UserBottomBar({
-  activeItem,
+export default function UserBottomBar({activeItem,
   onPressPatterns,   // navega a MisPatrones
   onPressCommunity,  // navega a Comunidad
   onPressTutorials,  // navega a Tutoriales
   onPressProfile,    // navega a Perfil
   onPressCamera,     // navega a GenerarPatron (acción central del app)
 }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createBottomNavigationStyles(colors), [colors]);
   const { width } = useWindowDimensions();
   const isPatternsActive = activeItem === UserBottomNavigationItem.PATTERNS;
   const isCommunityActive = activeItem === UserBottomNavigationItem.COMMUNITY;
@@ -32,18 +35,18 @@ export default function UserBottomBar({
         activeOpacity={0.85}
         style={[styles.fab, { left: fabLeft }]}
       >
-        <MaterialCommunityIcons name="camera-plus" size={28} color="white" />
+        <MaterialCommunityIcons name="camera-plus" size={28} color={Colors.fixedWhite} />
       </TouchableOpacity>
 
       {/* Barra de navegación: 5 slots */}
       <View style={styles.navBar}>
         <TouchableOpacity style={styles.navItem} onPress={onPressPatterns} activeOpacity={0.75}>
-          <Ionicons name={isPatternsActive ? 'grid' : 'grid-outline'} size={23} color={isPatternsActive ? PURPLE : '#AAA'} />
+          <Ionicons name={isPatternsActive ? 'grid' : 'grid-outline'} size={23} color={isPatternsActive ? PURPLE : colors.iconMuted} />
           <Text style={[styles.navLabel, isPatternsActive && styles.navLabelActive]}>Patrones</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={onPressCommunity} activeOpacity={0.75}>
-          <Ionicons name={isCommunityActive ? 'people' : 'people-outline'} size={23} color={isCommunityActive ? PURPLE : '#AAA'} />
+          <Ionicons name={isCommunityActive ? 'people' : 'people-outline'} size={23} color={isCommunityActive ? PURPLE : colors.iconMuted} />
           <Text style={[styles.navLabel, isCommunityActive && styles.navLabelActive]}>Comunidad</Text>
         </TouchableOpacity>
 
@@ -51,12 +54,12 @@ export default function UserBottomBar({
         <View style={{ flex: 1 }} />
 
         <TouchableOpacity style={styles.navItem} onPress={onPressTutorials} activeOpacity={0.75}>
-          <Ionicons name={isTutorialsActive ? 'book' : 'book-outline'} size={23} color={isTutorialsActive ? PURPLE : '#AAA'} />
+          <Ionicons name={isTutorialsActive ? 'book' : 'book-outline'} size={23} color={isTutorialsActive ? PURPLE : colors.iconMuted} />
           <Text style={[styles.navLabel, isTutorialsActive && styles.navLabelActive]}>Tutoriales</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={onPressProfile} activeOpacity={0.75}>
-          <Ionicons name={isProfileActive ? 'person' : 'person-outline'} size={23} color={isProfileActive ? PURPLE : '#AAA'} />
+          <Ionicons name={isProfileActive ? 'person' : 'person-outline'} size={23} color={isProfileActive ? PURPLE : colors.iconMuted} />
           <Text style={[styles.navLabel, isProfileActive && styles.navLabelActive]}>Mi perfil</Text>
         </TouchableOpacity>
       </View>

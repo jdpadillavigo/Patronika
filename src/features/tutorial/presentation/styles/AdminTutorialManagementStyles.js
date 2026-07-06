@@ -1,12 +1,13 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../../../../core/presentation/designsystem/Colors';
 import { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 export { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
-export const adminTutorialManagementStyles = StyleSheet.create({
+export const createAdminTutorialManagementStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: colors.background,
   },
   header: {
     backgroundColor: PURPLE,
@@ -15,20 +16,20 @@ export const adminTutorialManagementStyles = StyleSheet.create({
     paddingBottom: 14,
   },
   headerTitle: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 24,
     fontWeight: 'bold',
   },
   resultsCount: {
     fontSize: 13,
-    color: '#555',
+    color: colors.textSecondary,
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 4,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: colors.background,
   },
   actionErrorText: {
-    color: '#C0392B',
+    color: Colors.errorDark,
     fontSize: 13,
     fontWeight: '600',
     paddingHorizontal: 16,
@@ -60,7 +61,7 @@ export const adminTutorialManagementStyles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#999',
+    color: colors.textSubtle,
     fontWeight: '600',
     textAlign: 'center',
   },
@@ -72,13 +73,13 @@ export const adminTutorialManagementStyles = StyleSheet.create({
     borderRadius: 10,
   },
   retryButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontWeight: '700',
     fontSize: 14,
   },
   formSafeArea: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
   },
   formContent: {
     flexGrow: 1,
@@ -87,7 +88,7 @@ export const adminTutorialManagementStyles = StyleSheet.create({
     paddingBottom: 42,
   },
   formErrorText: {
-    color: '#C0392B',
+    color: Colors.errorDark,
     fontSize: 13,
     fontWeight: '600',
     textAlign: 'center',
@@ -110,8 +111,10 @@ export const adminTutorialManagementStyles = StyleSheet.create({
     opacity: 0.65,
   },
   saveButtonText: {
-    color: 'white',
+    color: Colors.fixedWhite,
     fontSize: 15,
     fontWeight: '800',
   },
 });
+
+export const adminTutorialManagementStyles = createAdminTutorialManagementStyles(Colors.light);

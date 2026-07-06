@@ -1,4 +1,6 @@
 ﻿import React, { useCallback, useMemo, useState } from 'react';
+import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
 import {
   Image,
   RefreshControl,
@@ -20,8 +22,9 @@ import ScreenState from '../../../../../core/presentation/designsystem/component
 import UserPreviewModal from '../../../../../core/presentation/designsystem/components/UserPreviewModal';
 import { gridDataToImageUri } from '../../../../../core/presentation/designsystem/utils/GridImage';
 import AdminCommunityUseCase from '../../domain/usecases/AdminCommunityUseCase';
-import { adminCommunityManagementStyles as styles, PURPLE } from '../styles/AdminCommunityManagementStyles';
+import { createAdminCommunityManagementStyles, adminCommunityManagementStyles as styles, PURPLE } from '../styles/AdminCommunityManagementStyles';
 import { REFRESH_TOP_BAR_OFFSET } from '../../../../../core/presentation/designsystem/components/CommonStyles';
+let themedStyles = styles;
 
 const TABS = {
   COMMENTS: 'comments',
@@ -53,11 +56,11 @@ function Avatar({ imageUrl, size = 58, onPress }) {
   const content = showImage ? (
     <Image
       source={{ uri: imageUrl }}
-      style={[styles.avatarImage, { width: size, height: size, borderRadius: size / 2 }]}
+      style={[themedStyles.avatarImage, { width: size, height: size, borderRadius: size / 2 }]}
       onError={() => setImageFailed(true)}
     />
   ) : (
-    <View style={[styles.avatarFallback, { width: size, height: size, borderRadius: size / 2 }]}>
+    <View style={[themedStyles.avatarFallback, { width: size, height: size, borderRadius: size / 2 }]}>
       <Ionicons name="person" size={size * 0.48} color={PURPLE} />
     </View>
   );
@@ -95,11 +98,11 @@ function CardActionMenu({ actions, direction = 'left' }) {
   }, [open, progress]);
 
   return (
-    <View style={[styles.cardActionMenu, isDown && styles.cardActionMenuDown]}>
+    <View style={[themedStyles.cardActionMenu, isDown && themedStyles.cardActionMenuDown]}>
       {!isDown ? (
         <Animated.View
           style={[
-            styles.cardActionMenuItems,
+            themedStyles.cardActionMenuItems,
             {
               width: progress.interpolate({
                 inputRange: [0, 1],
@@ -111,25 +114,25 @@ function CardActionMenu({ actions, direction = 'left' }) {
           pointerEvents={open ? 'auto' : 'none'}
         >
           {visibleActions.map(action => (
-            <View key={action.key} style={[styles.cardActionMenuItem, { width: getActionWidth(action) }]}>
+            <View key={action.key} style={[themedStyles.cardActionMenuItem, { width: getActionWidth(action) }]}>
               <AdminCircleIconButton {...action.props} />
             </View>
           ))}
         </Animated.View>
       ) : null}
       <TouchableOpacity
-        style={[styles.cardActionToggle, open && styles.cardActionToggleOpen]}
+        style={[themedStyles.cardActionToggle, open && themedStyles.cardActionToggleOpen]}
         onPress={() => setOpen(value => !value)}
         activeOpacity={0.84}
         accessibilityRole="button"
         accessibilityLabel={open ? 'Cerrar acciones' : 'Abrir acciones'}
       >
-        <Ionicons name={open ? 'close' : 'ellipsis-vertical'} size={18} color={open ? PURPLE : 'white'} />
+        <Ionicons name={open ? 'close' : 'ellipsis-vertical'} size={18} color={open ? PURPLE : Colors.fixedWhite} />
       </TouchableOpacity>
       {isDown ? (
         <Animated.View
           style={[
-            styles.cardActionMenuItemsDown,
+            themedStyles.cardActionMenuItemsDown,
             {
               height: progress.interpolate({
                 inputRange: [0, 1],
@@ -141,7 +144,7 @@ function CardActionMenu({ actions, direction = 'left' }) {
           pointerEvents={open ? 'auto' : 'none'}
         >
           {visibleActions.map(action => (
-            <View key={action.key} style={[styles.cardActionMenuItem, { width: getActionWidth(action) }]}>
+            <View key={action.key} style={[themedStyles.cardActionMenuItem, { width: getActionWidth(action) }]}>
               <AdminCircleIconButton {...action.props} />
             </View>
           ))}
@@ -157,24 +160,24 @@ function CommentCard({ item, onClearReports, onDelete, onSanction, onOpenPublica
   const reportCount = getReportCount(item);
 
   return (
-    <View style={styles.commentCard}>
-      <View style={styles.commentAvatarBlock}>
+    <View style={themedStyles.commentCard}>
+      <View style={themedStyles.commentAvatarBlock}>
         <Avatar
           imageUrl={item.user?.profileImageUrl || item.user?.avatar}
           onPress={() => item.user && onOpenUser(item.user)}
         />
-        <Text style={styles.commentUserName} numberOfLines={1}>{username}</Text>
+        <Text style={themedStyles.commentUserName} numberOfLines={1}>{username}</Text>
       </View>
 
-      <View style={styles.commentBody}>
-        <View style={styles.commentMetaRow}>
-          <Text style={styles.commentMeta} numberOfLines={1}>{formatRelativeDate(item.createdAt)}</Text>
-          <Text style={styles.commentMetaSeparator}>|</Text>
+      <View style={themedStyles.commentBody}>
+        <View style={themedStyles.commentMetaRow}>
+          <Text style={themedStyles.commentMeta} numberOfLines={1}>{formatRelativeDate(item.createdAt)}</Text>
+          <Text style={themedStyles.commentMetaSeparator}>|</Text>
           <TouchableOpacity onPress={() => onOpenPublication(item)} activeOpacity={0.75}>
-            <Text style={styles.commentPublicationLink}>Ir a la publicación</Text>
+            <Text style={themedStyles.commentPublicationLink}>Ir a la publicación</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.commentText} numberOfLines={2}>
+        <Text style={themedStyles.commentText} numberOfLines={2}>
           Comentario: {item.content}
         </Text>
       </View>
@@ -219,7 +222,7 @@ function PublicationCard({ publication, tall, onOpen, onClearReports, onDelete, 
   const reportCount = getReportCount(publication);
 
   return (
-    <TouchableOpacity style={styles.publicationCard} onPress={onOpen} activeOpacity={0.88}>
+    <TouchableOpacity style={themedStyles.publicationCard} onPress={onOpen} activeOpacity={0.88}>
       <CardActionMenu
         direction="down"
         actions={[
@@ -255,35 +258,38 @@ function PublicationCard({ publication, tall, onOpen, onClearReports, onDelete, 
       {imageUri ? (
         <Image
           source={{ uri: imageUri }}
-          style={[styles.publicationImage, tall && styles.publicationImageTall]}
+          style={[themedStyles.publicationImage, tall && themedStyles.publicationImageTall]}
           resizeMode="cover"
         />
       ) : (
-        <View style={[styles.publicationPlaceholder, tall && styles.publicationImageTall]}>
+        <View style={[themedStyles.publicationPlaceholder, tall && themedStyles.publicationImageTall]}>
           <Ionicons name="image-outline" size={36} color={PURPLE} />
         </View>
       )}
 
-      <View style={styles.publicationInfo}>
+      <View style={themedStyles.publicationInfo}>
         {TECHNIQUES[publication.technique] ? (
-          <View style={styles.techniqueBadge}>
-            <Text style={styles.techniqueBadgeText}>{TECHNIQUES[publication.technique]}</Text>
+          <View style={themedStyles.techniqueBadge}>
+            <Text style={themedStyles.techniqueBadgeText}>{TECHNIQUES[publication.technique]}</Text>
           </View>
         ) : null}
-        <Text style={styles.publicationDescription} numberOfLines={2}>{publication.description}</Text>
-        <View style={styles.publicationAuthorRow}>
+        <Text style={themedStyles.publicationDescription} numberOfLines={2}>{publication.description}</Text>
+        <View style={themedStyles.publicationAuthorRow}>
           <Avatar
             imageUrl={publication.user?.profileImageUrl}
             size={20}
           />
-          <Text style={styles.publicationAuthor} numberOfLines={1}>@{publication.user?.username || 'usuario'}</Text>
+          <Text style={themedStyles.publicationAuthor} numberOfLines={1}>@{publication.user?.username || 'usuario'}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 }
 
-export default function AdminCommunityManagementScreen({ navigation }) {
+export default function AdminCommunityManagementScreen({navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createAdminCommunityManagementStyles(colors), [colors]);
+  themedStyles = styles;
   const [activeTab, setActiveTab] = useState(TABS.COMMENTS);
   const [tabsWidth, setTabsWidth] = useState(0);
   const [activeFilter, setActiveFilter] = useState('todos');
@@ -573,7 +579,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
           onPress={() => setActiveFilter('todos')}
           activeOpacity={0.8}
         >
-          <Ionicons name={activeTab === TABS.COMMENTS ? 'chatbubbles' : 'images'} size={18} color={activeFilter === 'todos' ? 'white' : PURPLE} />
+          <Ionicons name={activeTab === TABS.COMMENTS ? 'chatbubbles' : 'images'} size={18} color={activeFilter === 'todos' ? Colors.fixedWhite : PURPLE} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -581,7 +587,7 @@ export default function AdminCommunityManagementScreen({ navigation }) {
           onPress={() => setActiveFilter('reportados')}
           activeOpacity={0.8}
         >
-          <Ionicons name="flag" size={14} color={activeFilter === 'reportados' ? 'white' : '#555'} />
+          <Ionicons name="flag" size={14} color={activeFilter === 'reportados' ? Colors.fixedWhite : colors.textSecondary} />
           <Text style={[styles.filtroPillText, activeFilter === 'reportados' && styles.filtroPillTextActivo]}>
             Reportados
           </Text>

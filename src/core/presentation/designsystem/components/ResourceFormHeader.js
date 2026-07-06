@@ -1,12 +1,15 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 import BackButton from './BackButton';
+import { useAppTheme } from '../Theme';
 
 export default function ResourceFormHeader({ title, onBack }) {
+  const { colors } = useAppTheme();
+
   return (
     <>
       <BackButton onPress={onBack} style={styles.backButton} />
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { color: colors.textStrong }]}>{title}</Text>
     </>
   );
 }
@@ -16,7 +19,6 @@ const styles = StyleSheet.create({
     marginLeft: -32,
   },
   title: {
-    color: '#262626',
     fontSize: 30,
     fontWeight: '800',
     marginBottom: 28,

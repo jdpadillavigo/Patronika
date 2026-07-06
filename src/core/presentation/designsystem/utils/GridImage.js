@@ -1,3 +1,5 @@
+import Colors from '../Colors';
+
 function parseGridData(gridData) {
   if (!gridData) return null;
   if (Array.isArray(gridData)) return gridData;
@@ -11,10 +13,10 @@ function parseGridData(gridData) {
 }
 
 function normalizeHex(value) {
-  if (typeof value !== 'string') return '#FFFFFF';
+  if (typeof value !== 'string') return Colors.fixedWhite;
   const hex = value.trim();
   if (/^#[0-9a-fA-F]{6}$/.test(hex)) return hex.toUpperCase();
-  return '#FFFFFF';
+  return Colors.fixedWhite;
 }
 
 function hexToRgb(hex) {
