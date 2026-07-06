@@ -128,8 +128,9 @@ async function createUserFromAdmin(
     email: string,
     password: string,
     profileImageUri?: string | null,
+    isAdmin = false,
 ): Promise<User> {
-    return createUser(await RegisterRemoteDataSource.register(username, email, password, profileImageUri));
+    return createUser(await RegisterRemoteDataSource.register(username, email, password, profileImageUri, isAdmin));
 }
 
 async function deleteUser(user: User): Promise<void> {

@@ -257,7 +257,6 @@ export default function GestionUsuariosScreen({navigation }) {
 
   const handleAskDelete = useCallback((user) => {
     setActionError('');
-    setMenuAbiertoId(null);
     setDeleteCandidate(user);
   }, []);
 

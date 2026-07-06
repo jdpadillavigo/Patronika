@@ -11,10 +11,11 @@ async function register(
     email: string,
     password: string,
     profileImageUri?: string | null,
+    isAdmin = false,
 ): Promise<User> {
     const formData = new FormData();
     formData.append('userRequest', {
-        string: JSON.stringify(createUserRequest(username, email, password)),
+        string: JSON.stringify(createUserRequest(username, email, password, { isAdmin })),
         type: 'application/json',
         name: 'userRequest',
     } as unknown as Blob);

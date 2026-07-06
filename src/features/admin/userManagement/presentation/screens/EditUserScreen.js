@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Animated,
   Image,
+  Modal,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -35,9 +36,11 @@ export default function EditUserScreen({route, navigation }) {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [typeModalVisible, setTypeModalVisible] = useState(false);
   const [usernameDraft, setUsernameDraft] = useState('');
   const [emailDraft, setEmailDraft] = useState('');
-  const [initialUserValues, setInitialUserValues] = useState({ username: '', email: '' });
+  const [initialUserValues, setInitialUserValues] = useState({ username: '', email: '', isAdmin: false });
   const [editingUsername, setEditingUsername] = useState(false);
   const [editingEmail, setEditingEmail] = useState(false);
   const [avatarUri, setAvatarUri] = useState(null);
@@ -91,11 +94,13 @@ export default function EditUserScreen({route, navigation }) {
       setUser(loadedUser);
       setUsername(loadedUser?.username || '');
       setEmail(loadedUser?.email || '');
+      setIsAdmin(loadedUser?.isAdmin === true);
       setUsernameDraft(loadedUser?.username || '');
       setEmailDraft(loadedUser?.email || '');
       setInitialUserValues({
         username: loadedUser?.username || '',
         email: loadedUser?.email || '',
+        isAdmin: loadedUser?.isAdmin === true,
       });
       setAvatarUri(loadedUser?.profileImageUrl || loadedUser?.avatar || null);
       setAvatarChanged(false);
@@ -332,6 +337,7 @@ export default function EditUserScreen({route, navigation }) {
       ...user,
       username: username.trim(),
       email: email.trim(),
+      isAdmin,
     }, avatarChanged ? avatarUri : null);
 
     if (!result.success) {
@@ -359,6 +365,7 @@ export default function EditUserScreen({route, navigation }) {
     user,
     username,
     email,
+    isAdmin,
   ]);
 
   const showAvatar = !!avatarUri && !avatarFailed;
@@ -423,6 +430,7 @@ export default function EditUserScreen({route, navigation }) {
   const hasAdminUserChanges = !editingOwnProfile && (
     username.trim() !== initialUserValues.username.trim()
     || email.trim().toLowerCase() !== initialUserValues.email.trim().toLowerCase()
+    || isAdmin !== initialUserValues.isAdmin
     || avatarChanged
   );
   const canSaveAdminUser = hasAdminUserChanges && username.trim() && email.trim() && !saving;
@@ -483,6 +491,20 @@ export default function EditUserScreen({route, navigation }) {
               inputContainerStyle={editingOwnProfile && !editingEmail ? styles.lockedInputContainer : null}
               inputProps={{ keyboardType: 'email-address', maxLength: 80 }}
             />
+
+            {!editingOwnProfile ? (
+              <View style={styles.editFieldGroup}>
+                <Text style={styles.editLabel}>Tipo</Text>
+                <TouchableOpacity
+                  style={styles.editSelectButton}
+                  onPress={() => setTypeModalVisible(true)}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.editSelectText}>{isAdmin ? 'Admin' : 'Usuario'}</Text>
+                  <Ionicons name="chevron-down" size={20} color={colors.placeholder} />
+                </TouchableOpacity>
+              </View>
+            ) : null}
 
             {editingOwnProfile ? (
               <>
@@ -579,6 +601,40 @@ export default function EditUserScreen({route, navigation }) {
         onResend={requestPasswordCode}
         onSubmit={handleSubmitPasswordCode}
       />
+      <Modal
+        visible={typeModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setTypeModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.statusModalOverlay}
+          activeOpacity={1}
+          onPress={() => setTypeModalVisible(false)}
+        >
+          <View style={styles.statusModalCard}>
+            {[
+              { label: 'Usuario', value: false },
+              { label: 'Admin', value: true },
+            ].map(option => (
+              <TouchableOpacity
+                key={option.label}
+                style={styles.statusOption}
+                onPress={() => {
+                  setIsAdmin(option.value);
+                  setTypeModalVisible(false);
+                }}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.statusOptionText}>{option.label}</Text>
+                {isAdmin === option.value ? (
+                  <Ionicons name="checkmark" size={20} color={PURPLE} />
+                ) : null}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
       {errorPopup}
     </View>
   );

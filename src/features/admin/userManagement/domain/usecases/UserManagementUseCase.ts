@@ -134,6 +134,7 @@ async function createUser(
     password: string,
     confirmPassword: string,
     profileImageUri?: string | null,
+    isAdmin = false,
 ) {
     const usernameValidation = validateUsername(username);
     if (!usernameValidation.isValid) {
@@ -160,6 +161,7 @@ async function createUser(
             email.trim(),
             password,
             profileImageUri,
+            isAdmin,
         );
         return { success: true, data: created };
     } catch (error: unknown) {

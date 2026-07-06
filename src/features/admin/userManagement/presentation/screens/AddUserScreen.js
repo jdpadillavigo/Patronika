@@ -4,6 +4,7 @@ import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme
 import {
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   Text,
@@ -15,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 import BackButton from '../../../../../core/presentation/designsystem/components/BackButton';
+import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 import { createGestionUsuariosStyles, gestionUsuariosStyles as styles } from '../styles/UserManagementStyles';
 import UserManagementUseCase from '../../domain/usecases/UserManagementUseCase';
 import { useErrorPopup } from '../../../../../core/presentation/designsystem/components/ErrorPopup';
@@ -25,6 +27,8 @@ export default function AddUserScreen({navigation }) {
   const [avatarUri, setAvatarUri] = useState(null);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [typeModalVisible, setTypeModalVisible] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -63,6 +67,7 @@ export default function AddUserScreen({navigation }) {
       password,
       confirmPassword,
       avatarUri,
+      isAdmin,
     );
     setSaving(false);
 
@@ -73,7 +78,7 @@ export default function AddUserScreen({navigation }) {
     }
 
     navigation.goBack();
-  }, [avatarUri, canSubmit, confirmPassword, email, navigation, password, showError, username]);
+  }, [avatarUri, canSubmit, confirmPassword, email, isAdmin, navigation, password, showError, username]);
 
   return (
     <KeyboardAvoidingView
@@ -132,6 +137,18 @@ export default function AddUserScreen({navigation }) {
         </View>
 
         <View style={styles.editFieldGroup}>
+          <Text style={styles.editLabel}>Tipo</Text>
+          <TouchableOpacity
+            style={styles.editSelectButton}
+            onPress={() => setTypeModalVisible(true)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.editSelectText}>{isAdmin ? 'Admin' : 'Usuario'}</Text>
+            <Ionicons name="chevron-down" size={20} color={colors.placeholder} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.editFieldGroup}>
           <Text style={styles.editLabel}>Contraseña</Text>
           <View style={styles.addPasswordInputContainer}>
             <TextInput
@@ -180,6 +197,40 @@ export default function AddUserScreen({navigation }) {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+      <Modal
+        visible={typeModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setTypeModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.statusModalOverlay}
+          activeOpacity={1}
+          onPress={() => setTypeModalVisible(false)}
+        >
+          <View style={styles.statusModalCard}>
+            {[
+              { label: 'Usuario', value: false },
+              { label: 'Admin', value: true },
+            ].map(option => (
+              <TouchableOpacity
+                key={option.label}
+                style={styles.statusOption}
+                onPress={() => {
+                  setIsAdmin(option.value);
+                  setTypeModalVisible(false);
+                }}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.statusOptionText}>{option.label}</Text>
+                {isAdmin === option.value ? (
+                  <Ionicons name="checkmark" size={20} color={PURPLE} />
+                ) : null}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
       {errorPopup}
     </KeyboardAvoidingView>
   );

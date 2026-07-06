@@ -78,10 +78,10 @@ function getActionWidth(action) {
   return action?.props?.count > 0 ? 50 : 32;
 }
 
-function CardActionMenu({ actions, direction = 'left' }) {
-  const [open, setOpen] = useState(false);
+function CardActionMenu({ actions, direction = 'left', menuId, activeMenuId, onToggleMenu }) {
   const progress = React.useRef(new Animated.Value(0)).current;
   const visibleActions = actions.filter(Boolean);
+  const open = activeMenuId === menuId;
   const isDown = direction === 'down';
   const actionsLength = visibleActions.length;
   const horizontalWidth = visibleActions.reduce((total, action, index) => (
@@ -122,7 +122,7 @@ function CardActionMenu({ actions, direction = 'left' }) {
       ) : null}
       <TouchableOpacity
         style={[themedStyles.cardActionToggle, open && themedStyles.cardActionToggleOpen]}
-        onPress={() => setOpen(value => !value)}
+        onPress={() => onToggleMenu(open ? null : menuId)}
         activeOpacity={0.84}
         accessibilityRole="button"
         accessibilityLabel={open ? 'Cerrar acciones' : 'Abrir acciones'}
@@ -154,7 +154,7 @@ function CardActionMenu({ actions, direction = 'left' }) {
   );
 }
 
-function CommentCard({ item, onClearReports, onDelete, onSanction, onOpenPublication, onOpenUser }) {
+function CommentCard({ item, activeMenuId, onToggleMenu, onClearReports, onDelete, onSanction, onOpenPublication, onOpenUser }) {
   const username = item.user?.username || 'Usuario';
   const publicationName = item.publication?.pattern?.name || 'Publicación';
   const reportCount = getReportCount(item);
@@ -183,6 +183,9 @@ function CommentCard({ item, onClearReports, onDelete, onSanction, onOpenPublica
       </View>
 
       <CardActionMenu
+        menuId={`comment-${item.id}`}
+        activeMenuId={activeMenuId}
+        onToggleMenu={onToggleMenu}
         actions={[
           reportCount > 0 ? {
             key: 'clear',
@@ -216,7 +219,7 @@ function CommentCard({ item, onClearReports, onDelete, onSanction, onOpenPublica
   );
 }
 
-function PublicationCard({ publication, tall, onOpen, onClearReports, onDelete, onReport }) {
+function PublicationCard({ publication, tall, activeMenuId, onToggleMenu, onOpen, onClearReports, onDelete, onReport }) {
   const imageUri = publication.imageUrl
     || (publication.pattern?.gridData ? gridDataToImageUri(publication.pattern.gridData, { maxDimension: 300 }) : null);
   const reportCount = getReportCount(publication);
@@ -225,6 +228,9 @@ function PublicationCard({ publication, tall, onOpen, onClearReports, onDelete, 
     <TouchableOpacity style={themedStyles.publicationCard} onPress={onOpen} activeOpacity={0.88}>
       <CardActionMenu
         direction="down"
+        menuId={`publication-${publication.id}`}
+        activeMenuId={activeMenuId}
+        onToggleMenu={onToggleMenu}
         actions={[
           {
             key: 'delete',
@@ -292,7 +298,9 @@ export default function AdminCommunityManagementScreen({navigation }) {
   themedStyles = styles;
   const [activeTab, setActiveTab] = useState(TABS.COMMENTS);
   const [tabsWidth, setTabsWidth] = useState(0);
-  const [activeFilter, setActiveFilter] = useState('todos');
+  const [commentsFilter, setCommentsFilter] = useState('todos');
+  const [publicationsFilter, setPublicationsFilter] = useState('todos');
+  const [activeMenuId, setActiveMenuId] = useState(null);
   const [comments, setComments] = useState([]);
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -312,6 +320,7 @@ export default function AdminCommunityManagementScreen({navigation }) {
       duration: 230,
       useNativeDriver: true,
     }).start();
+    setActiveMenuId(null);
   }, [activeTab, tabIndicator]);
 
   const loadDashboard = useCallback(async (isRefresh = false) => {
@@ -342,6 +351,7 @@ export default function AdminCommunityManagementScreen({navigation }) {
   }, [loadDashboard]);
 
   const handleAskDeleteComment = useCallback((comment) => {
+    setActiveMenuId(null);
     setCommentToDelete(comment);
   }, []);
 
@@ -404,6 +414,7 @@ export default function AdminCommunityManagementScreen({navigation }) {
   }, [publicationToDelete]);
 
   const handleOpenCommentPublication = useCallback((comment) => {
+    setActiveMenuId(null);
     navigation.navigate('PublicacionDetalle', {
       publicationId: comment.publicationId,
       publication: comment.publication || undefined,
@@ -411,6 +422,7 @@ export default function AdminCommunityManagementScreen({navigation }) {
   }, [navigation]);
 
   const handleSanctionComment = useCallback((comment) => {
+    setActiveMenuId(null);
     navigation.navigate('SancionarEliminarPublicacionAdmin', {
       targetType: 'comment',
       commentId: comment.id,
@@ -419,6 +431,7 @@ export default function AdminCommunityManagementScreen({navigation }) {
   }, [navigation]);
 
   const handleSanctionPublication = useCallback((publication) => {
+    setActiveMenuId(null);
     navigation.navigate('SancionarEliminarPublicacionAdmin', {
       targetType: 'publication',
       publicationId: publication.id,
@@ -428,20 +441,20 @@ export default function AdminCommunityManagementScreen({navigation }) {
 
   const columns = useMemo(() => ({
     left: publications
-      .filter(publication => activeFilter === 'todos' || getReportCount(publication) > 0)
+      .filter(publication => publicationsFilter === 'todos' || getReportCount(publication) > 0)
       .filter((_, index) => index % 2 === 0),
     right: publications
-      .filter(publication => activeFilter === 'todos' || getReportCount(publication) > 0)
+      .filter(publication => publicationsFilter === 'todos' || getReportCount(publication) > 0)
       .filter((_, index) => index % 2 !== 0),
-  }), [publications, activeFilter]);
+  }), [publications, publicationsFilter]);
 
   const filteredComments = useMemo(() => (
-    comments.filter(comment => activeFilter === 'todos' || getReportCount(comment) > 0)
-  ), [comments, activeFilter]);
+    comments.filter(comment => commentsFilter === 'todos' || getReportCount(comment) > 0)
+  ), [comments, commentsFilter]);
 
   const filteredPublications = useMemo(() => (
-    publications.filter(publication => activeFilter === 'todos' || getReportCount(publication) > 0)
-  ), [publications, activeFilter]);
+    publications.filter(publication => publicationsFilter === 'todos' || getReportCount(publication) > 0)
+  ), [publications, publicationsFilter]);
 
   const renderContent = () => {
     if (loading) {
@@ -478,7 +491,12 @@ export default function AdminCommunityManagementScreen({navigation }) {
             <View key={comment.id} style={actionLoadingId === comment.id && styles.disabledItem}>
               <CommentCard
                 item={comment}
-                onClearReports={setCommentReportsToClear}
+                activeMenuId={activeMenuId}
+                onToggleMenu={setActiveMenuId}
+                onClearReports={(item) => {
+                  setActiveMenuId(null);
+                  setCommentReportsToClear(item);
+                }}
                 onDelete={handleAskDeleteComment}
                 onSanction={handleSanctionComment}
                 onOpenPublication={handleOpenCommentPublication}
@@ -511,9 +529,20 @@ export default function AdminCommunityManagementScreen({navigation }) {
                 key={publication.id}
                 publication={publication}
                 tall={index % 3 === 0}
-                onOpen={() => navigation.navigate('PublicacionDetalle', { publicationId: publication.id, publication })}
-                onClearReports={() => setPublicationReportsToClear(publication)}
-                onDelete={() => setPublicationToDelete(publication)}
+                activeMenuId={activeMenuId}
+                onToggleMenu={setActiveMenuId}
+                onOpen={() => {
+                  setActiveMenuId(null);
+                  navigation.navigate('PublicacionDetalle', { publicationId: publication.id, publication });
+                }}
+                onClearReports={() => {
+                  setActiveMenuId(null);
+                  setPublicationReportsToClear(publication);
+                }}
+                onDelete={() => {
+                  setActiveMenuId(null);
+                  setPublicationToDelete(publication);
+                }}
                 onReport={() => handleSanctionPublication(publication)}
               />
             ))}
@@ -524,9 +553,20 @@ export default function AdminCommunityManagementScreen({navigation }) {
                 key={publication.id}
                 publication={publication}
                 tall={index % 3 === 1}
-                onOpen={() => navigation.navigate('PublicacionDetalle', { publicationId: publication.id, publication })}
-                onClearReports={() => setPublicationReportsToClear(publication)}
-                onDelete={() => setPublicationToDelete(publication)}
+                activeMenuId={activeMenuId}
+                onToggleMenu={setActiveMenuId}
+                onOpen={() => {
+                  setActiveMenuId(null);
+                  navigation.navigate('PublicacionDetalle', { publicationId: publication.id, publication });
+                }}
+                onClearReports={() => {
+                  setActiveMenuId(null);
+                  setPublicationReportsToClear(publication);
+                }}
+                onDelete={() => {
+                  setActiveMenuId(null);
+                  setPublicationToDelete(publication);
+                }}
                 onReport={() => handleSanctionPublication(publication)}
               />
             ))}
@@ -535,6 +575,9 @@ export default function AdminCommunityManagementScreen({navigation }) {
       </ScrollView>
     );
   };
+
+  const activeFilter = activeTab === TABS.COMMENTS ? commentsFilter : publicationsFilter;
+  const setActiveFilterForCurrentTab = activeTab === TABS.COMMENTS ? setCommentsFilter : setPublicationsFilter;
 
   return (
     <View style={styles.safeArea}>
@@ -576,7 +619,7 @@ export default function AdminCommunityManagementScreen({navigation }) {
       <View style={styles.filtrosContainer}>
         <TouchableOpacity
           style={[styles.filtroGrid, activeFilter === 'todos' && styles.filtroGridActivo]}
-          onPress={() => setActiveFilter('todos')}
+          onPress={() => setActiveFilterForCurrentTab('todos')}
           activeOpacity={0.8}
         >
           <Ionicons name={activeTab === TABS.COMMENTS ? 'chatbubbles' : 'images'} size={18} color={activeFilter === 'todos' ? Colors.fixedWhite : PURPLE} />
@@ -584,7 +627,7 @@ export default function AdminCommunityManagementScreen({navigation }) {
 
         <TouchableOpacity
           style={[styles.filtroPill, activeFilter === 'reportados' && styles.filtroPillActivo]}
-          onPress={() => setActiveFilter('reportados')}
+          onPress={() => setActiveFilterForCurrentTab('reportados')}
           activeOpacity={0.8}
         >
           <Ionicons name="flag" size={14} color={activeFilter === 'reportados' ? Colors.fixedWhite : colors.textSecondary} />
