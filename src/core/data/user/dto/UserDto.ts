@@ -10,6 +10,8 @@ export interface UserDto {
     registeredDate?: string;
     activateNotification: boolean;
     suspensionEndDate?: string | null;
+    suspensionStartDate?: string | null;
+    suspensionReason?: string | null;
     token?: string | null;
 }
 

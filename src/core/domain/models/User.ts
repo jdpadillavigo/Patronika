@@ -8,6 +8,8 @@ export interface User {
     registeredDate: string | null;
     activateNotification: boolean;
     suspensionEndDate?: string | null;
+    suspensionStartDate?: string | null;
+    suspensionReason?: string | null;
     profileImageUrl?: string | null;
     token?: string | null;
     avatar?: string | null;
@@ -29,6 +31,8 @@ export function createUser(apiData: Partial<User>): User {
         registeredDate: apiData.registeredDate || null,
         activateNotification: apiData.activateNotification ?? true,
         suspensionEndDate: apiData.suspensionEndDate || null,
+        suspensionStartDate: apiData.suspensionStartDate || null,
+        suspensionReason: apiData.suspensionReason || null,
         profileImageUrl: apiData.profileImageUrl || null,
         token: apiData.token || null,
         avatar: apiData.avatar || apiData.profileImageUrl || null,

@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useMemo } from 'react';
-import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
+import { useAppTheme } from '../../../../../../core/presentation/designsystem/Theme';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -10,15 +10,17 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import BackButton from '../../../../../core/presentation/designsystem/components/BackButton';
+import BackButton from '../../../../../../core/presentation/designsystem/components/BackButton';
 import { createSanctionUserDeletePublicationStyles, sanctionUserDeletePublicationStyles as styles } from '../styles/SanctionUserDeletePublicationStyles';
-import AdminCommunityUseCase from '../../domain/usecases/AdminCommunityUseCase';
+import AdminCommentUseCase from '../../../commentManagement/domain/usecases/AdminCommentUseCase';
+import AdminPostUseCase from '../../domain/usecases/AdminPostUseCase';
 
 export default function SanctionUserDeletePublicationScreen({route, navigation }) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createSanctionUserDeletePublicationStyles(colors), [colors]);
   const targetType = route?.params?.targetType === 'comment' ? 'comment' : 'publication';
   const targetId = targetType === 'comment' ? route?.params?.commentId : route?.params?.publicationId;
+  const targetUserId = route?.params?.userId || null;
   const [suspensionDays, setSuspensionDays] = useState('');
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
@@ -42,8 +44,8 @@ export default function SanctionUserDeletePublicationScreen({route, navigation }
     setError('');
     const sanctionDraft = { days, reason: reason.trim() };
     const result = targetType === 'comment'
-      ? await AdminCommunityUseCase.sanctionUserAndDeleteComment(targetId, sanctionDraft)
-      : await AdminCommunityUseCase.sanctionUserAndDeletePublication(targetId, sanctionDraft);
+      ? await AdminCommentUseCase.sanctionUserAndDeleteComment(targetId, sanctionDraft, targetUserId)
+      : await AdminPostUseCase.sanctionUserAndDeletePublication(targetId, sanctionDraft, targetUserId);
     setLoading(false);
 
     if (!result.success) {
@@ -53,7 +55,7 @@ export default function SanctionUserDeletePublicationScreen({route, navigation }
     }
 
     navigation.goBack();
-  }, [loading, navigation, reason, suspensionDays, targetId, targetType]);
+  }, [loading, navigation, reason, suspensionDays, targetId, targetType, targetUserId]);
 
   return (
     <KeyboardAvoidingView

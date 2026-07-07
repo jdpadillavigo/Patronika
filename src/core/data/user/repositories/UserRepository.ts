@@ -1,8 +1,7 @@
-import HttpClient from '../../../../core/data/network/HttpClientExt';
-import type { User } from '../../../../core/domain/models/User';
-import { createUser } from '../../../../core/domain/models/User';
+import HttpClient from '../../network/HttpClientExt';
+import type { User } from '../../../domain/models/User';
+import { createUser } from '../../../domain/models/User';
 import UserRemoteDataSource, { type UserRequest } from '../networking/UserRemoteDataSource';
-import RegisterRemoteDataSource from '../../../auth/register/data/network/RegisterRemoteDataSource';
 
 // Construye el body JSON que acepta PUT /api/users/{id}.
 // La contraseña es obligatoria en el backend; se incluye si se recibe.
@@ -108,6 +107,57 @@ async function updateUser(user: User, profileImageUri?: string | null): Promise<
     return { user: withAvatar, message };
 }
 
+async function suspendUser(user: User, days: number, reason: string): Promise<{ user: User; message: string }> {
+    if (!user.id) {
+        throw new Error('Usuario no encontrado');
+    }
+
+    const currentUser = await HttpClient.getCurrentUser<User>();
+    if (!currentUser?.id) {
+        throw new Error('Inicia sesión nuevamente para suspender usuarios');
+    }
+
+    const message = await UserRemoteDataSource.suspend(user.id, {
+        adminId: currentUser.id,
+        days,
+        reason,
+    });
+    const updated = createUser(await UserRemoteDataSource.loadById(user.id));
+    return { user: { ...updated, avatar: updated.profileImageUrl || user.avatar || null }, message };
+}
+
+async function suspendUserById(userId: string, days: number, reason: string): Promise<{ user: User; message: string }> {
+    const currentUser = await HttpClient.getCurrentUser<User>();
+    if (!currentUser?.id) {
+        throw new Error('Inicia sesiÃ³n nuevamente para suspender usuarios');
+    }
+
+    const message = await UserRemoteDataSource.suspend(userId, {
+        adminId: currentUser.id,
+        days,
+        reason,
+    });
+    const updated = createUser(await UserRemoteDataSource.loadById(userId));
+    return { user: { ...updated, avatar: updated.profileImageUrl || null }, message };
+}
+
+async function reactivateUser(user: User): Promise<{ user: User; message: string }> {
+    if (!user.id) {
+        throw new Error('Usuario no encontrado');
+    }
+
+    const currentUser = await HttpClient.getCurrentUser<User>();
+    if (!currentUser?.id) {
+        throw new Error('Inicia sesión nuevamente para reactivar usuarios');
+    }
+
+    const message = await UserRemoteDataSource.reactivate(user.id, {
+        adminId: currentUser.id,
+    });
+    const updated = createUser(await UserRemoteDataSource.loadById(user.id));
+    return { user: { ...updated, avatar: updated.profileImageUrl || user.avatar || null }, message };
+}
+
 async function updateProfileImage(user: User, profileImageUri: string): Promise<{ user: User; message: string }> {
     if (!user.id) {
         throw new Error('Usuario no encontrado');
@@ -130,7 +180,7 @@ async function createUserFromAdmin(
     profileImageUri?: string | null,
     isAdmin = false,
 ): Promise<User> {
-    return createUser(await RegisterRemoteDataSource.register(username, email, password, profileImageUri, isAdmin));
+    return createUser(await UserRemoteDataSource.create(username, email, password, profileImageUri, isAdmin));
 }
 
 async function deleteUser(user: User): Promise<void> {
@@ -149,6 +199,9 @@ const UserRepository = {
     getUserById,
     createUserFromAdmin,
     updateUser,
+    suspendUser,
+    suspendUserById,
+    reactivateUser,
     updateProfileImage,
     deleteUser,
 };

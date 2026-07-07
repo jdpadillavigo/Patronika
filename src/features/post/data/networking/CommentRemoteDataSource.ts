@@ -47,12 +47,19 @@ async function report(id: string): Promise<void> {
     await HttpClient.post<ApiResponse<string>>(`/api/comments/${id}/report`, {});
 }
 
+// POST /api/comments/{id}/clear-reports
+async function clearReports(id: string): Promise<Comment | null> {
+    const response = await HttpClient.post<ApiResponse<Comment>>(`/api/comments/${id}/clear-reports`, {});
+    return assertApiSuccess(response, 'Reportes eliminados correctamente');
+}
+
 const CommentRemoteDataSource = {
     loadAll,
     create,
     update,
     remove,
     report,
+    clearReports,
 };
 
 export default CommentRemoteDataSource;

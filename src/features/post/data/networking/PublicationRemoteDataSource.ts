@@ -78,10 +78,17 @@ async function remove(id: string): Promise<void> {
     await HttpClient.delete<ApiResponse<string>>(`/api/publications/${id}`);
 }
 
+// POST /api/publications/{id}/clear-reports
+async function clearReports(id: string): Promise<void> {
+    const response = await HttpClient.post<ApiResponse<string>>(`/api/publications/${id}/clear-reports`, {});
+    assertApiSuccess(response, 'Reportes eliminados correctamente');
+}
+
 const PublicationRemoteDataSource = {
     loadAll,
     create,
     remove,
+    clearReports,
 };
 
 export default PublicationRemoteDataSource;

@@ -30,6 +30,7 @@ export type RootStackParamList = {
         publicationName?: string;
         commentId?: string;
         commentContent?: string;
+        userId?: string;
     };
     GestionTutorialesAdmin: undefined;
     AgregarTutorialAdmin: undefined;

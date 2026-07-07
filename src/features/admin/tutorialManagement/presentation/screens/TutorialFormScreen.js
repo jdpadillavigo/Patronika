@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
+import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -10,10 +10,10 @@ import {
   View,
 } from 'react-native';
 
-import FormTextField from '../../../../core/presentation/designsystem/components/FormTextField';
-import ResourceFormHeader from '../../../../core/presentation/designsystem/components/ResourceFormHeader';
-import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
-import TutorialUseCase from '../../domain/usecases/TutorialUseCase';
+import FormTextField from '../../../../../core/presentation/designsystem/components/FormTextField';
+import ResourceFormHeader from '../../../../../core/presentation/designsystem/components/ResourceFormHeader';
+import { useErrorPopup } from '../../../../../core/presentation/designsystem/components/ErrorPopup';
+import TutorialUseCase from '../../../../tutorial/domain/usecases/TutorialUseCase';
 import { createAdminTutorialManagementStyles, adminTutorialManagementStyles as styles, PURPLE } from '../styles/AdminTutorialManagementStyles';
 
 export default function TutorialFormScreen({route, navigation }) {
@@ -167,7 +167,7 @@ export default function TutorialFormScreen({route, navigation }) {
               activeOpacity={0.85}
             >
               <Text style={styles.saveButtonText}>
-                {saving ? 'Guardando...' : isEditing ? 'Guardar' : 'Agregar'}
+                {saving ? 'Procesando...' : isEditing ? 'Guardar' : 'Agregar'}
               </Text>
             </TouchableOpacity>
           </>

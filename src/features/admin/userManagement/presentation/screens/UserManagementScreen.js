@@ -26,10 +26,24 @@ import AdminBottomBar from '../../../../../core/presentation/designsystem/compon
 import UserPreviewModal from '../../../../../core/presentation/designsystem/components/UserPreviewModal';
  
 // Formatea la fecha de registro a un formato legible (DD/MM/AAAA)
+function parseFechaLocal(fechaIso) {
+  if (!fechaIso) return null;
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fechaIso);
+  if (dateOnlyMatch) {
+    return new Date(
+      Number(dateOnlyMatch[1]),
+      Number(dateOnlyMatch[2]) - 1,
+      Number(dateOnlyMatch[3]),
+    );
+  }
+  return new Date(fechaIso);
+}
+
 function formatFecha(fechaIso) {
   if (!fechaIso) return 'Sin fecha';
   try {
-    const date = new Date(fechaIso);
+    const date = parseFechaLocal(fechaIso);
+    if (!date || Number.isNaN(date.getTime())) return 'Sin fecha';
     const dd = String(date.getDate()).padStart(2, '0');
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const yyyy = date.getFullYear();
@@ -39,8 +53,18 @@ function formatFecha(fechaIso) {
   }
 }
 
+function getDiasRestantes(fechaFin) {
+  if (!fechaFin) return null;
+  const end = parseFechaLocal(fechaFin);
+  if (!end || Number.isNaN(end.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.ceil((end.getTime() - today.getTime()) / 86400000));
+}
+
 // Card individual de cada usuario en el listado
-function UserCard({ user, isOwnAccount, isMenuOpen, onToggleMenu, onCloseMenu, onEdit, onToggleStatus, onDelete, onOpenUser }) {
+function UserCard({ user, isOwnAccount, isMenuOpen, onToggleMenu, onCloseMenu, onEdit, onToggleStatus, onDelete, onOpenUser, onOpenSuspensionInfo }) {
   const isActive = user.status === 0; // status 0 = activo, otro valor = suspendido (igual que en PerfilScreen/User.ts)
   const [avatarFailed, setAvatarFailed] = useState(false);
   const showAvatar = !!user.profileImageUrl && !avatarFailed;
@@ -111,9 +135,22 @@ return (
             Rol: {user.isAdmin ? 'Admin' : 'Usuario'}
           </Text>
           <Text style={themedStyles.userMetaSeparator}>|</Text>
-          <Text style={[themedStyles.userMetaText, isActive ? themedStyles.estadoActivoText : themedStyles.estadoSuspendidoText]}>
-            Estado: {isActive ? 'Activo' : 'Suspendido'}
-          </Text>
+          {isActive ? (
+            <Text style={[themedStyles.userMetaText, themedStyles.estadoActivoText]}>
+              Estado: Activo
+            </Text>
+          ) : (
+            <TouchableOpacity
+              style={themedStyles.suspendedStatusButton}
+              onPress={() => onOpenSuspensionInfo(user)}
+              activeOpacity={0.75}
+            >
+              <Text style={[themedStyles.userMetaText, themedStyles.estadoSuspendidoText]}>
+                Estado: Suspendido
+              </Text>
+              <Ionicons name="information-circle-outline" size={15} color={Colors.errorDark} />
+            </TouchableOpacity>
+          )}
         </View>
  
         <Text style={themedStyles.userDateText}>Fecha de registro: {formatFecha(user.registeredDate)}</Text>
@@ -136,6 +173,7 @@ export default function GestionUsuariosScreen({navigation }) {
   const [deleteCandidate, setDeleteCandidate] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [suspensionInfoUser, setSuspensionInfoUser] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [activeFilter, setActiveFilter] = useState('todos');
   const [statusCandidate, setStatusCandidate] = useState(null);
@@ -378,6 +416,7 @@ export default function GestionUsuariosScreen({navigation }) {
                   onToggleStatus={() => handleAskToggleStatus(item)}
                   onDelete={() => handleAskDelete(item)}
                   onOpenUser={setSelectedUser}
+                  onOpenSuspensionInfo={setSuspensionInfoUser}
                 />
               )}
               contentContainerStyle={styles.listContent}
@@ -497,7 +536,7 @@ export default function GestionUsuariosScreen({navigation }) {
                 disabled={statusLoading || !suspensionDays.trim() || !suspensionReason.trim()}
               >
                 <Text style={styles.deleteConfirmButtonText}>
-                  {statusLoading ? 'Guardando...' : 'Suspender'}
+                  {statusLoading ? 'Procesando...' : 'Suspender'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -531,7 +570,7 @@ export default function GestionUsuariosScreen({navigation }) {
                 disabled={statusLoading}
               >
                 <Text style={styles.deleteConfirmButtonText}>
-                  {statusLoading ? 'Guardando...' : 'Reactivar'}
+                  {statusLoading ? 'Procesando...' : 'Reactivar'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -544,6 +583,48 @@ export default function GestionUsuariosScreen({navigation }) {
         user={selectedUser}
         onClose={() => setSelectedUser(null)}
       />
+
+      <Modal
+        visible={!!suspensionInfoUser}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSuspensionInfoUser(null)}
+      >
+        <View style={styles.deleteModalOverlay}>
+          <View style={styles.deleteModalCard}>
+            <View style={styles.suspensionInfoIcon}>
+              <Ionicons name="information-circle" size={46} color={PURPLE} />
+            </View>
+
+            <View style={styles.suspensionInfoContent}>
+              <Text style={styles.suspensionInfoLabel}>Nombre de usuario</Text>
+              <Text style={styles.suspensionInfoValue}>{suspensionInfoUser?.username || 'Sin usuario'}</Text>
+
+              <Text style={styles.suspensionInfoLabel}>Motivo de suspensión</Text>
+              <Text style={styles.suspensionInfoValue}>{suspensionInfoUser?.suspensionReason || 'Sin motivo registrado'}</Text>
+
+              <Text style={styles.suspensionInfoLabel}>Inicio de suspensión</Text>
+              <Text style={styles.suspensionInfoValue}>{formatFecha(suspensionInfoUser?.suspensionStartDate)}</Text>
+
+              <Text style={styles.suspensionInfoLabel}>Fin de suspensión</Text>
+              <Text style={styles.suspensionInfoValue}>
+                {formatFecha(suspensionInfoUser?.suspensionEndDate)}
+                {getDiasRestantes(suspensionInfoUser?.suspensionEndDate) !== null
+                  ? ` (${getDiasRestantes(suspensionInfoUser?.suspensionEndDate)} días restantes)`
+                  : ''}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.suspensionInfoCloseButton}
+              onPress={() => setSuspensionInfoUser(null)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.suspensionInfoCloseButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

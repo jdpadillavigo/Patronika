@@ -1,6 +1,6 @@
 import HttpClient from '../../../../../core/data/network/HttpClientExt';
 import { createUser, type User } from '../../../../../core/domain/models/User';
-import UserRemoteDataSource from '../../../../user/data/networking/UserRemoteDataSource';
+import UserRemoteDataSource from '../../../../../core/data/user/networking/UserRemoteDataSource';
 import LoginRemoteDataSource from '../network/LoginRemoteDataSource';
 
 export interface AuthResult {

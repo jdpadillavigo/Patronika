@@ -1,4 +1,4 @@
-import UserRepository from '../../../user/data/repositories/UserRepository';
+import UserRepository from '../../../../core/data/user/repositories/UserRepository';
 import { validatePassword, validateUsername } from '../../../../core/domain/models/User';
 import { isSessionExpiredError } from '../../../../core/data/network/HttpClientExt';
 

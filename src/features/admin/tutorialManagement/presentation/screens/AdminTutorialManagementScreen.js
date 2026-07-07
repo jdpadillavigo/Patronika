@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useMemo } from 'react';
-import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
+import { useAppTheme } from '../../../../../core/presentation/designsystem/Theme';
 import {
   RefreshControl,
   ScrollView,
@@ -8,17 +8,17 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
-import { AdminBottomNavigationItem } from '../../../../core/domain/BottomNavigationItem';
-import AdminBottomBar from '../../../../core/presentation/designsystem/components/AdminBottomBar';
-import AdminCircleIconButton from '../../../../core/presentation/designsystem/components/AdminCircleIconButton';
-import AppTopBar from '../../../../core/presentation/designsystem/components/AppTopBar';
-import ConfirmationModal from '../../../../core/presentation/designsystem/components/ConfirmationModal';
-import FloatingIconButton from '../../../../core/presentation/designsystem/components/FloatingIconButton';
-import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
-import TutorialUseCase from '../../domain/usecases/TutorialUseCase';
-import TutorialCard from '../components/TutorialCard';
+import { AdminBottomNavigationItem } from '../../../../../core/domain/BottomNavigationItem';
+import AdminBottomBar from '../../../../../core/presentation/designsystem/components/AdminBottomBar';
+import AdminCircleIconButton from '../../../../../core/presentation/designsystem/components/AdminCircleIconButton';
+import AppTopBar from '../../../../../core/presentation/designsystem/components/AppTopBar';
+import ConfirmationModal from '../../../../../core/presentation/designsystem/components/ConfirmationModal';
+import FloatingIconButton from '../../../../../core/presentation/designsystem/components/FloatingIconButton';
+import ScreenState from '../../../../../core/presentation/designsystem/components/ScreenState';
+import TutorialUseCase from '../../../../tutorial/domain/usecases/TutorialUseCase';
+import TutorialCard from '../../../../tutorial/presentation/components/TutorialCard';
 import { createAdminTutorialManagementStyles, adminTutorialManagementStyles as styles, PURPLE } from '../styles/AdminTutorialManagementStyles';
-import { REFRESH_ADMIN_LIST_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
+import { REFRESH_ADMIN_LIST_OFFSET } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
 const UNKNOWN_CONNECTION_ERROR = 'Ocurrió un error desconocido o de conexión. Inténtalo de nuevo.';
 

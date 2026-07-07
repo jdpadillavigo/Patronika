@@ -1,9 +1,19 @@
-import HttpClient, { HttpResponseError, type ApiResponse } from '../../../../core/data/network/HttpClientExt';
-import type { User } from '../../../../core/domain/models/User';
-import { assertApiSuccess } from '../../../../core/data/network/dto/ApiResponseDto';
-import type { UserRequestDto } from '../../../../core/data/user/dto/UserDto';
+import HttpClient, { HttpResponseError, type ApiResponse } from '../../network/HttpClientExt';
+import type { User } from '../../../domain/models/User';
+import { assertApiSuccess } from '../../network/dto/ApiResponseDto';
+import { createUserRequest, type UserRequestDto } from '../dto/UserDto';
 
 export type UserRequest = UserRequestDto;
+
+export interface SuspendUserRequest {
+    adminId: string;
+    days: number;
+    reason: string;
+}
+
+export interface ReactivateUserRequest {
+    adminId: string;
+}
 
 async function loadAll(): Promise<User[]> {
     const response = await HttpClient.get<ApiResponse<User[]>>('/api/users');
@@ -24,6 +34,46 @@ async function loadById(id: string): Promise<User> {
 async function update(id: string, request: UserRequest): Promise<string> {
     const response = await HttpClient.put<ApiResponse<string>>(`/api/users/${id}`, request as unknown as Record<string, unknown>);
     return assertApiSuccess(response, 'Usuario actualizado correctamente') || 'Usuario actualizado correctamente';
+}
+
+async function create(
+    username: string,
+    email: string,
+    password: string,
+    profileImageUri?: string | null,
+    isAdmin = false,
+): Promise<User> {
+    const formData = new FormData();
+    formData.append('userRequest', {
+        string: JSON.stringify(createUserRequest(username, email, password, { isAdmin })),
+        type: 'application/json',
+        name: 'userRequest',
+    } as unknown as Blob);
+
+    if (profileImageUri) {
+        formData.append('file', {
+            uri: profileImageUri,
+            name: profileImageUri.split('/').pop() || `profile-${Date.now()}.jpg`,
+            type: 'image/jpeg',
+        } as unknown as Blob);
+    }
+
+    const response = await HttpClient.post<ApiResponse<User>>('/api/users', formData);
+    const user = assertApiSuccess(response, 'No se pudo crear el usuario');
+    if (!user) {
+        throw new Error('No se pudo crear el usuario');
+    }
+    return user;
+}
+
+async function suspend(id: string, request: SuspendUserRequest): Promise<string> {
+    const response = await HttpClient.post<ApiResponse<string>>(`/api/users/${id}/suspend`, request);
+    return assertApiSuccess(response, 'Usuario suspendido correctamente') || 'Usuario suspendido correctamente';
+}
+
+async function reactivate(id: string, request: ReactivateUserRequest): Promise<string> {
+    const response = await HttpClient.post<ApiResponse<string>>(`/api/users/${id}/reactivate`, request);
+    return assertApiSuccess(response, 'Usuario reactivado correctamente') || 'Usuario reactivado correctamente';
 }
 
 async function remove(id: string, username: string): Promise<void> {
@@ -67,7 +117,10 @@ async function changePassword(email: string, currentPassword: string, newPasswor
 const UserRemoteDataSource = {
     loadAll,
     loadById,
+    create,
     update,
+    suspend,
+    reactivate,
     remove,
     uploadAvatar,
     changePassword,

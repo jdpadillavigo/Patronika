@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
-import Colors from '../../../../core/presentation/designsystem/Colors';
-import { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
+import Colors from '../../../../../core/presentation/designsystem/Colors';
+import { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
-export { PURPLE } from '../../../../core/presentation/designsystem/components/CommonStyles';
+export { PURPLE } from '../../../../../core/presentation/designsystem/components/CommonStyles';
 
 export const createAdminTutorialManagementStyles = (colors = Colors.light) => StyleSheet.create({
   safeArea: {

@@ -233,6 +233,11 @@ export const createGestionUsuariosStyles = (colors = Colors.light) => StyleSheet
     color: Colors.errorDark,
     fontWeight: '600',
   },
+  suspendedStatusButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
  
   // ── Overlay de acciones (editar / estado / eliminar) ──────────────────────
   // Reemplaza visualmente la card seleccionada — mismo tamaño y posición,
@@ -428,6 +433,42 @@ export const createGestionUsuariosStyles = (colors = Colors.light) => StyleSheet
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 14,
+  },
+  suspensionInfoIcon: {
+    marginBottom: 12,
+  },
+  suspensionInfoContent: {
+    width: '100%',
+    gap: 5,
+  },
+  suspensionInfoLabel: {
+    alignSelf: 'flex-start',
+    color: colors.textStrong,
+    fontSize: 14,
+    fontWeight: '800',
+    paddingBottom: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: PURPLE,
+    marginTop: 10,
+  },
+  suspensionInfoValue: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 19,
+  },
+  suspensionInfoCloseButton: {
+    width: '100%',
+    backgroundColor: PURPLE,
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  suspensionInfoCloseButtonText: {
+    color: Colors.fixedWhite,
+    fontSize: 15,
+    fontWeight: '700',
   },
   editSafeArea: {
     flex: 1,

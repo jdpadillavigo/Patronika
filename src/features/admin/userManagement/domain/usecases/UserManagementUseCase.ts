@@ -1,4 +1,4 @@
-import UserRepository from '../../../../user/data/repositories/UserRepository';
+import UserRepository from '../../../../../core/data/user/repositories/UserRepository';
 import { validateEmail, validatePassword, validateUsername, type User } from '../../../../../core/domain/models/User';
 import { isSessionExpiredError } from '../../../../../core/data/network/HttpClientExt';
 
@@ -174,8 +174,31 @@ async function createUser(
 }
 
 async function updateUserStatus(user: User, status: number, suspensionDraft?: { days: number; reason: string } | null) {
-    void suspensionDraft;
-    return updateUser({ ...user, status });
+    const suspendRequest = suspensionDraft
+        ? { days: suspensionDraft.days, reason: suspensionDraft.reason.trim() }
+        : null;
+
+    if (status !== 0) {
+        if (!suspendRequest || !Number.isInteger(suspendRequest.days) || suspendRequest.days <= 0) {
+            return { success: false, error: 'Ingresa una cantidad de días válida para suspender.' };
+        }
+        if (!suspendRequest.reason) {
+            return { success: false, error: 'Ingresa el motivo de suspensión.' };
+        }
+    }
+
+    try {
+        const updated = status === 0
+            ? await UserRepository.reactivateUser(user)
+            : await UserRepository.suspendUser(user, suspendRequest?.days || 0, suspendRequest?.reason || '');
+        return { success: true, data: updated.user, message: updated.message };
+    } catch (error: unknown) {
+        if (isSessionExpiredError(error)) {
+            return { success: false, sessionExpired: true };
+        }
+        const message = error instanceof Error ? error.message : 'Error al actualizar el estado del usuario';
+        return { success: false, error: message };
+    }
 }
 
 async function deleteUser(user: User) {

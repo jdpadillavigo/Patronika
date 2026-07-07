@@ -16,7 +16,7 @@ import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
 import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
 import PatternLibraryUseCase from '../../../pattern/domain/usecases/PatternLibraryUseCase';
 import HttpClient from '../../../../core/data/network/HttpClientExt';
-import UserRemoteDataSource from '../../../user/data/networking/UserRemoteDataSource';
+import UserRemoteDataSource from '../../../../core/data/user/networking/UserRemoteDataSource';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
 import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
