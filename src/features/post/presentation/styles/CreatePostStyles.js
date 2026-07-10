@@ -199,6 +199,63 @@ export const createCrearStyles = (colors = Colors.light) => StyleSheet.create({
     color: PURPLE,
     fontWeight: '600',
   },
+  suspensionContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    gap: 16,
+  },
+  suspensionIconWrapper: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: colors.dangerBackground,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  suspensionTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: colors.textHeading,
+    textAlign: 'center',
+  },
+  suspensionMessage: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 21,
+  },
+  suspensionDateBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.primarySoft,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginTop: 4,
+  },
+  suspensionDateText: {
+    fontSize: 14,
+    color: PURPLE,
+    fontWeight: '600',
+  },
+  suspensionDaysChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: colors.dangerBackground,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  suspensionDaysText: {
+    fontSize: 13,
+    color: Colors.errorStrong,
+    fontWeight: '700',
+  },
 });
 
 export const crearStyles = createCrearStyles(Colors.light);

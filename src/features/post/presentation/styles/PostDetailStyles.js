@@ -342,6 +342,21 @@ export const createDetalleStyles = (colors = Colors.light) => StyleSheet.create(
     color: colors.textMuted,
     fontSize: 14,
   },
+  suspendedInputBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSoft,
+    backgroundColor: colors.dangerBackground,
+  },
+  suspendedInputText: {
+    fontSize: 13,
+    color: Colors.errorStrong,
+    flex: 1,
+  },
 });
 
 export const detalleStyles = createDetalleStyles(Colors.light);

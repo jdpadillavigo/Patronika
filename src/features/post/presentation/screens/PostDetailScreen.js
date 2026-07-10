@@ -67,9 +67,10 @@ export default function PublicacionDetalleScreen({navigation, route }) {
   const [patternLoadDone, setPatternLoadDone] = useState(!initialPub?.patternId && !initialPub?.pattern?.id);
   const [resultImageLoaded, setResultImageLoaded] = useState(!initialPub?.imageUrl);
   const [patternImageLoaded, setPatternImageLoaded] = useState(false);
+  const [isPublicationReported, setIsPublicationReported] = useState(false);
 
-  // Clave de AsyncStorage por usuario para persistir los comentarios reportados
   const getReportKey = useCallback((userId) => `@patronika_reported_comments_${userId}`, []);
+  const getReportPubKey = useCallback((userId) => `@patronika_reported_publications_${userId}`, []);
 
   useEffect(() => {
     async function loadReported() {
@@ -77,9 +78,14 @@ export default function PublicacionDetalleScreen({navigation, route }) {
       if (!user?.id) return;
       const stored = await AsyncStorage.getItem(getReportKey(user.id));
       if (stored) setReportedComments(new Set(JSON.parse(stored)));
+      const storedPubs = await AsyncStorage.getItem(getReportPubKey(user.id));
+      if (storedPubs) {
+        const reportedPubs = JSON.parse(storedPubs);
+        if (reportedPubs.includes(publicationId)) setIsPublicationReported(true);
+      }
     }
     loadReported();
-  }, [getReportKey]);
+  }, [getReportKey, getReportPubKey, publicationId]);
   const inputRef = useRef(null);
   const { showConfirm, errorPopup } = useErrorPopup();
 
@@ -183,6 +189,7 @@ export default function PublicacionDetalleScreen({navigation, route }) {
   };
 
   const handleSend = async () => {
+    if (currentUser && currentUser.status !== 0) return;
     if (!commentText.trim() || sending) return;
     if (editingComment && commentText.trim() === editingComment.content.trim()) return;
     setSending(true);
@@ -237,6 +244,33 @@ export default function PublicacionDetalleScreen({navigation, route }) {
     setCommentText('');
   };
 
+  const handleReportPublication = () => {
+    Alert.alert(
+      'Reportar publicación',
+      '¿Quieres reportar esta publicación como inapropiada?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Reportar',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await PublicationUseCase.reportPublication(publicationId);
+            if (result.success) {
+              const user = await HttpClient.getCurrentUser();
+              setIsPublicationReported(true);
+              if (user?.id) {
+                const key = getReportPubKey(user.id);
+                const stored = await AsyncStorage.getItem(key);
+                const prev = stored ? JSON.parse(stored) : [];
+                await AsyncStorage.setItem(key, JSON.stringify([...prev, publicationId]));
+              }
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleReportComment = (commentId) => {
     Alert.alert(
       'Reportar comentario',
@@ -271,13 +305,24 @@ export default function PublicacionDetalleScreen({navigation, route }) {
         <BackButton onPress={() => navigation.goBack()} />
         <View style={styles.headerTitleRow}>
           <Text style={styles.headerTitle}>Publicación</Text>
-          {!isAdmin && !isOwnPublication && patternId && (
-            <TouchableOpacity style={styles.saveBtn} onPress={handleToggleSave} disabled={savingPattern}>
-              {savingPattern
-                ? <ActivityIndicator size="small" color={PURPLE} />
-                : <Ionicons name={isSaved ? 'bookmark' : 'bookmark-outline'} size={22} color={PURPLE} />
-              }
-            </TouchableOpacity>
+          {!isAdmin && !isOwnPublication && (
+            <>
+              {patternId && (
+                <TouchableOpacity style={styles.saveBtn} onPress={handleToggleSave} disabled={savingPattern}>
+                  {savingPattern
+                    ? <ActivityIndicator size="small" color={PURPLE} />
+                    : <Ionicons name={isSaved ? 'bookmark' : 'bookmark-outline'} size={22} color={PURPLE} />
+                  }
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={styles.deleteBtn} onPress={handleReportPublication} disabled={isPublicationReported}>
+                <Ionicons
+                  name={isPublicationReported ? 'flag' : 'flag-outline'}
+                  size={20}
+                  color={isPublicationReported ? Colors.errorStrong : colors.textDisabled}
+                />
+              </TouchableOpacity>
+            </>
           )}
           {isOwnPublication && (
             <TouchableOpacity style={styles.deleteBtn} onPress={() => setShowDeleteModal(true)}>
@@ -435,31 +480,38 @@ export default function PublicacionDetalleScreen({navigation, route }) {
           </View>
         )}
 
-        <View style={styles.inputBar}>
-          <TextInput
-            ref={inputRef}
-            style={styles.input}
-            placeholder="Escribe un comentario..."
-            placeholderTextColor={colors.textDisabled}
-            value={commentText}
-            onChangeText={setCommentText}
-            multiline
-            maxLength={250}
-            scrollEnabled={false}
-            returnKeyType="send"
-            onSubmitEditing={handleSend}
-          />
-          <TouchableOpacity
-            style={[styles.sendBtn, (!commentText.trim() || sending || (editingComment && commentText.trim() === editingComment.content.trim())) && styles.sendBtnDisabled]}
-            onPress={handleSend}
-            disabled={!commentText.trim() || sending || (editingComment && commentText.trim() === editingComment.content.trim())}
-          >
-            {sending
-              ? <ActivityIndicator size="small" color={Colors.fixedWhite} />
-              : <Ionicons name="send" size={18} color={Colors.fixedWhite} />
-            }
-          </TouchableOpacity>
-        </View>
+        {currentUser && currentUser.status !== 0 ? (
+          <View style={styles.suspendedInputBar}>
+            <Ionicons name="ban" size={16} color={Colors.errorStrong} />
+            <Text style={styles.suspendedInputText}>Tu cuenta está suspendida y no puedes comentar</Text>
+          </View>
+        ) : (
+          <View style={styles.inputBar}>
+            <TextInput
+              ref={inputRef}
+              style={styles.input}
+              placeholder="Escribe un comentario..."
+              placeholderTextColor={colors.textDisabled}
+              value={commentText}
+              onChangeText={setCommentText}
+              multiline
+              maxLength={250}
+              scrollEnabled={false}
+              returnKeyType="send"
+              onSubmitEditing={handleSend}
+            />
+            <TouchableOpacity
+              style={[styles.sendBtn, (!commentText.trim() || sending || (editingComment && commentText.trim() === editingComment.content.trim())) && styles.sendBtnDisabled]}
+              onPress={handleSend}
+              disabled={!commentText.trim() || sending || (editingComment && commentText.trim() === editingComment.content.trim())}
+            >
+              {sending
+                ? <ActivityIndicator size="small" color={Colors.fixedWhite} />
+                : <Ionicons name="send" size={18} color={Colors.fixedWhite} />
+              }
+            </TouchableOpacity>
+          </View>
+        )}
       </KeyboardAvoidingView>
 
       {/* Visor fullscreen */}

@@ -15,6 +15,7 @@ import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
 import PatternLibraryUseCase from '../../../pattern/domain/usecases/PatternLibraryUseCase';
 import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
 import HttpClient from '../../../../core/data/network/HttpClientExt';
+import UserRemoteDataSource from '../../../../core/data/user/networking/UserRemoteDataSource';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
 import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
@@ -31,7 +32,25 @@ function PatternThumb({ pattern }) {
   );
 }
 
-export default function CrearPublicacionScreen({navigation }) {
+function parseDateLocal(dateStr) {
+  const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function formatSuspensionDate(dateStr) {
+  if (!dateStr) return '';
+  return parseDateLocal(dateStr).toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function getSuspensionDaysRemaining(dateStr) {
+  if (!dateStr) return 0;
+  const end = parseDateLocal(dateStr);
+  end.setHours(23, 59, 59, 999);
+  const diff = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff : 0;
+}
+
+export default function CrearPublicacionScreen({ navigation }) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createCrearStyles(colors), [colors]);
   themedStyles = styles;
@@ -44,6 +63,8 @@ export default function CrearPublicacionScreen({navigation }) {
   const [customTechnique, setCustomTechnique] = useState('');
   const [imageUri, setImageUri] = useState(null);
   const [publishing, setPublishing] = useState(false);
+  const [isSuspended, setIsSuspended] = useState(false);
+  const [suspensionEndDate, setSuspensionEndDate] = useState(null);
   const { showError, errorPopup } = useErrorPopup();
 
   useEffect(() => {
@@ -56,6 +77,18 @@ export default function CrearPublicacionScreen({navigation }) {
 
       const uid = user?.id || null;
       setCurrentUserId(uid);
+
+      if (user && user.status !== 0) {
+        setIsSuspended(true);
+        try {
+          const freshUser = await UserRemoteDataSource.loadById(user.id);
+          setSuspensionEndDate(freshUser.suspensionEndDate || null);
+        } catch {
+          setSuspensionEndDate(user.suspensionEndDate || null);
+        }
+        setLoadingPatterns(false);
+        return;
+      }
 
       const ownPatterns = mineResult.success
         ? (mineResult.data || []).map(p => ({
@@ -119,6 +152,43 @@ export default function CrearPublicacionScreen({navigation }) {
 
   const isSavedPattern = selectedPattern?.isSavedPattern === true;
   const canPublish = selectedPattern && description.trim().length > 0 && !publishing && (!isSavedPattern || imageUri);
+
+  if (isSuspended) {
+    const daysLeft = getSuspensionDaysRemaining(suspensionEndDate);
+    return (
+      <View style={styles.safeArea}>
+        <View style={styles.header}>
+          <BackButton onPress={() => navigation.goBack()} />
+          <Text style={styles.headerTitle}>Nueva publicación</Text>
+        </View>
+        <View style={styles.suspensionContainer}>
+          <View style={styles.suspensionIconWrapper}>
+            <Ionicons name="ban" size={56} color={Colors.errorStrong} />
+          </View>
+          <Text style={styles.suspensionTitle}>Cuenta suspendida</Text>
+          <Text style={styles.suspensionMessage}>
+            No puedes publicar en la comunidad mientras tu cuenta esté suspendida.
+          </Text>
+          <View style={styles.suspensionDateBox}>
+            <Ionicons name="calendar-outline" size={16} color={PURPLE} />
+            <Text style={styles.suspensionDateText}>
+              {suspensionEndDate
+                ? `Suspensión hasta el ${formatSuspensionDate(suspensionEndDate)}`
+                : 'Duración no especificada'}
+            </Text>
+          </View>
+          {daysLeft > 0 && (
+            <View style={styles.suspensionDaysChip}>
+              <Ionicons name="time-outline" size={14} color={Colors.errorStrong} />
+              <Text style={styles.suspensionDaysText}>
+                {daysLeft} {daysLeft === 1 ? 'día restante' : 'días restantes'}
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.safeArea}>

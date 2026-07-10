@@ -84,11 +84,17 @@ async function clearReports(id: string): Promise<void> {
     assertApiSuccess(response, 'Reportes eliminados correctamente');
 }
 
+// POST /api/publications/{id}/report — incrementa el contador de reportes
+async function report(id: string): Promise<void> {
+    await HttpClient.post<ApiResponse<string>>(`/api/publications/${id}/report`, {});
+}
+
 const PublicationRemoteDataSource = {
     loadAll,
     create,
     remove,
     clearReports,
+    report,
 };
 
 export default PublicationRemoteDataSource;

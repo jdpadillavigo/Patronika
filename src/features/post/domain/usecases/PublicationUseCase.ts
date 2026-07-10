@@ -52,11 +52,23 @@ async function getMyPublishedPatternIds() {
     }
 }
 
+async function reportPublication(id: string) {
+    try {
+        await PublicationRepository.reportPublication(id);
+        return { success: true as const };
+    } catch (error: unknown) {
+        if (isSessionExpiredError(error)) return { success: false as const, sessionExpired: true };
+        const message = error instanceof Error ? error.message : 'Error al reportar la publicación';
+        return { success: false as const, error: message };
+    }
+}
+
 const PublicationUseCase = {
     loadFeed,
     create,
     remove,
     getMyPublishedPatternIds,
+    reportPublication,
 };
 
 export default PublicationUseCase;
