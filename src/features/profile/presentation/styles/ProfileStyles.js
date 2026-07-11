@@ -11,17 +11,16 @@ export const createPerfilStyles = (colors = Colors.light) => StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: 'center',
     paddingHorizontal: 58,
-    paddingTop: 78,
-    paddingBottom: 40,
   },
   profileSummary: {
     alignItems: 'center',
   },
   avatarFrame: {
-    width: 192,
-    height: 192,
-    borderRadius: 96,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     backgroundColor: colors.borderMuted,
     alignItems: 'center',
     justifyContent: 'center',
@@ -29,9 +28,9 @@ export const createPerfilStyles = (colors = Colors.light) => StyleSheet.create({
     marginBottom: 18,
   },
   avatarImage: {
-    width: 192,
-    height: 192,
-    borderRadius: 96,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
   },
   username: {
     color: colors.textStrong,
@@ -45,9 +44,6 @@ export const createPerfilStyles = (colors = Colors.light) => StyleSheet.create({
     fontSize: 15,
     fontWeight: '400',
     textAlign: 'center',
-  },
-  actions: {
-    marginTop: 72,
   },
 });
 

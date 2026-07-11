@@ -35,7 +35,7 @@ export const createBottomNavigationStyles = (colors = Colors.light) => StyleShee
     alignItems: 'center',
     backgroundColor: colors.background,
     borderTopWidth: 1,
-    borderTopColor: colors.borderSoft,
+    borderTopColor: colors.border,
     paddingTop: FAB_PROTRUSION + 4,
     paddingBottom: 10,
     paddingHorizontal: 4,

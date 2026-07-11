@@ -1,5 +1,5 @@
 import React, { type PropsWithChildren, useEffect } from 'react';
-import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -9,10 +9,11 @@ import {
 } from 'react-native-safe-area-context';
 
 import Colors from '../Colors';
+import { useAppTheme } from '../Theme';
 
 function SystemBarsContent({ children }: PropsWithChildren) {
-    const isDark = useColorScheme() === 'dark';
-    const navigationBarColor = isDark ? Colors.black : Colors.white;
+    const { colors, isDark } = useAppTheme();
+    const navigationBarColor = colors.background;
 
     useEffect(() => {
         if (Platform.OS !== 'android') return;

@@ -548,7 +548,7 @@ export default function GestionUsuariosScreen({navigation }) {
         <View style={styles.deleteModalOverlay}>
           <View style={styles.deleteModalCard}>
             <View style={styles.deleteModalIcon}>
-              <Ionicons name="play-circle" size={32} color={PURPLE} />
+              <Ionicons name="happy" size={32} color={PURPLE} />
             </View>
             <Text style={styles.deleteModalTitle}>¿Quieres reactivar al usuario?</Text>
             <View style={styles.deleteModalActions}>

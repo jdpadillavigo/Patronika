@@ -6,6 +6,7 @@ import {
   RefreshControl,
   ScrollView,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,9 +25,11 @@ import ProfileActionButton from '../../../../core/presentation/designsystem/comp
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
 
-export default function PerfilScreen({navigation, route }) {
+export default function PerfilScreen({ navigation, route }) {
   const { colors } = useAppTheme();
+  const { height: screenHeight } = useWindowDimensions();
   const styles = useMemo(() => createPerfilStyles(colors), [colors]);
+  const marginTop = screenHeight * 0.07;
   const [usuario, setUsuario] = useState(null);
   const [loadingUsuario, setLoadingUsuario] = useState(true);
   const [avatarFailed, setAvatarFailed] = useState(false);
@@ -106,7 +109,7 @@ export default function PerfilScreen({navigation, route }) {
                   onError={() => setAvatarFailed(true)}
                 />
               ) : (
-                <Ionicons name="person" size={108} color={Colors.fixedBlack} />
+                <Ionicons name="person" size={85} color={Colors.fixedBlack} />
               )}
             </View>
 
@@ -114,7 +117,7 @@ export default function PerfilScreen({navigation, route }) {
             <Text style={styles.email}>{usuario?.email || 'correo@ejemplo.com'}</Text>
           </View>
 
-          <View style={styles.actions}>
+          <View style={{ marginTop: marginTop }}>
             <ProfileActionButton
               label="Editar perfil"
               iconName="pencil"

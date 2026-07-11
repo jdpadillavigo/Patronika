@@ -223,7 +223,7 @@ export default function MisPatronesScreen({navigation }) {
             showError(result.error || 'No se pudo eliminar el patrón');
           }
       },
-      { acceptText: 'Eliminar' },
+      { acceptText: 'Eliminar', iconName: 'trash' },
     );
   }, [selectedPattern, loadPatterns, showError, showConfirm]);
 
@@ -242,7 +242,7 @@ export default function MisPatronesScreen({navigation }) {
             showError(result.error || 'No se pudo quitar el patrón');
           }
       },
-      { acceptText: 'Quitar' },
+      { acceptText: 'Quitar', iconName: 'bookmark-outline' },
     );
   }, [selectedPattern, loadPatterns, showError, showConfirm]);
 
