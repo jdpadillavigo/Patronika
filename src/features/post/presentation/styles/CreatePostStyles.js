@@ -39,6 +39,10 @@ export const createCrearStyles = (colors = Colors.light) => StyleSheet.create({
   },
   patternList: {
     gap: 10,
+    paddingHorizontal: 16,
+  },
+  patternScroll: {
+    marginHorizontal: -16,
   },
   patternCard: {
     width: 110,

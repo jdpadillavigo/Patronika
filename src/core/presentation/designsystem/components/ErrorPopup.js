@@ -14,6 +14,7 @@ export function useErrorPopup() {
     acceptText: 'Aceptar',
     cancelText: null,
     onAccept: null,
+    iconName: null,
   });
 
   const hidePopup = useCallback(() => {
@@ -29,6 +30,7 @@ export function useErrorPopup() {
       acceptText: options.acceptText || 'Aceptar',
       cancelText: options.cancelText || null,
       onAccept: options.onAccept || null,
+      iconName: options.iconName || null,
     });
   }, []);
 
@@ -42,6 +44,7 @@ export function useErrorPopup() {
       acceptText: options.acceptText || 'Aceptar',
       cancelText: options.cancelText || 'Cancelar',
       onAccept,
+      iconName: options.iconName || null,
     });
   }, [showPopup]);
 
@@ -61,6 +64,7 @@ export function useErrorPopup() {
       cancelText={popupState.cancelText}
       onAccept={acceptPopup}
       onCancel={popupState.cancelText ? hidePopup : null}
+      iconName={popupState.iconName}
     />
   ), [acceptPopup, hidePopup, popupState]);
 
@@ -75,10 +79,11 @@ export default function ErrorPopup({visible,
   cancelText,
   onAccept,
   onCancel,
+  iconName,
 }) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createErrorPopupStyles(colors), [colors]);
-  const iconName = type === 'success'
+  const defaultIconName = type === 'success'
     ? 'checkmark-circle'
     : type === 'info'
     ? 'information-circle'
@@ -96,7 +101,7 @@ export default function ErrorPopup({visible,
       <View style={styles.modalOverlay}>
         <View style={styles.modalCard}>
           <View style={styles.modalIconContainer}>
-            <Ionicons name={iconName} size={38} color={PURPLE} />
+            <Ionicons name={iconName || defaultIconName} size={38} color={PURPLE} />
           </View>
 
           <Text style={styles.modalTitle}>{title}</Text>

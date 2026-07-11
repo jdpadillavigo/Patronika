@@ -30,15 +30,15 @@ export const createTutorialesStyles = (colors = Colors.light) => StyleSheet.crea
 
   // Lista
   list: {
-    padding: 16,
-    paddingBottom: 16,
-    gap: 16,
+    padding: 14,
+    paddingBottom: 14,
+    gap: 14,
   },
   emptyList: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 16,
-    paddingBottom: 16,
+    padding: 14,
+    paddingBottom: 14,
   },
 
   // Tarjeta de tutorial

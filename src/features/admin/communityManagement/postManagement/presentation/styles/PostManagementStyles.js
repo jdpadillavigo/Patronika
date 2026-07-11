@@ -11,21 +11,21 @@ export const createPostManagementStyles = (colors = Colors.light) => StyleSheet.
   emptyContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 12,
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    paddingBottom: 10,
   },
   publicationsContent: {
-    padding: 8,
-    paddingBottom: 8,
+    padding: 14,
+    paddingBottom: 10,
   },
   publicationColumns: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
   },
   publicationColumn: {
     flex: 1,
-    gap: 8,
+    gap: 10,
   },
   publicationCard: {
     backgroundColor: colors.surface,

@@ -145,7 +145,7 @@ export default function AdminTutorialManagementScreen({navigation }) {
                     onPress={() => navigation.navigate('EditarTutorialAdmin', { tutorialId: tutorial.id })}
                   />
                   <AdminCircleIconButton
-                    iconName="trash-outline"
+                    iconName="trash"
                     label="Eliminar tutorial"
                     onPress={() => setDeleteCandidate(tutorial)}
                   />

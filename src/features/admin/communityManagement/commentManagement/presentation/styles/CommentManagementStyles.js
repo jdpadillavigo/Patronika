@@ -9,10 +9,10 @@ export const createCommentManagementStyles = (colors = Colors.light) => StyleShe
     flex: 1,
   },
   commentsContent: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingTop: 14,
-    paddingBottom: 12,
-    gap: 12,
+    paddingBottom: 14,
+    gap: 10,
   },
   emptyContent: {
     flexGrow: 1,

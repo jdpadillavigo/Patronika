@@ -14,8 +14,12 @@ import ScreenState from '../../../../core/presentation/designsystem/components/S
 import PublicationUseCase from '../../../post/domain/usecases/PublicationUseCase';
 import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
+import HttpClient from '../../../../core/data/network/HttpClientExt';
+import UserRemoteDataSource from '../../../../core/data/user/networking/UserRemoteDataSource';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
+import { formatSuspensionDate, getSuspensionDaysRemaining } from '../../../../core/presentation/designsystem/utils/Suspension';
 import { REFRESH_TOP_BAR_OFFSET } from '../../../../core/presentation/designsystem/components/CommonStyles';
+import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 let themedStyles = styles;
 
 const TECHNIQUES = ['Crochet', 'Tejido a dos agujas', 'Bordado', 'Macramé', 'Otros'];
@@ -88,6 +92,7 @@ export default function HomeScreen({navigation }) {
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { showPopup, errorPopup } = useErrorPopup();
 
   const loadFeed = useCallback(async (isRefresh = false) => {
     if (!isRefresh) setLoading(true);
@@ -124,6 +129,30 @@ export default function HomeScreen({navigation }) {
     loadFeed(true);
   }, [loadFeed]);
 
+  const handleCreatePublication = useCallback(async () => {
+    const sessionUser = await HttpClient.getCurrentUser();
+    let user = sessionUser;
+    if (sessionUser?.id) {
+      try {
+        user = await UserRemoteDataSource.loadById(sessionUser.id);
+      } catch {
+        // Se conserva la información disponible en la sesión si no se puede recargar.
+      }
+    }
+
+    if (!user || user.status === 0) {
+      navigation.navigate('CrearPublicacion');
+      return;
+    }
+
+    const suspensionEndDate = user.suspensionEndDate || null;
+    const daysLeft = getSuspensionDaysRemaining(suspensionEndDate);
+    const dateMessage = suspensionEndDate
+      ? `Hasta el ${formatSuspensionDate(suspensionEndDate)},\n${daysLeft === 1 ? 'queda 1 día' : `quedan ${daysLeft} días`}`
+      : 'La fecha de finalización no está disponible.';
+    showPopup(dateMessage, 'Cuenta suspendida', { type: 'warning', acceptText: 'Entendido' });
+  }, [navigation, showPopup]);
+
   const leftCol = publications.filter((_, i) => i % 2 === 0);
   const rightCol = publications.filter((_, i) => i % 2 !== 0);
 
@@ -135,7 +164,7 @@ export default function HomeScreen({navigation }) {
         rightAction={(
           <TouchableOpacity
             style={styles.addBtn}
-            onPress={() => navigation.navigate('CrearPublicacion')}
+            onPress={handleCreatePublication}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Ionicons name="add" size={22} color={Colors.fixedWhite} />
@@ -192,6 +221,7 @@ export default function HomeScreen({navigation }) {
         onPressProfile={() => navigation.navigate('Perfil', { isAdmin: false })}
         onPressCamera={() => navigation.navigate('GenerarPatron')}
       />
+      {errorPopup}
     </View>
   );
 }

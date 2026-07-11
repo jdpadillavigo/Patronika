@@ -51,6 +51,7 @@ export interface AppColors {
     imageBackground: string;
     primarySubtle: string;
     primarySoft: string;
+    editingBannerBackground: string;
     actionBackground: string;
     dangerBackground: string;
     modalHandle: string;
@@ -129,6 +130,7 @@ export function useAppTheme(): ThemeResult {
         imageBackground: themeColors.imageBackground,
         primarySubtle: themeColors.primarySubtle,
         primarySoft: themeColors.primarySoft,
+        editingBannerBackground: themeColors.editingBannerBackground,
         actionBackground: themeColors.actionBackground,
         dangerBackground: themeColors.dangerBackground,
         modalHandle: themeColors.modalHandle,

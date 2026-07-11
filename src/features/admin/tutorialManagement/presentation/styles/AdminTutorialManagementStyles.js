@@ -39,14 +39,14 @@ export const createAdminTutorialManagementStyles = (colors = Colors.light) => St
     flex: 1,
   },
   list: {
-    padding: 16,
+    padding: 14,
     paddingBottom: 80,
-    gap: 16,
+    gap: 14,
   },
   emptyList: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 16,
+    padding: 14,
     paddingBottom: 80,
   },
   cardButton: {

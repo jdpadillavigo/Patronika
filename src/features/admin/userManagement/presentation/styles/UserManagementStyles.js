@@ -109,15 +109,15 @@ export const createGestionUsuariosStyles = (colors = Colors.light) => StyleSheet
  
   // Lista
   listContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingTop: 8,
     paddingBottom: 80,
-    gap: 12,
+    gap: 10,
   },
   emptyListContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingTop: 8,
     paddingBottom: 80,
   },

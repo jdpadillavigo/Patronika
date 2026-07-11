@@ -5,8 +5,8 @@ import { PURPLE } from '../../../../core/presentation/designsystem/components/Co
 export { PURPLE, DARK_BG, DARK_BANNER, AUTH_GRADIENTS, absoluteFill } from '../../../../core/presentation/designsystem/components/CommonStyles';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const GRID_PADDING = 12;
-const GRID_GAP = 8;
+const GRID_PADDING = 14;
+const GRID_GAP = 10;
 export const CARD_WIDTH = (SCREEN_WIDTH - GRID_PADDING * 2 - GRID_GAP) / 2;
 
 export const createMisPatronesStyles = (colors = Colors.light) => StyleSheet.create({
@@ -134,10 +134,14 @@ export const createMisPatronesStyles = (colors = Colors.light) => StyleSheet.cre
     justifyContent: 'center',
     backgroundColor: colors.primarySubtle,
   },
-  gridCardBadge: {
+  gridCardBadges: {
     position: 'absolute',
     top: 8,
     right: 8,
+    flexDirection: 'row',
+    gap: 6,
+  },
+  gridCardBadge: {
     backgroundColor: PURPLE,
     borderRadius: 12,
     width: 24,
@@ -146,9 +150,6 @@ export const createMisPatronesStyles = (colors = Colors.light) => StyleSheet.cre
     justifyContent: 'center',
   },
   gridCardPublishedBadge: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
     backgroundColor: PURPLE,
     borderRadius: 12,
     width: 24,

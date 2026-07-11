@@ -72,14 +72,18 @@ const GridCard = memo(function GridCard({ pattern, onPress, styles }) {
             }}
           />
         ) : null}
-        {pattern.isPublished && (
-          <View style={themedStyles.gridCardPublishedBadge}>
-            <Ionicons name="earth" size={12} color={Colors.fixedWhite} />
-          </View>
-        )}
-        {pattern.isSaved && (
-          <View style={themedStyles.gridCardBadge}>
-            <Ionicons name="bookmark" size={12} color={Colors.fixedWhite} />
+        {(pattern.isPublished || pattern.isSaved) && (
+          <View style={themedStyles.gridCardBadges}>
+            {pattern.isPublished && (
+              <View style={themedStyles.gridCardPublishedBadge}>
+                <Ionicons name="earth" size={12} color={Colors.fixedWhite} />
+              </View>
+            )}
+            {pattern.isSaved && (
+              <View style={themedStyles.gridCardBadge}>
+                <Ionicons name="bookmark" size={12} color={Colors.fixedWhite} />
+              </View>
+            )}
           </View>
         )}
       </View>
@@ -96,7 +100,11 @@ export default function MisPatronesScreen({navigation }) {
   const styles = useMemo(() => createMisPatronesStyles(colors), [colors]);
   themedStyles = styles;
   const [activeFilter, setActiveFilter] = useState('todos');
-  const [patterns, setPatterns] = useState([]);
+  const [patternCollections, setPatternCollections] = useState({
+    todos: [],
+    guardados: [],
+    mios: [],
+  });
   const [loading, setLoading] = useState(false);
   const [selectedPattern, setSelectedPattern] = useState(null);
   const [fullscreenVisible, setFullscreenVisible] = useState(false);
@@ -106,41 +114,43 @@ export default function MisPatronesScreen({navigation }) {
   const loadPatterns = useCallback(async () => {
     setLoading(true);
     try {
-      let normalized = [];
-
-      const [publishedResult, patternsResult] = await Promise.all([
+      const [publishedResult, mineResult, savedResult, allResult] = await Promise.all([
         PublicationUseCase.getMyPublishedPatternIds(),
-        activeFilter === 'mios'
-          ? PatternUseCase.listMine()
-          : activeFilter === 'guardados'
-          ? PatternLibraryUseCase.listSaved()
-          : PatternLibraryUseCase.listAll(),
+        PatternUseCase.listMine(),
+        PatternLibraryUseCase.listSaved(),
+        PatternLibraryUseCase.listAll(),
       ]);
 
-      if (patternsResult.sessionExpired) { setPatterns([]); return; }
+      if (mineResult.sessionExpired || savedResult.sessionExpired || allResult.sessionExpired) {
+        setPatternCollections({ todos: [], guardados: [], mios: [] });
+        return;
+      }
 
       const publishedIds = publishedResult.data ?? new Set();
 
-      if (activeFilter === 'mios') {
-        if (!patternsResult.success) { showError(patternsResult.error || 'No se pudieron cargar tus patrones'); return; }
-        normalized = (patternsResult.data || []).map(p => normalizeOwn(p, publishedIds));
-      } else if (activeFilter === 'guardados') {
-        if (!patternsResult.success) { showError(patternsResult.error || 'No se pudieron cargar los patrones guardados'); return; }
-        normalized = (patternsResult.data || []).map(e => normalizeSaved(e, publishedIds));
-      } else {
-        if (!patternsResult.success) {
-          // Fallback a solo propios si listAll falla
-          const mine = await PatternUseCase.listMine();
-          normalized = mine.success ? (mine.data || []).map(p => normalizeOwn(p, publishedIds)) : [];
-        } else {
-          normalized = (patternsResult.data || []).map(p => normalizeAll(p, patternsResult.currentUserId, publishedIds));
-        }
+      const ownPatterns = mineResult.success
+        ? (mineResult.data || []).map(pattern => normalizeOwn(pattern, publishedIds))
+        : [];
+      const savedPatterns = savedResult.success
+        ? (savedResult.data || []).map(entry => normalizeSaved(entry, publishedIds))
+        : [];
+      const allPatterns = allResult.success
+        ? (allResult.data || []).map(pattern => normalizeAll(pattern, allResult.currentUserId, publishedIds))
+        : ownPatterns;
+
+      setPatternCollections({
+        todos: [...allPatterns].reverse(),
+        guardados: [...savedPatterns].reverse(),
+        mios: [...ownPatterns].reverse(),
+      });
+
+      if (!mineResult.success || !savedResult.success || !allResult.success) {
+        showError('No se pudieron cargar todos los patrones. Inténtalo nuevamente.');
       }
-      setPatterns([...normalized].reverse());
     } finally {
       setLoading(false);
     }
-  }, [activeFilter, showError]);
+  }, [showError]);
 
   useFocusEffect(useCallback(() => {
     loadPatterns();
@@ -173,7 +183,7 @@ export default function MisPatronesScreen({navigation }) {
       const base64 = uri.split(',')[1];
       const safeName = (selectedPattern.name || 'patron').replace(/[^a-zA-Z0-9]/g, '_');
 
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      const { status } = await MediaLibrary.requestPermissionsAsync(false, ['photo']);
       if (status !== 'granted') {
         showPopup(
           'Activa el permiso de fotos en Configuración para guardar el patrón',
@@ -242,6 +252,7 @@ export default function MisPatronesScreen({navigation }) {
   }, []);
 
   // --- Columnas para el grid ---
+  const patterns = patternCollections[activeFilter];
   const leftCol = patterns.filter((_, i) => i % 2 === 0);
   const rightCol = patterns.filter((_, i) => i % 2 !== 0);
 
@@ -287,6 +298,7 @@ export default function MisPatronesScreen({navigation }) {
           onPress={() => handleFilterChange('mios')}
           activeOpacity={0.8}
         >
+          <Ionicons name="person" size={14} color={activeFilter === 'mios' ? Colors.fixedWhite : colors.textSecondary} />
           <Text style={[styles.filtroPillText, activeFilter === 'mios' && styles.filtroPillTextActivo]}>
             Creado por ti
           </Text>

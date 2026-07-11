@@ -27,6 +27,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "resize",
       "permissions": [
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.WRITE_EXTERNAL_STORAGE"

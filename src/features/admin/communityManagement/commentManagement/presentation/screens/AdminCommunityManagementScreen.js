@@ -15,6 +15,7 @@ import AdminCommentUseCase from '../../domain/usecases/AdminCommentUseCase';
 import CommentManagementScreen from './CommentManagementScreen';
 import AdminPostUseCase from '../../../postManagement/domain/usecases/AdminPostUseCase';
 import PostManagementScreen from '../../../postManagement/presentation/screens/PostManagementScreen';
+import PatternUseCase from '../../../../../pattern/domain/usecases/PatternUseCase';
 import { createAdminCommunityManagementStyles, PURPLE } from '../styles/AdminCommunityManagementStyles';
 
 const TABS = {
@@ -75,8 +76,26 @@ export default function AdminCommunityManagementScreen({ navigation }) {
       return;
     }
 
+    const publicationsData = publicationsResult.data || [];
+    const missingPatternIds = [...new Set(
+      publicationsData
+        .filter(publication => !publication.imageUrl && publication.patternId && !publication.pattern?.gridData)
+        .map(publication => publication.patternId)
+    )];
+    const patternGridMap = {};
+
+    await Promise.all(missingPatternIds.map(async (patternId) => {
+      const result = await PatternUseCase.getById(patternId);
+      if (result.success && result.data?.gridData) {
+        patternGridMap[patternId] = result.data.gridData;
+      }
+    }));
+
     setComments(commentsResult.data || []);
-    setPublications(publicationsResult.data || []);
+    setPublications(publicationsData.map(publication => ({
+      ...publication,
+      patternGridData: publication.pattern?.gridData || patternGridMap[publication.patternId] || null,
+    })));
     setLoading(false);
     setRefreshing(false);
   }, []);

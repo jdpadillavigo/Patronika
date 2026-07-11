@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import Colors from '../../../../core/presentation/designsystem/Colors';
 import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
@@ -22,16 +22,23 @@ export default function VistaPreviaScreen({navigation, route }) {
   const { patronUrl, imageUri, pattern } = route?.params || {};
   const [generatedUri, setGeneratedUri] = useState(null);
   const [isRenderingPattern, setIsRenderingPattern] = useState(Boolean(pattern?.gridData));
+  const discardStartedRef = useRef(false);
+  const allowRemoveRef = useRef(false);
   const previewUri = generatedUri || patronUrl || (!isRenderingPattern ? imageUri : null);
 
-  const discardPattern = async () => {
-    if (pattern?.id) {
+  const discardPattern = useCallback(async () => {
+    if (!pattern?.id || discardStartedRef.current) return;
+    discardStartedRef.current = true;
+    try {
       await PatternUseCase.discard(pattern.id);
+    } catch {
+      // Permite completar la navegación incluso si el backend no responde.
     }
-  };
+  }, [pattern?.id]);
 
   const closeAndDiscard = async () => {
     await discardPattern();
+    allowRemoveRef.current = true;
     closeFlow();
   };
 
@@ -39,6 +46,25 @@ export default function VistaPreviaScreen({navigation, route }) {
     await discardPattern();
     navigation.goBack();
   };
+
+  const acceptAndClose = () => {
+    allowRemoveRef.current = true;
+    acceptPattern();
+  };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (event) => {
+      if (allowRemoveRef.current) return;
+
+      event.preventDefault();
+      discardPattern().finally(() => {
+        allowRemoveRef.current = true;
+        navigation.dispatch(event.data.action);
+      });
+    });
+
+    return unsubscribe;
+  }, [discardPattern, navigation]);
 
   useEffect(() => {
     let mounted = true;
@@ -95,7 +121,7 @@ export default function VistaPreviaScreen({navigation, route }) {
         <View style={styles.buttons}>
           <TouchableOpacity
             style={styles.buttonSolid}
-            onPress={acceptPattern}
+            onPress={acceptAndClose}
           >
             <Text style={styles.buttonSolidText}>Aceptar</Text>
           </TouchableOpacity>

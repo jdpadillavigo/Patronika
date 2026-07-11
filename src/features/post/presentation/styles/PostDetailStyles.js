@@ -267,7 +267,7 @@ export const createDetalleStyles = (colors = Colors.light) => StyleSheet.create(
     paddingVertical: 8,
   },
   editingBanner: {
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.editingBannerBackground,
     paddingHorizontal: 12,
     paddingVertical: 6,
     flexDirection: 'row',
@@ -297,50 +297,6 @@ export const createDetalleStyles = (colors = Colors.light) => StyleSheet.create(
     borderRadius: 20,
     padding: 8,
     zIndex: 10,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: colors.overlay,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 18,
-    padding: 24,
-    width: '80%',
-    alignItems: 'center',
-    gap: 12,
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  modalMessage: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  modalDanger: {
-    backgroundColor: Colors.errorStrong,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    width: '100%',
-    alignItems: 'center',
-  },
-  modalDangerText: {
-    color: Colors.fixedWhite,
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  modalCancel: {
-    paddingVertical: 8,
-  },
-  modalCancelText: {
-    color: colors.textMuted,
-    fontSize: 14,
   },
   suspendedInputBar: {
     flexDirection: 'row',

@@ -32,8 +32,8 @@ export const createHomeStyles = (colors = Colors.light) => StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 8,
-    paddingBottom: 8,
+    padding: 14,
+    paddingBottom: 14,
   },
   columns: {
     flexDirection: 'row',

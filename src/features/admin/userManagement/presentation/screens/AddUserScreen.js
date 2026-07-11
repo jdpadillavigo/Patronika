@@ -48,7 +48,7 @@ export default function AddUserScreen({navigation }) {
     if (status !== 'granted') return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -83,7 +83,7 @@ export default function AddUserScreen({navigation }) {
   return (
     <KeyboardAvoidingView
       style={styles.editSafeArea}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
         style={styles.editSafeArea}

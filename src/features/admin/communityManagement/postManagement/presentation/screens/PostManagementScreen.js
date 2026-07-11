@@ -96,7 +96,9 @@ function CardActionMenu({ actions, menuId, activeMenuId, onToggleMenu, styles })
 
 function PublicationCard({ publication, tall, activeMenuId, onToggleMenu, onOpen, onClearReports, onDelete, onReport, styles }) {
   const imageUri = publication.imageUrl
-    || (publication.pattern?.gridData ? gridDataToImageUri(publication.pattern.gridData, { maxDimension: 300 }) : null);
+    || (publication.patternGridData || publication.pattern?.gridData
+      ? gridDataToImageUri(publication.patternGridData || publication.pattern?.gridData, { maxDimension: 300 })
+      : null);
   const reportCount = getReportCount(publication);
 
   return (

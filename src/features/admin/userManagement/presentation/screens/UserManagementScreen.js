@@ -183,7 +183,6 @@ export default function GestionUsuariosScreen({navigation }) {
   const [suspensionReason, setSuspensionReason] = useState('');
   const [menuAbiertoId, setMenuAbiertoId] = useState(null); // id del usuario cuyo menú overlay está abierto
  
-  // Verifica el rol del usuario actual antes de mostrar el listado (criterio de aceptación #3)
   const verificarAccesoYCargar = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
@@ -316,7 +315,6 @@ export default function GestionUsuariosScreen({navigation }) {
     setDeleteCandidate(null);
   }, [deleteCandidate]);
  
-  // ── Acceso denegado (criterio de aceptación #3) ──────────────────────────
   if (esAdmin === false) {
     return (
       <View style={styles.safeArea}>
@@ -370,12 +368,10 @@ export default function GestionUsuariosScreen({navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Estado: cargando */}
       {loading && (
         <ScreenState loading text="Cargando usuarios..." />
       )}
  
-      {/* Estado: error (criterio de aceptación #4) */}
       {!loading && error ? (
         <ScreenState
           iconName="cloud-offline-outline"
@@ -385,7 +381,6 @@ export default function GestionUsuariosScreen({navigation }) {
         />
       ) : null}
  
-      {/* Estado: listado vacío (criterio de aceptación #4) */}
       {!loading && !error && (
         <>
           <Text style={styles.resultsCount}>

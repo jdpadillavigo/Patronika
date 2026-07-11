@@ -5,7 +5,9 @@ import {
   ActivityIndicator,
   Animated,
   Image,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -119,7 +121,7 @@ export default function EditUserScreen({route, navigation }) {
     if (status !== 'granted') return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -436,7 +438,10 @@ export default function EditUserScreen({route, navigation }) {
   const canSaveAdminUser = hasAdminUserChanges && username.trim() && email.trim() && !saving;
 
   return (
-    <View style={styles.editSafeArea}>
+    <KeyboardAvoidingView
+      style={styles.editSafeArea}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <ScrollView
         style={styles.editSafeArea}
         contentContainerStyle={styles.editContent}
@@ -636,6 +641,6 @@ export default function EditUserScreen({route, navigation }) {
         </TouchableOpacity>
       </Modal>
       {errorPopup}
-    </View>
+    </KeyboardAvoidingView>
   );
 }

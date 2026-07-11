@@ -5,7 +5,6 @@ import {
   View, Text, ScrollView, TouchableOpacity, Image,
   TextInput, ActivityIndicator,
   KeyboardAvoidingView, Platform, Modal,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -55,8 +54,6 @@ export default function PublicacionDetalleScreen({navigation, route }) {
   const [sending, setSending] = useState(false);
   const [editingComment, setEditingComment] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deletingPub, setDeletingPub] = useState(false);
   const [fullscreenUri, setFullscreenUri] = useState(null);
   const [fullscreenLoading, setFullscreenLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -87,7 +84,7 @@ export default function PublicacionDetalleScreen({navigation, route }) {
     loadReported();
   }, [getReportKey, getReportPubKey, publicationId]);
   const inputRef = useRef(null);
-  const { showConfirm, errorPopup } = useErrorPopup();
+  const { showConfirm, showError, errorPopup } = useErrorPopup();
 
   const currentUserId = currentUser?.id || null;
   const isAdmin = currentUser?.isAdmin === true;
@@ -227,16 +224,21 @@ export default function PublicacionDetalleScreen({navigation, route }) {
           const result = await CommentUseCase.deleteComment(commentId);
           if (result.success) setComments(prev => prev.filter(c => c.id !== commentId));
       },
-      { acceptText: 'Eliminar' },
+      { acceptText: 'Eliminar', iconName: 'trash' },
     );
   };
 
-  const handleDeletePublication = async () => {
-    setDeletingPub(true);
-    const result = await PublicationUseCase.remove(publicationId);
-    setDeletingPub(false);
-    setShowDeleteModal(false);
-    if (result.success) navigation.goBack();
+  const handleDeletePublication = () => {
+    showConfirm(
+      'Esta acción no se puede deshacer.',
+      'Eliminar publicación',
+      async () => {
+        const result = await PublicationUseCase.remove(publicationId);
+        if (result.success) navigation.goBack();
+        else if (!result.sessionExpired) showError(result.error || 'No se pudo eliminar la publicación');
+      },
+      { acceptText: 'Eliminar', iconName: 'trash' },
+    );
   };
 
   const cancelEdit = () => {
@@ -245,54 +247,48 @@ export default function PublicacionDetalleScreen({navigation, route }) {
   };
 
   const handleReportPublication = () => {
-    Alert.alert(
-      'Reportar publicación',
+    showConfirm(
       '¿Quieres reportar esta publicación como inapropiada?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Reportar',
-          style: 'destructive',
-          onPress: async () => {
-            const result = await PublicationUseCase.reportPublication(publicationId);
-            if (result.success) {
-              const user = await HttpClient.getCurrentUser();
-              setIsPublicationReported(true);
-              if (user?.id) {
-                const key = getReportPubKey(user.id);
-                const stored = await AsyncStorage.getItem(key);
-                const prev = stored ? JSON.parse(stored) : [];
-                await AsyncStorage.setItem(key, JSON.stringify([...prev, publicationId]));
-              }
-            }
-          },
-        },
-      ]
+      'Reportar publicación',
+      async () => {
+        const result = await PublicationUseCase.reportPublication(publicationId);
+        if (!result.success) {
+          if (!result.sessionExpired) showError(result.error || 'No se pudo reportar la publicación');
+          return;
+        }
+
+        const user = await HttpClient.getCurrentUser();
+        setIsPublicationReported(true);
+        if (user?.id) {
+          const key = getReportPubKey(user.id);
+          const stored = await AsyncStorage.getItem(key);
+          const previousReports = stored ? JSON.parse(stored) : [];
+          await AsyncStorage.setItem(key, JSON.stringify([...previousReports, publicationId]));
+        }
+      },
+      { acceptText: 'Reportar', iconName: 'flag' },
     );
   };
 
   const handleReportComment = (commentId) => {
-    Alert.alert(
-      'Reportar comentario',
+    showConfirm(
       '¿Quieres reportar este comentario como inapropiado?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Reportar',
-          style: 'destructive',
-          onPress: async () => {
-            const result = await CommentUseCase.reportComment(commentId);
-            if (result.success) {
-              const user = await HttpClient.getCurrentUser();
-              const updated = new Set([...reportedComments, commentId]);
-              setReportedComments(updated);
-              if (user?.id) {
-                await AsyncStorage.setItem(getReportKey(user.id), JSON.stringify([...updated]));
-              }
-            }
-          },
-        },
-      ]
+      'Reportar comentario',
+      async () => {
+        const result = await CommentUseCase.reportComment(commentId);
+        if (!result.success) {
+          if (!result.sessionExpired) showError(result.error || 'No se pudo reportar el comentario');
+          return;
+        }
+
+        const user = await HttpClient.getCurrentUser();
+        const updated = new Set([...reportedComments, commentId]);
+        setReportedComments(updated);
+        if (user?.id) {
+          await AsyncStorage.setItem(getReportKey(user.id), JSON.stringify([...updated]));
+        }
+      },
+      { acceptText: 'Reportar', iconName: 'flag' },
     );
   };
 
@@ -325,7 +321,7 @@ export default function PublicacionDetalleScreen({navigation, route }) {
             </>
           )}
           {isOwnPublication && (
-            <TouchableOpacity style={styles.deleteBtn} onPress={() => setShowDeleteModal(true)}>
+            <TouchableOpacity style={styles.deleteBtn} onPress={handleDeletePublication}>
               <Ionicons name="trash-outline" size={20} color={Colors.errorStrong} />
             </TouchableOpacity>
           )}
@@ -334,8 +330,8 @@ export default function PublicacionDetalleScreen({navigation, route }) {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'android' ? 18 : 0}
       >
         <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled">
 
@@ -351,7 +347,7 @@ export default function PublicacionDetalleScreen({navigation, route }) {
               />
               <View style={styles.imageLabelBadge}>
                 <Ionicons name="camera" size={11} color={Colors.fixedWhite} />
-                <Text style={styles.imageLabelText}>Foto del resultado · toca para ampliar</Text>
+                <Text style={styles.imageLabelText}>Foto del resultado · Toca para ampliar</Text>
               </View>
             </TouchableOpacity>
           )}
@@ -371,7 +367,7 @@ export default function PublicacionDetalleScreen({navigation, route }) {
               />
               <View style={styles.imageLabelBadge}>
                 <Ionicons name="grid" size={11} color={Colors.fixedWhite} />
-                <Text style={styles.imageLabelText}>Patrón generado · toca para ampliar</Text>
+                <Text style={styles.imageLabelText}>Patrón generado · Toca para ampliar</Text>
               </View>
             </TouchableOpacity>
           ) : !resultImageUri && (
@@ -540,21 +536,6 @@ export default function PublicacionDetalleScreen({navigation, route }) {
         </View>
       </Modal>
 
-      <Modal visible={showDeleteModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Ionicons name="trash-outline" size={40} color={Colors.errorStrong} />
-            <Text style={styles.modalTitle}>Eliminar publicación</Text>
-            <Text style={styles.modalMessage}>Esta acción no se puede deshacer.</Text>
-            <TouchableOpacity style={styles.modalDanger} onPress={handleDeletePublication} disabled={deletingPub}>
-              <Text style={styles.modalDangerText}>{deletingPub ? 'Eliminando...' : 'Eliminar'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalCancel} onPress={() => setShowDeleteModal(false)}>
-              <Text style={styles.modalCancelText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
       {loadingPublication ? (
         <View style={styles.loadingOverlay}>
           <ScreenState loading text="Cargando publicación..." />

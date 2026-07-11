@@ -17,6 +17,7 @@ import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
 import HttpClient from '../../../../core/data/network/HttpClientExt';
 import UserRemoteDataSource from '../../../../core/data/user/networking/UserRemoteDataSource';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
+import { formatSuspensionDate, getSuspensionDaysRemaining } from '../../../../core/presentation/designsystem/utils/Suspension';
 import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
 
@@ -30,24 +31,6 @@ function PatternThumb({ pattern }) {
       <Ionicons name="grid-outline" size={28} color={PURPLE} />
     </View>
   );
-}
-
-function parseDateLocal(dateStr) {
-  const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
-  return new Date(year, month - 1, day);
-}
-
-function formatSuspensionDate(dateStr) {
-  if (!dateStr) return '';
-  return parseDateLocal(dateStr).toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' });
-}
-
-function getSuspensionDaysRemaining(dateStr) {
-  if (!dateStr) return 0;
-  const end = parseDateLocal(dateStr);
-  end.setHours(23, 59, 59, 999);
-  const diff = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
-  return diff > 0 ? diff : 0;
 }
 
 export default function CrearPublicacionScreen({ navigation }) {
@@ -215,7 +198,12 @@ export default function CrearPublicacionScreen({ navigation }) {
             ) : patterns.length === 0 ? (
               <Text style={styles.noPatterns}>No tienes patrones generados aún</Text>
             ) : (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.patternList}>
+              <ScrollView
+                horizontal
+                style={styles.patternScroll}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.patternList}
+              >
                 {patterns.map(p => {
                   const isSaved = currentUserId && p.userId !== currentUserId;
                   return (

@@ -8,13 +8,13 @@ import {
   Image,
   Platform,
   Modal,
-  Alert,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { createGenerarPatronStyles, generarPatronStyles as styles, PURPLE } from '../styles/GeneratePatternStyles';
 import { useGeneratePatternFlow } from '../../../../main/GeneratePatternFlowContext';
 import { useErrorPopup } from '../../../../core/presentation/designsystem/components/ErrorPopup';
+import ImageSourcePopup from '../components/ImageSourcePopup';
 
 export default function GenerarPatronScreen({navigation }) {
   const { colors } = useAppTheme();
@@ -22,6 +22,7 @@ export default function GenerarPatronScreen({navigation }) {
   const { closeFlow } = useGeneratePatternFlow();
   const [image, setImage] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [imageSourcePopupVisible, setImageSourcePopupVisible] = useState(false);
   const { showError, errorPopup } = useErrorPopup();
 
   const pickImage = async () => {
@@ -31,7 +32,7 @@ export default function GenerarPatronScreen({navigation }) {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
@@ -50,7 +51,7 @@ export default function GenerarPatronScreen({navigation }) {
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -61,17 +62,18 @@ export default function GenerarPatronScreen({navigation }) {
     }
   };
 
-  // Selector nativo para evitar conflictos con las vistas de cámara/galería en iOS.
   const handleSelectImage = () => {
-    Alert.alert(
-      '¿Cómo quieres agregar tu imagen?',
-      '',
-      [
-        { text: 'Desde la galería', onPress: pickImage },
-        { text: 'Tomar una foto',   onPress: takePhoto },
-        { text: 'Cancelar', style: 'cancel' },
-      ]
-    );
+    setImageSourcePopupVisible(true);
+  };
+
+  const handleTakePhoto = () => {
+    setImageSourcePopupVisible(false);
+    takePhoto();
+  };
+
+  const handleChooseFromLibrary = () => {
+    setImageSourcePopupVisible(false);
+    pickImage();
   };
 
   const handleOpenTerms = () => {
@@ -106,17 +108,24 @@ export default function GenerarPatronScreen({navigation }) {
         <Text style={styles.bannerText}>Lea los términos y condiciones de uso</Text>
       </TouchableOpacity>
 
+      <ImageSourcePopup
+        visible={imageSourcePopupVisible}
+        onTakePhoto={handleTakePhoto}
+        onChooseFromLibrary={handleChooseFromLibrary}
+        onCancel={() => setImageSourcePopupVisible(false)}
+      />
+
       <View style={styles.content}>
         <TouchableOpacity
           style={styles.imageContainer}
-          // NUEVO: abre el Alert nativo de selección de fuente
+          // Abre el selector de fuente de la imagen.
           onPress={handleSelectImage}
           activeOpacity={0.85}
         >
           {image ? (
             <>
               <Image source={{ uri: image }} style={styles.image} resizeMode="cover" />
-              {/* NUEVO: el badge de edición también abre el Alert de selección */}
+              {/* El badge de edición también abre el selector de fuente. */}
               <TouchableOpacity style={styles.editBadge} onPress={handleSelectImage}>
                 <Ionicons name="pencil" size={14} color={Colors.fixedWhite} />
               </TouchableOpacity>
