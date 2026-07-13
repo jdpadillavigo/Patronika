@@ -15,9 +15,9 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Patronika necesita acceso a tu cámara para que puedas tomar fotos y convertirlas en patrones de tejido.",
-        "NSPhotoLibraryUsageDescription": "Patronika necesita acceso a tu galería para que puedas seleccionar imágenes y convertirlas en patrones de tejido.",
-        "NSPhotoLibraryAddUsageDescription": "Patronika necesita permiso para guardar los patrones generados en tu galería.",
+        "NSCameraUsageDescription": "Patrónika necesita acceso a tu cámara para que puedas tomar fotos y convertirlas en patrones de tejido.",
+        "NSPhotoLibraryUsageDescription": "Patrónika necesita acceso a tu galería para que puedas seleccionar imágenes y convertirlas en patrones de tejido.",
+        "NSPhotoLibraryAddUsageDescription": "Patrónika necesita permiso para guardar los patrones generados en tu galería.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "pe.edu.ulima.patronika"

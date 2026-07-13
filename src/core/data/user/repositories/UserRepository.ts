@@ -44,7 +44,7 @@ async function getCurrent(): Promise<User | null> {
 async function updateProfile(username: string, password: string, avatar?: string | null): Promise<User> {
     const currentUser = await HttpClient.getCurrentUser<User>();
     if (!currentUser?.id) {
-        throw new Error('Inicia sesion nuevamente para actualizar tu perfil');
+        throw new Error('Inicia sesión nuevamente para actualizar tu perfil');
     }
 
     // Paso 1: actualiza datos básicos del perfil
