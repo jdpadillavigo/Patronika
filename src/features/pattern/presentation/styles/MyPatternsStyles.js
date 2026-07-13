@@ -124,12 +124,12 @@ export const createMisPatronesStyles = (colors = Colors.light) => StyleSheet.cre
     overflow: 'hidden',
   },
   gridCardImg: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     width: '100%',
     height: '100%',
   },
   gridCardPlaceholder: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primarySubtle,

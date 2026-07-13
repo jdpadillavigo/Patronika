@@ -68,6 +68,7 @@ export default function PublicacionDetalleScreen({navigation, route }) {
   const [reportedComments, setReportedComments] = useState(new Set());
   const [patternLoadDone, setPatternLoadDone] = useState(!initialPub?.patternId && !initialPub?.pattern?.id);
   const [resultImageLoaded, setResultImageLoaded] = useState(!initialPub?.imageUrl);
+  const [resultImageFailed, setResultImageFailed] = useState(false);
   const [patternImageLoaded, setPatternImageLoaded] = useState(false);
   const [isPublicationReported, setIsPublicationReported] = useState(false);
 
@@ -104,7 +105,8 @@ export default function PublicacionDetalleScreen({navigation, route }) {
     ? gridDataToImageUri(patternGrid, { maxDimension: 600 })
     : null;
 
-  const resultImageUri = pub?.imageUrl || null;
+  // Si la foto del resultado no carga, se oculta y solo queda la imagen del patrón.
+  const resultImageUri = (!resultImageFailed && pub?.imageUrl) || null;
   const loadingPublication = (!initialGrid && !patternLoadDone)
     || (!!resultImageUri && !resultImageLoaded)
     || (!!patternImageUri && !patternImageLoaded);
@@ -368,7 +370,11 @@ export default function PublicacionDetalleScreen({navigation, route }) {
                 style={styles.image}
                 resizeMode="cover"
                 onLoadEnd={() => setResultImageLoaded(true)}
-                onError={() => setResultImageLoaded(true)}
+                onError={(e) => {
+                  if (__DEV__) console.warn('[Image] foto del resultado no cargó', String(resultImageUri).slice(0, 120), e?.nativeEvent?.error);
+                  setResultImageFailed(true);
+                  setResultImageLoaded(true);
+                }}
               />
               <View style={styles.imageLabelBadge}>
                 <Ionicons name="camera" size={11} color={Colors.fixedWhite} />

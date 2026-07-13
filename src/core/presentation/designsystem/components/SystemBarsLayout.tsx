@@ -1,6 +1,6 @@
 import React, { type PropsWithChildren, useEffect } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import * as NavigationBar from 'expo-navigation-bar';
+import { NavigationBar } from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import {
     initialWindowMetrics,
@@ -18,13 +18,13 @@ function SystemBarsContent({ children }: PropsWithChildren) {
     useEffect(() => {
         if (Platform.OS !== 'android') return;
 
-        NavigationBar.setStyle(isDark ? 'dark' : 'light');
-        NavigationBar.setButtonStyleAsync(isDark ? 'light' : 'dark').catch(() => undefined);
+        // SDK 58: setStyle defines the button color (light buttons on dark theme).
+        NavigationBar.setStyle(isDark ? 'light' : 'dark');
     }, [isDark]);
 
     return (
         <View style={[styles.root, { backgroundColor: navigationBarColor }]}>
-            <StatusBar style="light" backgroundColor={Colors.primary} translucent />
+            <StatusBar style="light" />
             <SafeAreaView style={styles.statusBarArea} edges={['top']}>
                 <SafeAreaView
                     style={[styles.content, { backgroundColor: navigationBarColor }]}

@@ -37,15 +37,29 @@ function AvatarCircle({ imageUrl, styles }) {
 }
 
 function PublicationCard({ pub, onPress, tall, styles }) {
-  const imageUri = pub.imageUrl
-    || (pub.patternGridData ? gridDataToImageUri(pub.patternGridData, { maxDimension: 300 }) : null);
+  const gridImageUri = pub.patternGridData ? gridDataToImageUri(pub.patternGridData, { maxDimension: 300 }) : null;
+  // Si la foto del resultado no existe o no carga, se muestra la imagen del patrón.
+  const [resultImageFailed, setResultImageFailed] = useState(false);
+  const imageUri = (pub.imageUrl && !resultImageFailed) ? pub.imageUrl : gridImageUri;
   const [imageLoading, setImageLoading] = useState(Boolean(imageUri));
   const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setResultImageFailed(false);
+  }, [pub.imageUrl]);
 
   useEffect(() => {
     setImageLoading(Boolean(imageUri));
     setImageFailed(false);
   }, [imageUri]);
+
+  // Si la foto se queda cargando sin responder, se pasa a la imagen del patrón.
+  const showingResultPhoto = Boolean(pub.imageUrl) && imageUri === pub.imageUrl;
+  useEffect(() => {
+    if (!showingResultPhoto || !imageLoading) return undefined;
+    const timer = setTimeout(() => setResultImageFailed(true), 10_000);
+    return () => clearTimeout(timer);
+  }, [showingResultPhoto, imageLoading]);
 
   return (
     <TouchableOpacity style={themedStyles.card} onPress={onPress} activeOpacity={0.88}>
@@ -62,7 +76,13 @@ function PublicationCard({ pub, onPress, tall, styles }) {
             resizeMode="cover"
             onLoadStart={() => setImageLoading(true)}
             onLoadEnd={() => setImageLoading(false)}
-            onError={() => {
+            onError={(e) => {
+              if (__DEV__) console.warn('[Image] no cargó', pub.description, String(imageUri).slice(0, 120), e?.nativeEvent?.error);
+              if (showingResultPhoto) {
+                // El patrón se muestra en cuanto esté disponible (puede llegar después).
+                setResultImageFailed(true);
+                return;
+              }
               setImageFailed(true);
               setImageLoading(false);
             }}

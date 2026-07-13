@@ -87,7 +87,7 @@ export const createTutorialesStyles = (colors = Colors.light) => StyleSheet.crea
     backgroundColor: colors.text,
   },
   playOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.overlaySoft,

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import {
     View, Text, TouchableOpacity,
-    FlatList, Dimensions, type ViewToken,
+    FlatList, Dimensions, type ListViewToken as ViewToken,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -79,7 +79,7 @@ export default function OnboardingScreen({ navigation }: Props) {
     };
 
     const onViewableItemsChanged = useRef(
-        ({ viewableItems }: { viewableItems: ViewToken<Slide>[] }) => {
+        ({ viewableItems }: { viewableItems: ViewToken[] }) => {
             if (viewableItems.length > 0) {
                 setCurrentIndex(viewableItems[0].index ?? 0);
             }

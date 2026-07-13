@@ -6,7 +6,8 @@ export default async function loadPublicationGrids(publications: Publication[]):
     const missingIds = new Set<string>();
     for (const publication of publications) {
         const id = publication.patternId || publication.pattern?.id;
-        if (id && !publication.imageUrl && !publication.pattern?.gridData) missingIds.add(id);
+        // También para publicaciones con foto: si la foto no carga, la tarjeta muestra el patrón.
+        if (id && !publication.pattern?.gridData) missingIds.add(id);
     }
 
     const grids = new Map<string, string>();
