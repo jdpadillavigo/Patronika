@@ -5,9 +5,9 @@ import { isSessionExpiredError } from '../../../../core/data/network/HttpClientE
 import PublicationRepository from '../../data/repositories/PublicationRepository';
 
 // Carga el feed completo de la comunidad
-async function loadFeed() {
+async function loadFeed(refresh = false) {
     try {
-        const publications = await PublicationRepository.loadFeed();
+        const publications = await PublicationRepository.loadFeed(refresh);
         return { success: true as const, data: publications };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) return { success: false as const, sessionExpired: true, data: [] };
@@ -42,9 +42,9 @@ async function remove(id: string) {
 }
 
 // Obtiene los ids de patrones que el usuario publicó en comunidad
-async function getMyPublishedPatternIds() {
+async function getMyPublishedPatternIds(refresh = false) {
     try {
-        const ids = await PublicationRepository.getMyPublishedPatternIds();
+        const ids = await PublicationRepository.getMyPublishedPatternIds(refresh);
         return { success: true as const, data: ids };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) return { success: false as const, sessionExpired: true, data: new Set<string>() };

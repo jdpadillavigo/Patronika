@@ -36,10 +36,10 @@ export default function PerfilScreen({ navigation, route }) {
   const [errorPerfil, setErrorPerfil] = useState('');
   const [modalLogout, setModalLogout] = useState(false);
 
-  const loadProfile = useCallback(() => {
+  const loadProfile = useCallback((refresh = false) => {
     setLoadingUsuario(true);
     setErrorPerfil('');
-    ProfileUseCase.getCurrent()
+    ProfileUseCase.getCurrent(refresh)
       .then(user => {
         setUsuario(user);
         setAvatarFailed(false);
@@ -91,14 +91,14 @@ export default function PerfilScreen({ navigation, route }) {
           iconName="cloud-offline-outline"
           text={errorPerfil}
           actionText="Reintentar"
-          onAction={loadProfile}
+          onAction={() => loadProfile(true)}
         />
       ) : (
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={loadingUsuario} onRefresh={loadProfile} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+          refreshControl={<RefreshControl refreshing={loadingUsuario} onRefresh={() => loadProfile(true)} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
         >
           <View style={styles.profileSummary}>
             <View style={styles.avatarFrame}>

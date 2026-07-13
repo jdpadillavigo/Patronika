@@ -39,9 +39,9 @@ function validateDraft(title: string, description: string, url: string) {
     return null;
 }
 
-async function getAll() {
+async function getAll(refresh = false) {
     try {
-        const tutorials = await TutorialRepository.getAll();
+        const tutorials = await TutorialRepository.getAll(refresh);
         return { success: true as const, data: tutorials };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) return { success: false as const, sessionExpired: true, data: [] };

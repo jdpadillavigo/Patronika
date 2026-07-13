@@ -25,9 +25,9 @@ function getFriendlyUserError(error: unknown, fallback: string): string {
     return message;
 }
 
-async function getAllUsers() {
+async function getAllUsers(refresh = false) {
     try {
-        const users = await UserRepository.getAllUsers();
+        const users = await UserRepository.getAllUsers(refresh);
         return { success: true, data: users };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) {

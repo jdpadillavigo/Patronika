@@ -23,11 +23,11 @@ function mergeCommentsWithContext(
     }));
 }
 
-async function loadComments(publications?: Publication[]): Promise<AdminCommentItem[]> {
+async function loadComments(publications?: Publication[], refresh = false): Promise<AdminCommentItem[]> {
     const [comments, resolvedPublications, users] = await Promise.all([
-        CommentRemoteDataSource.loadAll(),
-        publications ? Promise.resolve(publications) : PublicationRemoteDataSource.loadAll(),
-        UserRepository.getAllUsers(),
+        CommentRemoteDataSource.loadAll(refresh),
+        publications ? Promise.resolve(publications) : PublicationRemoteDataSource.loadAll(refresh),
+        UserRepository.getAllUsers(refresh),
     ]);
 
     return mergeCommentsWithContext(comments, resolvedPublications, users);

@@ -5,8 +5,8 @@ import type { User } from '../../../../core/domain/models/User';
 import PublicationRemoteDataSource, { type Publication } from '../networking/PublicationRemoteDataSource';
 
 // Carga todas las publicaciones para el feed de Comunidad
-async function loadFeed(): Promise<Publication[]> {
-    return PublicationRemoteDataSource.loadAll();
+async function loadFeed(refresh = false): Promise<Publication[]> {
+    return PublicationRemoteDataSource.loadAll(refresh);
 }
 
 // Crea una publicación asociando automáticamente el userId del usuario en sesión
@@ -27,11 +27,11 @@ async function remove(id: string): Promise<void> {
 }
 
 // Retorna los ids de patrones que el usuario publicó en comunidad
-async function getMyPublishedPatternIds(): Promise<Set<string>> {
+async function getMyPublishedPatternIds(refresh = false): Promise<Set<string>> {
     const currentUser = await HttpClient.getCurrentUser<User>();
     if (!currentUser?.id) return new Set();
 
-    const publications = await PublicationRemoteDataSource.loadAll();
+    const publications = await PublicationRemoteDataSource.loadAll(refresh);
     const myPatternIds = new Set<string>();
 
     for (const pub of publications) {

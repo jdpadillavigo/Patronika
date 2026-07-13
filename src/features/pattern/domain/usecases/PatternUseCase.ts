@@ -1,9 +1,9 @@
 import { isSessionExpiredError } from '../../../../core/data/network/HttpClientExt';
 import PatternRepository from '../../data/repositories/PatternRepository';
 
-async function listMine() {
+async function listMine(refresh = false) {
     try {
-        const patterns = await PatternRepository.listMine();
+        const patterns = await PatternRepository.listMine(refresh);
         return { success: true, data: patterns };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) {

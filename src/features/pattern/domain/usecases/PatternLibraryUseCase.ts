@@ -1,9 +1,9 @@
 import { isSessionExpiredError } from '../../../../core/data/network/HttpClientExt';
 import PatternLibraryRepository from '../../data/repositories/PatternLibraryRepository';
 
-async function listSaved() {
+async function listSaved(refresh = false) {
     try {
-        const data = await PatternLibraryRepository.listSaved();
+        const data = await PatternLibraryRepository.listSaved(refresh);
         return { success: true as const, data };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) return { success: false as const, sessionExpired: true, data: [] };
@@ -12,9 +12,9 @@ async function listSaved() {
     }
 }
 
-async function listAll() {
+async function listAll(refresh = false) {
     try {
-        const { patterns, currentUserId } = await PatternLibraryRepository.listAll();
+        const { patterns, currentUserId } = await PatternLibraryRepository.listAll(refresh);
         return { success: true as const, data: patterns, currentUserId };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) {

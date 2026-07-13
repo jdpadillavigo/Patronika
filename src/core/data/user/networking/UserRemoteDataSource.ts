@@ -1,4 +1,4 @@
-import HttpClient, { HttpResponseError, type ApiResponse } from '../../network/HttpClientExt';
+import HttpClient, { cacheAfterWrite, HttpResponseError, type ApiResponse } from '../../network/HttpClientExt';
 import type { User } from '../../../domain/models/User';
 import { assertApiSuccess } from '../../network/dto/ApiResponseDto';
 import { createUserRequest, type UserRequestDto } from '../dto/UserDto';
@@ -29,10 +29,14 @@ async function loadById(id: string): Promise<User> {
     return user;
 }
 
+function writeUser<T>(write: () => Promise<T>, id?: string): Promise<T> {
+    return cacheAfterWrite(write, cache => cache.invalidate('users-list', ...(id ? [`/api/users/${id}`] : [])));
+}
+
 // PUT /api/users/{id} — actualiza datos del perfil (username, password, etc.)
 // No acepta imagen; para subir foto usar uploadAvatar()
 async function update(id: string, request: UserRequest): Promise<string> {
-    const response = await HttpClient.put<ApiResponse<string>>(`/api/users/${id}`, request as unknown as Record<string, unknown>);
+    const response = await writeUser(() => HttpClient.put<ApiResponse<string>>(`/api/users/${id}`, request as unknown as Record<string, unknown>), id);
     return assertApiSuccess(response, 'Usuario actualizado correctamente') || 'Usuario actualizado correctamente';
 }
 
@@ -58,7 +62,7 @@ async function create(
         } as unknown as Blob);
     }
 
-    const response = await HttpClient.post<ApiResponse<User>>('/api/users', formData);
+    const response = await writeUser(() => HttpClient.post<ApiResponse<User>>('/api/users', formData));
     const user = assertApiSuccess(response, 'No se pudo crear el usuario');
     if (!user) {
         throw new Error('No se pudo crear el usuario');
@@ -67,21 +71,21 @@ async function create(
 }
 
 async function suspend(id: string, request: SuspendUserRequest): Promise<string> {
-    const response = await HttpClient.post<ApiResponse<string>>(`/api/users/${id}/suspend`, request);
+    const response = await writeUser(() => HttpClient.post<ApiResponse<string>>(`/api/users/${id}/suspend`, request), id);
     return assertApiSuccess(response, 'Usuario suspendido correctamente') || 'Usuario suspendido correctamente';
 }
 
 async function reactivate(id: string, request: ReactivateUserRequest): Promise<string> {
-    const response = await HttpClient.post<ApiResponse<string>>(`/api/users/${id}/reactivate`, request);
+    const response = await writeUser(() => HttpClient.post<ApiResponse<string>>(`/api/users/${id}/reactivate`, request), id);
     return assertApiSuccess(response, 'Usuario reactivado correctamente') || 'Usuario reactivado correctamente';
 }
 
 async function remove(id: string, username: string): Promise<void> {
     try {
-        await HttpClient.delete<ApiResponse<string>>(`/api/users/${id}`);
+        await writeUser(() => HttpClient.delete<ApiResponse<string>>(`/api/users/${id}`), id);
     } catch (error: unknown) {
         if (error instanceof HttpResponseError && (error.status === 404 || error.status === 405)) {
-            await HttpClient.delete<ApiResponse<string>>(`/api/users/${id}/${encodeURIComponent(username)}`);
+            await writeUser(() => HttpClient.delete<ApiResponse<string>>(`/api/users/${id}/${encodeURIComponent(username)}`), id);
             return;
         }
         throw error;
@@ -101,7 +105,7 @@ async function uploadAvatar(id: string, imageUri: string): Promise<string> {
         name: filename,
         type: mimeType,
     } as unknown as Blob);
-    const response = await HttpClient.put<ApiResponse<string>>(`/api/users/${id}/profile-image`, formData);
+    const response = await writeUser(() => HttpClient.put<ApiResponse<string>>(`/api/users/${id}/profile-image`, formData), id);
     return assertApiSuccess(response, 'Imagen de perfil actualizada correctamente') || 'Imagen de perfil actualizada correctamente';
 }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import Colors from '../../../../core/presentation/designsystem/Colors';
 import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
@@ -12,7 +12,7 @@ import { UserBottomNavigationItem } from '../../../../core/domain/BottomNavigati
 import AppTopBar from '../../../../core/presentation/designsystem/components/AppTopBar';
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
 import PublicationUseCase from '../../../post/domain/usecases/PublicationUseCase';
-import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
+import loadPublicationGrids from '../../../post/domain/usecases/LoadPublicationGrids';
 import UserBottomBar from '../../../../core/presentation/designsystem/components/UserBottomBar';
 import HttpClient from '../../../../core/data/network/HttpClientExt';
 import UserRemoteDataSource from '../../../../core/data/user/networking/UserRemoteDataSource';
@@ -92,40 +92,46 @@ export default function HomeScreen({navigation }) {
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [feedError, setFeedError] = useState('');
+  const feedRequest = useRef(0);
   const { showPopup, errorPopup } = useErrorPopup();
 
-  const loadFeed = useCallback(async (isRefresh = false) => {
-    if (!isRefresh) setLoading(true);
-    const result = await PublicationUseCase.loadFeed();
-    if (result.success) {
-      const pubs = result.data;
-      const uniquePatternIds = [...new Set(
-        pubs.filter(p => !p.imageUrl && p.patternId).map(p => p.patternId)
-      )];
-
-      const patternGridMap = {};
-      await Promise.all(uniquePatternIds.map(async (id) => {
-        const res = await PatternUseCase.getById(id);
-        if (res.success && res.data?.gridData) {
-          patternGridMap[id] = res.data.gridData;
-        }
-      }));
-
-      setPublications(pubs.map(pub => ({
-        ...pub,
-        patternGridData: patternGridMap[pub.patternId] || null,
-      })));
-    }
+  const loadFeed = useCallback(async (refresh = false) => {
+    const request = ++feedRequest.current;
+    setRefreshing(refresh);
+    setFeedError('');
+    const result = await PublicationUseCase.loadFeed(refresh);
+    if (request !== feedRequest.current) return;
     setLoading(false);
     setRefreshing(false);
+
+    if (!result.success) {
+      if (!result.sessionExpired) setFeedError(result.error);
+      return;
+    }
+
+    const publications = result.data;
+    setPublications(previous => {
+      const previousGrids = new Map(previous.map(pub => [pub.patternId, pub.patternGridData]));
+      return publications.map(pub => ({
+        ...pub,
+        patternGridData: pub.pattern?.gridData || previousGrids.get(pub.patternId) || null,
+      }));
+    });
+    const grids = await loadPublicationGrids(publications);
+    if (request !== feedRequest.current) return;
+    setPublications(previous => previous.map(pub => ({
+      ...pub,
+      patternGridData: pub.pattern?.gridData || grids.get(pub.patternId || pub.pattern?.id) || pub.patternGridData,
+    })));
   }, []);
 
   useFocusEffect(useCallback(() => {
     loadFeed();
+    return () => { feedRequest.current += 1; };
   }, [loadFeed]));
 
   const onRefresh = useCallback(() => {
-    setRefreshing(true);
     loadFeed(true);
   }, [loadFeed]);
 
@@ -175,11 +181,19 @@ export default function HomeScreen({navigation }) {
       {loading ? (
         <ScreenState loading text="Cargando publicaciones..." />
       ) : publications.length === 0 ? (
-        <ScreenState
-          iconName="people-outline"
-          text="Aún no hay publicaciones"
-          subtext="Sé el primero en compartir un patrón con la comunidad"
-        />
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+        >
+          <ScreenState
+            iconName={feedError ? 'cloud-offline-outline' : 'people-outline'}
+            text={feedError || 'Aún no hay publicaciones'}
+            subtext={feedError ? undefined : 'Sé el primero en compartir un patrón con la comunidad'}
+            actionText={feedError ? 'Reintentar' : undefined}
+            onAction={onRefresh}
+          />
+        </ScrollView>
       ) : (
         <ScrollView
           style={styles.scroll}

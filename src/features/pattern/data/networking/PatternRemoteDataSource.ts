@@ -1,4 +1,5 @@
-import HttpClient, { type ApiResponse } from '../../../../core/data/network/HttpClientExt';
+import HttpClient, { cacheAfterWrite, cachedRead, type ApiResponse } from '../../../../core/data/network/HttpClientExt';
+import { createUser } from '../../../../core/domain/models/User';
 import type { Pattern } from '../../domain/models/Pattern';
 import { assertApiSuccess } from '../../../../core/data/network/dto/ApiResponseDto';
 
@@ -13,9 +14,17 @@ function getMimeType(uri: string): string {
     return 'image/jpeg';
 }
 
-async function loadByUser(userId: string): Promise<Pattern[]> {
-    const response = await HttpClient.get<ApiResponse<Pattern[]>>(`/api/patterns/user/${userId}`);
-    return assertApiSuccess(response, 'No se pudieron cargar tus patrones') || [];
+function toCachedPattern(pattern: Pattern): Pattern {
+    const { user, ...data } = pattern;
+    return { ...data, user: user ? createUser({ id: user.id, username: user.username }) : undefined };
+}
+
+async function loadByUser(userId: string, refresh = false): Promise<Pattern[]> {
+    const route = `/api/patterns/user/${userId}`;
+    return cachedRead(route, async () => {
+        const response = await HttpClient.get<ApiResponse<Pattern[]>>(route);
+        return (assertApiSuccess(response, 'No se pudieron cargar tus patrones') || []).map(toCachedPattern);
+    }, { ttlMs: 120_000, refresh, collection: true });
 }
 
 async function create(userId: string, name: string, size: number, imageUri?: string | null): Promise<Pattern> {
@@ -35,29 +44,46 @@ async function create(userId: string, name: string, size: number, imageUri?: str
         } as unknown as Blob);
     }
 
-    const response = await HttpClient.post<ApiResponse<Pattern>>(
-        '/api/patterns',
-        formData,
-        { headers: { UserId: userId } },
-    );
-
-    if (!response.data) {
-        assertApiSuccess(response, 'No se pudo crear el patrón');
-        throw new Error('No se pudo crear el patrón');
-    }
-
-    return response.data as Pattern;
+    return cacheAfterWrite(async () => {
+        const response = await HttpClient.post<ApiResponse<Pattern>>(
+            '/api/patterns',
+            formData,
+            { headers: { UserId: userId } },
+        );
+        const pattern = assertApiSuccess(response, 'No se pudo crear el patrón');
+        if (!pattern) throw new Error('No se pudo crear el patrón');
+        return pattern;
+    }, async (cache, pattern) => {
+        await cache.update<Pattern[]>(`/api/patterns/user/${userId}`, patterns =>
+            [...patterns.filter(item => item.id !== pattern.id), toCachedPattern(pattern)],
+        );
+        await cache.invalidate(`/api/pattern-library/user/${userId}/all`);
+    });
 }
 
-async function getById(id: string): Promise<{ id: string; name: string; gridData?: string | null; userId: string }> {
-    const response = await HttpClient.get<ApiResponse<{ id: string; name: string; gridData?: string | null; userId: string }>>(`/api/patterns/${id}`);
-    const data = assertApiSuccess(response, 'No se pudo cargar el patrón');
-    if (!data) throw new Error('No se pudo cargar el patrón');
-    return data;
+interface PatternDetail {
+    id: string;
+    name: string;
+    gridData?: string | null;
+    userId: string;
+}
+
+async function getById(id: string): Promise<PatternDetail> {
+    const route = `/api/patterns/${id}`;
+    return cachedRead(route, async () => {
+        const response = await HttpClient.get<ApiResponse<PatternDetail>>(route);
+        const data = assertApiSuccess(response, 'No se pudo cargar el patrón');
+        if (!data) throw new Error('No se pudo cargar el patrón');
+        const { id, name, gridData, userId } = data;
+        return { id, name, gridData, userId };
+    }, { ttlMs: 600_000 });
 }
 
 async function remove(id: string): Promise<void> {
-    await HttpClient.delete<ApiResponse<string>>(`/api/patterns/${id}`);
+    await cacheAfterWrite(
+        () => HttpClient.delete<ApiResponse<string>>(`/api/patterns/${id}`),
+        cache => cache.invalidate(`/api/patterns/${id}`, '/api/patterns/user', '/api/pattern-library/user', '/api/publications', '/api/comments'),
+    );
 }
 
 const PatternRemoteDataSource = {

@@ -3,9 +3,9 @@ import UserRepository from '../../../../../../core/data/user/repositories/UserRe
 import type { Publication } from '../../../../../post/data/networking/PublicationRemoteDataSource';
 import AdminCommentRepository from '../../data/repositories/AdminCommentRepository';
 
-async function loadComments(publications?: Publication[]) {
+async function loadComments(publications?: Publication[], refresh = false) {
     try {
-        const comments = await AdminCommentRepository.loadComments(publications);
+        const comments = await AdminCommentRepository.loadComments(publications, refresh);
         return { success: true as const, data: comments };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) return { success: false as const, sessionExpired: true };

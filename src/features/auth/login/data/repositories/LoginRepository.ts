@@ -49,9 +49,14 @@ async function resolveCurrentUser(username: string, accessToken: string): Promis
 
 async function login(username: string, password: string): Promise<AuthResult> {
     const tokens = await LoginRemoteDataSource.login(username, password);
+    const previous = await getSession();
+    if (previous?.username.toLowerCase() !== username.toLowerCase()) {
+        await HttpClient.clearSession();
+    }
     await HttpClient.saveTokens(tokens.accessToken, tokens.refreshToken);
     const user = await resolveCurrentUser(username, tokens.accessToken);
     if (user) await HttpClient.saveCurrentUser(user);
+    else await HttpClient.clearCurrentUser();
     return { success: true, data: user };
 }
 

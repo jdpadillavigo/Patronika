@@ -3,13 +3,13 @@ import type { Pattern } from '../../domain/models/Pattern';
 import type { User } from '../../../../core/domain/models/User';
 import PatternRemoteDataSource from '../networking/PatternRemoteDataSource';
 
-async function listMine(): Promise<Pattern[]> {
+async function listMine(refresh = false): Promise<Pattern[]> {
     const user = await HttpClient.getCurrentUser<User>();
     if (!user?.id) {
         throw new Error('Inicia sesión nuevamente para ver tus patrones');
     }
 
-    return PatternRemoteDataSource.loadByUser(user.id);
+    return PatternRemoteDataSource.loadByUser(user.id, refresh);
 }
 
 async function create(name: string, size: number, imageUri?: string | null): Promise<Pattern> {

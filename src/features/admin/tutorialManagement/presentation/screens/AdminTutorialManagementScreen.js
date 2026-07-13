@@ -43,7 +43,7 @@ export default function AdminTutorialManagementScreen({navigation }) {
     setActionError('');
 
     try {
-      const result = await TutorialUseCase.getAll();
+      const result = await TutorialUseCase.getAll(isRefresh);
       if (!result.success) {
         if (!result.sessionExpired) setError(UNKNOWN_CONNECTION_ERROR);
         setTutorials([]);

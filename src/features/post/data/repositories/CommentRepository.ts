@@ -6,8 +6,8 @@ import type { User } from '../../../../core/domain/models/User';
 import CommentRemoteDataSource, { type Comment } from '../networking/CommentRemoteDataSource';
 
 // Carga los comentarios de una publicación específica (filtro local)
-async function loadForPublication(publicationId: string): Promise<Comment[]> {
-    const all = await CommentRemoteDataSource.loadAll();
+async function loadForPublication(publicationId: string, refresh = false): Promise<Comment[]> {
+    const all = await CommentRemoteDataSource.loadAll(refresh);
     return all.filter(c => c.publicationId === publicationId);
 }
 

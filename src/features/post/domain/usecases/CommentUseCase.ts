@@ -3,9 +3,9 @@ import { isSessionExpiredError } from '../../../../core/data/network/HttpClientE
 import CommentRepository from '../../data/repositories/CommentRepository';
 
 // Carga los comentarios de una publicación específica
-async function loadForPublication(publicationId: string) {
+async function loadForPublication(publicationId: string, refresh = false) {
     try {
-        const comments = await CommentRepository.loadForPublication(publicationId);
+        const comments = await CommentRepository.loadForPublication(publicationId, refresh);
         return { success: true as const, data: comments };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) return { success: false as const, sessionExpired: true, data: [] };

@@ -2,8 +2,8 @@ import UserRepository from '../../../../core/data/user/repositories/UserReposito
 import { validatePassword, validateUsername } from '../../../../core/domain/models/User';
 import { isSessionExpiredError } from '../../../../core/data/network/HttpClientExt';
 
-async function getCurrent() {
-    return UserRepository.getCurrent();
+async function getCurrent(refresh = false) {
+    return UserRepository.getCurrent(refresh);
 }
 
 async function updateProfile(username: string, password: string, avatar?: string | null) {

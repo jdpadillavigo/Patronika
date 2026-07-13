@@ -5,16 +5,16 @@ import PatternLibraryRemoteDataSource, {
     type LibraryPattern,
 } from '../networking/PatternLibraryRemoteDataSource';
 
-async function listSaved(): Promise<LibraryEntry[]> {
+async function listSaved(refresh = false): Promise<LibraryEntry[]> {
     const user = await HttpClient.getCurrentUser<User>();
     if (!user?.id) throw new Error('Inicia sesión nuevamente');
-    return PatternLibraryRemoteDataSource.getSaved(user.id);
+    return PatternLibraryRemoteDataSource.getSaved(user.id, refresh);
 }
 
-async function listAll(): Promise<{ patterns: LibraryPattern[]; currentUserId: string }> {
+async function listAll(refresh = false): Promise<{ patterns: LibraryPattern[]; currentUserId: string }> {
     const user = await HttpClient.getCurrentUser<User>();
     if (!user?.id) throw new Error('Inicia sesión nuevamente');
-    const patterns = await PatternLibraryRemoteDataSource.getAll(user.id);
+    const patterns = await PatternLibraryRemoteDataSource.getAll(user.id, refresh);
     return { patterns, currentUserId: user.id };
 }
 

@@ -2,9 +2,9 @@ import { isSessionExpiredError } from '../../../../../../core/data/network/HttpC
 import UserRepository from '../../../../../../core/data/user/repositories/UserRepository';
 import AdminPostRepository from '../../data/repositories/AdminPostRepository';
 
-async function loadPublications() {
+async function loadPublications(refresh = false) {
     try {
-        const publications = await AdminPostRepository.loadPublications();
+        const publications = await AdminPostRepository.loadPublications(refresh);
         return { success: true as const, data: publications };
     } catch (error: unknown) {
         if (isSessionExpiredError(error)) return { success: false as const, sessionExpired: true };

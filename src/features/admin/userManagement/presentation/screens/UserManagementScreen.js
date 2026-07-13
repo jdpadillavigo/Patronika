@@ -192,7 +192,7 @@ export default function GestionUsuariosScreen({navigation }) {
     setError('');
     setActionError('');
  
-    const currentUser = await ProfileUseCase.getCurrent().catch(() => null);
+    const currentUser = await ProfileUseCase.getCurrent(isRefresh).catch(() => null);
     setCurrentUserId(currentUser?.id || null);
     if (!currentUser?.isAdmin) {
       setEsAdmin(false);
@@ -203,7 +203,7 @@ export default function GestionUsuariosScreen({navigation }) {
     setEsAdmin(true);
     
 
-    const result = await UserManagementUseCase.getAllUsers();
+    const result = await UserManagementUseCase.getAllUsers(isRefresh);
     if (!result.success) {
       setError('No se pudieron cargar los usuarios. Revisa tu conexión e inténtalo nuevamente.');
       setUsuarios([]);

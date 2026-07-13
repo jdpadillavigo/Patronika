@@ -17,12 +17,17 @@ export default function TutorialesScreen({navigation }) {
   const styles = useMemo(() => createTutorialesStyles(colors), [colors]);
   const [tutorials, setTutorials] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [tutorialsError, setTutorialsError] = useState('');
 
-  const loadTutorials = useCallback(async () => {
-    setLoading(true);
-    const result = await TutorialUseCase.getAll();
+  const loadTutorials = useCallback(async (refresh = false) => {
+    setRefreshing(refresh);
+    setTutorialsError('');
+    const result = await TutorialUseCase.getAll(refresh);
     if (result.success) setTutorials(result.data);
+    else if (!result.sessionExpired) setTutorialsError(result.error);
     setLoading(false);
+    setRefreshing(false);
   }, []);
 
   useFocusEffect(useCallback(() => {
@@ -39,19 +44,21 @@ export default function TutorialesScreen({navigation }) {
         <ScrollView
           contentContainerStyle={styles.emptyList}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={loadTutorials} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadTutorials(true)} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
         >
-        <ScreenState
-          iconName="book-outline"
-          text="Sin tutoriales aún"
-          subtext="Vuelve pronto para ver contenido nuevo"
-        />
+          <ScreenState
+            iconName={tutorialsError ? 'cloud-offline-outline' : 'book-outline'}
+            text={tutorialsError || 'Sin tutoriales aún'}
+            subtext={tutorialsError ? undefined : 'Vuelve pronto para ver contenido nuevo'}
+            actionText={tutorialsError ? 'Reintentar' : undefined}
+            onAction={() => loadTutorials(true)}
+          />
         </ScrollView>
       ) : (
         <ScrollView
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={loadTutorials} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadTutorials(true)} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
         >
           {tutorials.map(t => (
             <TutorialCard key={t.id} tutorial={t} />

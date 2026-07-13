@@ -105,20 +105,21 @@ export default function MisPatronesScreen({navigation }) {
     guardados: [],
     mios: [],
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedPattern, setSelectedPattern] = useState(null);
   const [fullscreenVisible, setFullscreenVisible] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
   const { showError, showPopup, showConfirm, errorPopup } = useErrorPopup();
 
-  const loadPatterns = useCallback(async () => {
-    setLoading(true);
+  const loadPatterns = useCallback(async (refresh = false) => {
+    setRefreshing(refresh);
     try {
       const [publishedResult, mineResult, savedResult, allResult] = await Promise.all([
-        PublicationUseCase.getMyPublishedPatternIds(),
-        PatternUseCase.listMine(),
-        PatternLibraryUseCase.listSaved(),
-        PatternLibraryUseCase.listAll(),
+        PublicationUseCase.getMyPublishedPatternIds(refresh),
+        PatternUseCase.listMine(refresh),
+        PatternLibraryUseCase.listSaved(refresh),
+        PatternLibraryUseCase.listAll(refresh),
       ]);
 
       if (mineResult.sessionExpired || savedResult.sessionExpired || allResult.sessionExpired) {
@@ -149,6 +150,7 @@ export default function MisPatronesScreen({navigation }) {
       }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [showError]);
 
@@ -314,7 +316,7 @@ export default function MisPatronesScreen({navigation }) {
             style={styles.gridScroll}
             contentContainerStyle={styles.gridEmptyContainer}
             showsVerticalScrollIndicator={false}
-            refreshControl={<RefreshControl refreshing={loading} onRefresh={loadPatterns} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadPatterns(true)} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
           >
             <ScreenState iconName="grid-outline" text={emptyText} />
           </ScrollView>
@@ -323,7 +325,7 @@ export default function MisPatronesScreen({navigation }) {
             style={styles.gridScroll}
             contentContainerStyle={styles.gridContainer}
             showsVerticalScrollIndicator={false}
-            refreshControl={<RefreshControl refreshing={loading} onRefresh={loadPatterns} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadPatterns(true)} colors={[PURPLE]} tintColor={PURPLE} progressViewOffset={REFRESH_TOP_BAR_OFFSET} />}
           >
             <View style={styles.gridColumns}>
               <View style={styles.gridColumn}>

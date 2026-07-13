@@ -1,6 +1,6 @@
 // Capa de datos: comunicación directa con el backend para publicaciones.
 // Usa HttpClientExt (maneja tokens Bearer y refresco de sesión automáticamente).
-import HttpClient, { type ApiResponse } from '../../../../core/data/network/HttpClientExt';
+import HttpClient, { cacheAfterWrite, cachedRead, type ApiResponse } from '../../../../core/data/network/HttpClientExt';
 import { assertApiSuccess } from '../../../../core/data/network/dto/ApiResponseDto';
 
 // Tipos que espeja el backend (GET /api/publications)
@@ -30,10 +30,29 @@ export interface Publication {
     reportCount: number;
 }
 
+const PUBLICATIONS = '/api/publications';
+
+function toPublication({ user, pattern, ...publication }: Publication): Publication {
+    return {
+        ...publication,
+        patternId: publication.patternId || pattern?.id || '',
+        user: user && { id: user.id, username: user.username, profileImageUrl: user.profileImageUrl },
+        pattern: pattern && {
+            id: pattern.id,
+            name: pattern.name,
+            gridData: pattern.gridData,
+            width: pattern.width,
+            height: pattern.height,
+        },
+    };
+}
+
 // GET /api/publications — devuelve todas las publicaciones de la comunidad
-async function loadAll(): Promise<Publication[]> {
-    const response = await HttpClient.get<ApiResponse<Publication[]>>('/api/publications');
-    return assertApiSuccess(response, 'No se pudo cargar el feed') || [];
+async function loadAll(refresh = false): Promise<Publication[]> {
+    return cachedRead(PUBLICATIONS, async () => {
+        const response = await HttpClient.get<ApiResponse<Publication[]>>(PUBLICATIONS);
+        return (assertApiSuccess(response, 'No se pudo cargar el feed') || []).map(toPublication);
+    }, { ttlMs: 60_000, refresh, collection: true });
 }
 
 // POST /api/publications — crea una nueva publicación con multipart/form-data.
@@ -67,26 +86,45 @@ async function create(
         } as unknown as Blob);
     }
 
-    const response = await HttpClient.post<ApiResponse<Publication>>('/api/publications', formData);
-    const pub = assertApiSuccess(response, 'No se pudo crear la publicación');
-    if (!pub) throw new Error('No se pudo crear la publicación');
-    return pub;
+    return cacheAfterWrite(async () => {
+        const response = await HttpClient.post<ApiResponse<Publication>>(PUBLICATIONS, formData);
+        const pub = assertApiSuccess(response, 'No se pudo crear la publicación');
+        if (!pub) throw new Error('No se pudo crear la publicación');
+        return pub;
+    }, (cache, pub) => cache.update<Publication[]>(PUBLICATIONS, publications =>
+        [toPublication(pub), ...publications.filter(item => item.id !== pub.id)],
+    ));
 }
 
 // DELETE /api/publications/{id}
 async function remove(id: string): Promise<void> {
-    await HttpClient.delete<ApiResponse<string>>(`/api/publications/${id}`);
+    await cacheAfterWrite(
+        () => HttpClient.delete<ApiResponse<string>>(`${PUBLICATIONS}/${id}`),
+        async cache => {
+            await cache.update<Publication[]>(PUBLICATIONS, publications => publications.filter(pub => pub.id !== id));
+            await cache.invalidate('/api/comments');
+        },
+    );
 }
 
 // POST /api/publications/{id}/clear-reports
 async function clearReports(id: string): Promise<void> {
-    const response = await HttpClient.post<ApiResponse<string>>(`/api/publications/${id}/clear-reports`, {});
-    assertApiSuccess(response, 'Reportes eliminados correctamente');
+    await cacheAfterWrite(
+        () => HttpClient.post<ApiResponse<string>>(`${PUBLICATIONS}/${id}/clear-reports`, {}),
+        cache => cache.update<Publication[]>(PUBLICATIONS, publications =>
+            publications.map(pub => pub.id === id ? { ...pub, reportCount: 0 } : pub),
+        ),
+    );
 }
 
 // POST /api/publications/{id}/report — incrementa el contador de reportes
 async function report(id: string): Promise<void> {
-    await HttpClient.post<ApiResponse<string>>(`/api/publications/${id}/report`, {});
+    await cacheAfterWrite(
+        () => HttpClient.post<ApiResponse<string>>(`${PUBLICATIONS}/${id}/report`, {}),
+        cache => cache.update<Publication[]>(PUBLICATIONS, publications =>
+            publications.map(pub => pub.id === id ? { ...pub, reportCount: (pub.reportCount || 0) + 1 } : pub),
+        ),
+    );
 }
 
 const PublicationRemoteDataSource = {

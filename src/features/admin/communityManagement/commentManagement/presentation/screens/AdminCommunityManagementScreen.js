@@ -15,7 +15,7 @@ import AdminCommentUseCase from '../../domain/usecases/AdminCommentUseCase';
 import CommentManagementScreen from './CommentManagementScreen';
 import AdminPostUseCase from '../../../postManagement/domain/usecases/AdminPostUseCase';
 import PostManagementScreen from '../../../postManagement/presentation/screens/PostManagementScreen';
-import PatternUseCase from '../../../../../pattern/domain/usecases/PatternUseCase';
+import loadPublicationGrids from '../../../../../post/domain/usecases/LoadPublicationGrids';
 import { createAdminCommunityManagementStyles, PURPLE } from '../styles/AdminCommunityManagementStyles';
 
 const TABS = {
@@ -62,9 +62,9 @@ export default function AdminCommunityManagementScreen({ navigation }) {
     if (!isRefresh) setLoading(true);
     setError('');
 
-    const publicationsResult = await AdminPostUseCase.loadPublications();
+    const publicationsResult = await AdminPostUseCase.loadPublications(isRefresh);
     const commentsResult = publicationsResult.success
-      ? await AdminCommentUseCase.loadComments(publicationsResult.data || [])
+      ? await AdminCommentUseCase.loadComments(publicationsResult.data || [], isRefresh)
       : { success: false, sessionExpired: publicationsResult.sessionExpired, error: publicationsResult.error };
 
     if (!commentsResult.success || !publicationsResult.success) {
@@ -77,24 +77,12 @@ export default function AdminCommunityManagementScreen({ navigation }) {
     }
 
     const publicationsData = publicationsResult.data || [];
-    const missingPatternIds = [...new Set(
-      publicationsData
-        .filter(publication => !publication.imageUrl && publication.patternId && !publication.pattern?.gridData)
-        .map(publication => publication.patternId)
-    )];
-    const patternGridMap = {};
-
-    await Promise.all(missingPatternIds.map(async (patternId) => {
-      const result = await PatternUseCase.getById(patternId);
-      if (result.success && result.data?.gridData) {
-        patternGridMap[patternId] = result.data.gridData;
-      }
-    }));
+    const patternGrids = await loadPublicationGrids(publicationsData);
 
     setComments(commentsResult.data || []);
     setPublications(publicationsData.map(publication => ({
       ...publication,
-      patternGridData: publication.pattern?.gridData || patternGridMap[publication.patternId] || null,
+      patternGridData: publication.pattern?.gridData || patternGrids.get(publication.patternId || publication.pattern?.id) || null,
     })));
     setLoading(false);
     setRefreshing(false);

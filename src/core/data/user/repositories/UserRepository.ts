@@ -1,4 +1,4 @@
-import HttpClient from '../../network/HttpClientExt';
+import HttpClient, { cachedRead, HttpResponseError, isTemporaryHttpError } from '../../network/HttpClientExt';
 import type { User } from '../../../domain/models/User';
 import { createUser } from '../../../domain/models/User';
 import UserRemoteDataSource, { type UserRequest } from '../networking/UserRemoteDataSource';
@@ -25,16 +25,27 @@ function toUserRequest(user: User, password?: string): UserRequest {
 // Obtiene el usuario actual combinando los datos remotos con el avatar guardado localmente.
 // IMPORTANTE: prioriza el profileImageUrl del backend para que la foto persista
 // entre cierres de sesión. Si el backend ya tiene la foto, no necesitamos el cache local.
-async function getCurrent(): Promise<User | null> {
+async function getCurrent(refresh = false): Promise<User | null> {
     const localUser = await HttpClient.getCurrentUser<User>();
     if (!localUser?.id) return localUser;
 
-    const remoteUser = createUser(await UserRemoteDataSource.loadById(localUser.id));
+    const id = localUser.id;
+    const remoteUser = await cachedRead(
+        `/api/users/${id}/profile`,
+        async () => createUser(await UserRemoteDataSource.loadById(id)),
+        { ttlMs: 120_000, refresh, persist: false },
+    ).catch((error: unknown) => {
+        if (isTemporaryHttpError(error)) return localUser;
+        throw error;
+    });
     // Si el backend tiene profileImageUrl (subido previamente), lo usa como avatar.
     // De lo contrario cae en el avatar guardado localmente en sesión anterior.
     const avatar = remoteUser.profileImageUrl || localUser.avatar || null;
-    await HttpClient.saveCurrentUser({ ...remoteUser, avatar });
-    return { ...remoteUser, avatar };
+    const profile = { ...remoteUser, avatar };
+    if (JSON.stringify(profile) !== JSON.stringify(localUser)) {
+        await HttpClient.saveCurrentUser(profile);
+    }
+    return profile;
 }
 
 // Actualiza el perfil del usuario en dos pasos:
@@ -79,9 +90,23 @@ async function changePassword(currentPassword: string, newPassword: string): Pro
     return { user: { ...updated, avatar: currentUser.avatar || null }, message };
 }
 
-async function getAllUsers(): Promise<User[]> {
-    const users = await UserRemoteDataSource.loadAll();
-    return users.map(user => createUser(user));
+async function getAllUsers(refresh = false): Promise<User[]> {
+    return cachedRead('users-list', async () => {
+        const users = await UserRemoteDataSource.loadAll();
+        return users.map(user => createUser(user));
+    }, { ttlMs: 60_000, refresh, persist: false, collection: true });
+}
+
+async function getUserSummary(id: string) {
+    return cachedRead(`/api/users/${id}/summary`, async () => {
+        try {
+            const user = await UserRemoteDataSource.loadById(id);
+            return { username: user.username, profileImageUrl: user.profileImageUrl ?? null };
+        } catch (error: unknown) {
+            if (error instanceof HttpResponseError && error.status === 404) return null;
+            throw error;
+        }
+    }, { ttlMs: 600_000 });
 }
 
 async function getUserById(id: string): Promise<User> {
@@ -197,6 +222,7 @@ const UserRepository = {
     changePassword,
     getAllUsers,
     getUserById,
+    getUserSummary,
     createUserFromAdmin,
     updateUser,
     suspendUser,

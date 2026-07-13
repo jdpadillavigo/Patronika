@@ -1,7 +1,7 @@
 import TutorialRemoteDataSource, { type Tutorial, type TutorialRequest } from '../networking/TutorialRemoteDataSource';
 
-async function getAll(): Promise<Tutorial[]> {
-    return TutorialRemoteDataSource.getAll();
+async function getAll(refresh = false): Promise<Tutorial[]> {
+    return TutorialRemoteDataSource.getAll(refresh);
 }
 
 async function getById(id: string): Promise<Tutorial> {

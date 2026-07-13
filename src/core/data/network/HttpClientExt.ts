@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import ReadCache, { type ReadOptions } from '../cache/ReadCache';
 import SessionExpiredService from '../../domain/session/SessionExpiredService';
 import HttpClientFactory, { HttpTimeoutError } from './HttpClientFactory';
 
@@ -35,6 +36,18 @@ export class SessionExpiredError extends Error {
     }
 }
 
+class HttpNetworkError extends Error {
+    constructor() {
+        super('Sin conexión a internet. Verifica tu conexión e intenta de nuevo.');
+        this.name = 'HttpNetworkError';
+    }
+}
+
+export function isTemporaryHttpError(error: unknown): boolean {
+    return error instanceof HttpNetworkError || error instanceof HttpTimeoutError
+        || (error instanceof HttpResponseError && (error.status === 429 || error.status >= 500));
+}
+
 export class HttpResponseError extends Error {
     constructor(public readonly status: number, message: string) {
         super(message);
@@ -55,6 +68,51 @@ export function constructRoute(route: string): string {
 
 const transport = HttpClientFactory.create();
 let refreshPromise: Promise<string> | null = null;
+let sessionGeneration = 0;
+let scopedCache: { scope: string; cache: ReadCache } | null = null;
+
+async function getReadCache(generation: number): Promise<ReadCache | null> {
+    const session = await AsyncStorage.multiGet([CURRENT_USER_KEY, TOKEN_KEY]);
+    if (generation !== sessionGeneration) throw new SessionExpiredError();
+    const storedUser = session[0]?.[1];
+    const token = session[1]?.[1];
+    if (!storedUser || !token) return null;
+
+    const user = JSON.parse(storedUser) as { id?: string | null } | null;
+    if (!user?.id) return null;
+    const scope = JSON.stringify([BASE_URL, user.id]);
+    if (scope !== scopedCache?.scope) {
+        scopedCache = { scope, cache: new ReadCache(AsyncStorage, scope, isTemporaryHttpError) };
+    }
+    return scopedCache.cache;
+}
+
+export async function cachedRead<T>(
+    key: string,
+    load: () => Promise<T>,
+    options: ReadOptions,
+): Promise<T> {
+    const generation = sessionGeneration;
+    try {
+        const cache = await getReadCache(generation).catch(() => null);
+        if (generation !== sessionGeneration) throw new SessionExpiredError();
+        return cache ? await cache.read(key, load, options) : await load();
+    } finally {
+        if (generation !== sessionGeneration) throw new SessionExpiredError();
+    }
+}
+
+export async function cacheAfterWrite<T>(
+    write: () => Promise<T>,
+    update: (cache: ReadCache, result: T) => Promise<void>,
+): Promise<T> {
+    const generation = sessionGeneration;
+    const result = await write();
+    if (generation !== sessionGeneration) return result;
+    const cache = await getReadCache(generation).catch(() => null);
+    if (cache) await update(cache, result);
+    return result;
+}
 
 async function readBody(response: Response): Promise<unknown> {
     const text = await response.text();
@@ -102,7 +160,7 @@ export async function safeCall<T>(execute: () => Promise<T>): Promise<T> {
         }
 
         if (error instanceof TypeError || (error instanceof Error && error.message === 'Network request failed')) {
-            throw new Error('Sin conexión a internet. Verifica tu conexión e intenta de nuevo.');
+            throw new HttpNetworkError();
         }
 
         throw error instanceof Error ? error : new Error('Ocurrió un error inesperado.');
@@ -112,8 +170,10 @@ export async function safeCall<T>(execute: () => Promise<T>): Promise<T> {
 async function refreshAccessToken(): Promise<string> {
     if (refreshPromise) return refreshPromise;
 
-    refreshPromise = (async () => {
+    const generation = sessionGeneration;
+    const pending = (async () => {
         const refreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
+        if (generation !== sessionGeneration) throw new SessionExpiredError();
         if (!refreshToken) throw new Error('No hay refresh token disponible');
 
         const response = await request<ApiResponse<RefreshTokenData>>('/api/auth/refresh', {
@@ -128,13 +188,15 @@ async function refreshAccessToken(): Promise<string> {
 
         if (!response.success || !accessToken) throw new Error('No se pudo renovar la sesión');
 
+        if (generation !== sessionGeneration) throw new SessionExpiredError();
         await saveTokens(accessToken, nextRefreshToken);
         return accessToken;
     })().finally(() => {
-        refreshPromise = null;
+        if (refreshPromise === pending) refreshPromise = null;
     });
 
-    return refreshPromise;
+    refreshPromise = pending;
+    return pending;
 }
 
 async function expireSession(): Promise<void> {
@@ -151,6 +213,7 @@ export async function request<T = unknown>(route: string, options: RequestOption
         retryOnUnauthorized = true,
     } = options;
 
+    const generation = sessionGeneration;
     const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
     const requestHeaders: Record<string, string> = { ...headers };
 
@@ -158,6 +221,7 @@ export async function request<T = unknown>(route: string, options: RequestOption
 
     if (requiresAuth) {
         const token = await AsyncStorage.getItem(TOKEN_KEY);
+        if (generation !== sessionGeneration) throw new SessionExpiredError();
         if (token) requestHeaders.Authorization = `Bearer ${token}`;
     }
 
@@ -167,16 +231,25 @@ export async function request<T = unknown>(route: string, options: RequestOption
     return safeCall(async () => {
         const response = await transport.execute(constructRoute(route), requestInit);
 
+        if (requiresAuth && generation !== sessionGeneration) throw new SessionExpiredError();
+
         if (response.status === 401 && requiresAuth) {
             if (retryOnUnauthorized) {
                 try {
-                    const accessToken = await refreshAccessToken();
+                    const latestToken = await AsyncStorage.getItem(TOKEN_KEY);
+                    if (generation !== sessionGeneration) throw new SessionExpiredError();
+                    const accessToken = latestToken && `Bearer ${latestToken}` !== requestHeaders.Authorization
+                        ? latestToken
+                        : await refreshAccessToken();
+                    if (generation !== sessionGeneration) throw new SessionExpiredError();
                     return request<T>(route, {
                         ...options,
                         headers: { ...headers, Authorization: `Bearer ${accessToken}` },
                         retryOnUnauthorized: false,
                     });
-                } catch {
+                } catch (error: unknown) {
+                    if (generation !== sessionGeneration) throw new SessionExpiredError();
+                    if (isTemporaryHttpError(error)) throw error;
                     await expireSession();
                     throw new SessionExpiredError();
                 }
@@ -207,8 +280,9 @@ export function del<T = unknown>(route: string, options: RequestOptions = {}): P
 }
 
 export async function saveTokens(accessToken: string, refreshToken?: string | null): Promise<void> {
-    await AsyncStorage.setItem(TOKEN_KEY, accessToken);
-    if (refreshToken) await AsyncStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    const tokens: [string, string][] = [[TOKEN_KEY, accessToken]];
+    if (refreshToken) tokens.push([REFRESH_TOKEN_KEY, refreshToken]);
+    await AsyncStorage.multiSet(tokens);
 }
 
 export function getAccessToken(): Promise<string | null> {
@@ -237,7 +311,14 @@ export function clearCurrentUser(): Promise<void> {
 }
 
 export async function clearSession(): Promise<void> {
-    await AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_TOKEN_KEY, CURRENT_USER_KEY]);
+    sessionGeneration += 1;
+    refreshPromise = null;
+    const cache = scopedCache?.cache ?? new ReadCache(AsyncStorage, '', isTemporaryHttpError);
+    scopedCache = null;
+    await Promise.all([
+        AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_TOKEN_KEY, CURRENT_USER_KEY]),
+        cache.clear(),
+    ]);
 }
 
 const HttpClientExt = {

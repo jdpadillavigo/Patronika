@@ -3,9 +3,10 @@ import Colors from '../../../../core/presentation/designsystem/Colors';
 import { useAppTheme } from '../../../../core/presentation/designsystem/Theme';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
-  TextInput, ActivityIndicator,
+  TextInput, ActivityIndicator, RefreshControl,
   KeyboardAvoidingView, Platform, Modal,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createDetalleStyles, detalleStyles as styles, PURPLE } from '../styles/PostDetailStyles';
@@ -15,7 +16,8 @@ import PublicationUseCase from '../../domain/usecases/PublicationUseCase';
 import PatternUseCase from '../../../pattern/domain/usecases/PatternUseCase';
 import PatternLibraryUseCase from '../../../pattern/domain/usecases/PatternLibraryUseCase';
 import HttpClient from '../../../../core/data/network/HttpClientExt';
-import UserRemoteDataSource from '../../../../core/data/user/networking/UserRemoteDataSource';
+import getUserSummary from '../../../../core/domain/usecases/GetUserSummary';
+import mapInBatches from '../../../../core/domain/utils/MapInBatches';
 import { gridDataToImageUri } from '../../../../core/presentation/designsystem/utils/GridImage';
 import BackButton from '../../../../core/presentation/designsystem/components/BackButton';
 import ScreenState from '../../../../core/presentation/designsystem/components/ScreenState';
@@ -50,6 +52,9 @@ export default function PublicacionDetalleScreen({navigation, route }) {
   const [fetchedPattern, setFetchedPattern] = useState(null);
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(true);
+  const [refreshingComments, setRefreshingComments] = useState(false);
+  const [commentsError, setCommentsError] = useState('');
+  const commentsRequest = useRef(0);
   const [commentText, setCommentText] = useState('');
   const [sending, setSending] = useState(false);
   const [editingComment, setEditingComment] = useState(null);
@@ -93,12 +98,14 @@ export default function PublicacionDetalleScreen({navigation, route }) {
   // patternId puede venir como campo plano (nuevo backend) o dentro del objeto pattern (compatibilidad)
   const patternId = pub?.patternId || pub?.pattern?.id || null;
 
-  const patternImageUri = fetchedPattern?.gridData
-    ? gridDataToImageUri(fetchedPattern.gridData, { maxDimension: 600 })
+  const initialGrid = pub?.pattern?.gridData || pub?.patternGridData;
+  const patternGrid = initialGrid || fetchedPattern?.gridData;
+  const patternImageUri = patternGrid
+    ? gridDataToImageUri(patternGrid, { maxDimension: 600 })
     : null;
 
   const resultImageUri = pub?.imageUrl || null;
-  const loadingPublication = !patternLoadDone
+  const loadingPublication = (!initialGrid && !patternLoadDone)
     || (!!resultImageUri && !resultImageLoaded)
     || (!!patternImageUri && !patternImageLoaded);
 
@@ -107,29 +114,21 @@ export default function PublicacionDetalleScreen({navigation, route }) {
     setFullscreenUri(uri);
   };
 
-  // Cargar usuario en sesión y agregarlo al mapa de usuarios
+  const initialPatternName = pub?.pattern?.name;
   useEffect(() => {
-    HttpClient.getCurrentUser().then(u => {
-      if (!u) return;
-      setCurrentUser(u);
-      setUserMap(prev => ({
-        ...prev,
-        [u.id]: { username: u.username, profileImageUrl: u.profileImageUrl ?? null },
-      }));
-    });
-  }, []);
-
-  // Fetch del patrón para obtener gridData y nombre
-  useEffect(() => {
-    if (!patternId) {
+    if (!patternId || (initialGrid && initialPatternName)) {
       setPatternLoadDone(true);
       return;
     }
+    let active = true;
     setPatternLoadDone(false);
     PatternUseCase.getById(patternId).then(result => {
-      if (result.success && result.data) setFetchedPattern(result.data);
-    }).finally(() => setPatternLoadDone(true));
-  }, [patternId]);
+      if (active && result.success) setFetchedPattern(result.data);
+    }).finally(() => {
+      if (active) setPatternLoadDone(true);
+    });
+    return () => { active = false; };
+  }, [patternId, initialGrid, initialPatternName]);
 
   useEffect(() => {
     setResultImageLoaded(!resultImageUri);
@@ -149,28 +148,50 @@ export default function PublicacionDetalleScreen({navigation, route }) {
     });
   }, [patternId, currentUserId, isOwnPublication, isAdmin]);
 
-  const loadComments = useCallback(async () => {
-    setLoadingComments(true);
-    const result = await CommentUseCase.loadForPublication(publicationId);
-    if (result.success) {
-      setComments(result.data);
-      const uniqueIds = [...new Set(result.data.map(c => c.userId))];
-      const entries = await Promise.all(
-        uniqueIds.map(async uid => {
-          try {
-            const u = await UserRemoteDataSource.loadById(uid);
-            return [uid, { username: u.username, profileImageUrl: u.profileImageUrl ?? null }];
-          } catch {
-            return [uid, { username: 'Usuario', profileImageUrl: null }];
-          }
-        })
-      );
-      setUserMap(prev => ({ ...prev, ...Object.fromEntries(entries) }));
-    }
+  const publicationAuthor = pub?.user;
+  const loadComments = useCallback(async (refresh = false) => {
+    const request = ++commentsRequest.current;
+    setRefreshingComments(refresh);
+    setCommentsError('');
+    const [result, viewer] = await Promise.all([
+      CommentUseCase.loadForPublication(publicationId, refresh),
+      HttpClient.getCurrentUser().then(user => {
+        if (request === commentsRequest.current) setCurrentUser(user);
+        return user;
+      }).catch(() => null),
+    ]);
+    if (request !== commentsRequest.current) return;
     setLoadingComments(false);
-  }, [publicationId]);
+    setRefreshingComments(false);
 
-  useEffect(() => { loadComments(); }, [loadComments]);
+    if (!result.success) {
+      if (!result.sessionExpired) setCommentsError(result.error);
+      return;
+    }
+
+    setComments(result.data);
+    const authors = new Map();
+    if (publicationAuthor?.id) authors.set(publicationAuthor.id, publicationAuthor);
+    if (viewer?.id) authors.set(viewer.id, viewer);
+    setUserMap(previous => ({ ...previous, ...Object.fromEntries(authors) }));
+
+    const ids = [...new Set(result.data.map(comment => comment.userId))]
+      .filter(id => id && !authors.has(id));
+    const summaries = await mapInBatches(ids, id => getUserSummary(id).catch(() => null));
+    if (request !== commentsRequest.current) return;
+    setUserMap(previous => {
+      const next = { ...previous };
+      ids.forEach((id, index) => {
+        if (summaries[index]) next[id] = summaries[index];
+      });
+      return next;
+    });
+  }, [publicationId, publicationAuthor]);
+
+  useFocusEffect(useCallback(() => {
+    loadComments();
+    return () => { commentsRequest.current += 1; };
+  }, [loadComments]));
 
   const handleToggleSave = async () => {
     if (savingPattern || !patternId) return;
@@ -203,7 +224,7 @@ export default function PublicacionDetalleScreen({navigation, route }) {
     } else {
       const result = await CommentUseCase.addComment(publicationId, commentText);
       if (result.success && result.data) {
-        setComments(prev => [...prev, result.data]);
+        setComments(prev => [...prev.filter(comment => comment.id !== result.data.id), result.data]);
         setCommentText('');
       }
     }
@@ -333,7 +354,11 @@ export default function PublicacionDetalleScreen({navigation, route }) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'android' ? 18 : 0}
       >
-        <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          style={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={<RefreshControl refreshing={refreshingComments} onRefresh={() => loadComments(true)} colors={[PURPLE]} tintColor={PURPLE} />}
+        >
 
           {/* Foto del resultado */}
           {resultImageUri && (
@@ -418,7 +443,7 @@ export default function PublicacionDetalleScreen({navigation, route }) {
                 <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 8 }}>Cargando comentarios...</Text>
               </View>
             ) : comments.length === 0 ? (
-              <Text style={styles.noComments}>¡Sé el primero en comentar!</Text>
+              <Text style={styles.noComments}>{commentsError || '¡Sé el primero en comentar!'}</Text>
             ) : (
               comments.map(comment => {
                 const commentUser = userMap[comment.userId];

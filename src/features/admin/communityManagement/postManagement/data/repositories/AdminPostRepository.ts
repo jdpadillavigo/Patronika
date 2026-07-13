@@ -1,7 +1,7 @@
 import PublicationRemoteDataSource, { type Publication } from '../../../../../post/data/networking/PublicationRemoteDataSource';
 
-async function loadPublications(): Promise<Publication[]> {
-    return PublicationRemoteDataSource.loadAll();
+async function loadPublications(refresh = false): Promise<Publication[]> {
+    return PublicationRemoteDataSource.loadAll(refresh);
 }
 
 async function deletePublication(publicationId: string): Promise<void> {
